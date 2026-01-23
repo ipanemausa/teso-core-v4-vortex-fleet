@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Flujograma: Onboarding Conductores TESO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+        }
+
+        .mermaid-box {
+            background: #2d3436;
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+            border-left: 6px solid #f1c40f;
+            margin-top: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .notes {
+            background: #e8f8f5;
+            border-left: 5px solid #1abc9c;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>FLUJO DE REGISTRO DE CONDUCTORES (ONBOARDING)</h1>
+        <p>Este diagrama visualiza el proceso de validación de seguridad para nuevos conductores ("Socios").</p>
+
+        <div class="mermaid-box">
+            <div class="mermaid">
+                graph TD
+                A[INICIO: Chofer Descarga App] --> B{¿Tiene Cuenta?}
+                B -->|Sí| C[Login Directo]
+                B -->|No| D[Registro: Teléfono + OTP SMS]
+
+                D --> E[CAPTURA DATOS BÁSICOS]
+                E -->|Nombre, Email, Ciudad| F[CAPTURA VEHÍCULO]
+                F -->|Placa, Marca, Modelo, Color| G[SUBIDA DE DOCUMENTOS (Upload)]
+
+                subgraph VALIDACIÓN_SEGURIDAD [Filtro de Seguridad]
+                G --> H1[Licencia Conducción (Foto)]
+                G --> H2[Tarjeta Propiedad + SOAT]
+                G --> H3[Consulta Antecedentes (Auto/Manual)]
+                end
+
+                H1 & H2 & H3 --> I[ESTADO: 'EN REVISIÓN' (Pendiente)]
+                I --> J{ADMIN: ¿Aprueba?}
+
+                J -->|NO| K[Email: Documentos Rechazados/Faltantes]
+                K --> G
+
+                J -->|SÍ| L[ESTADO: 'ACTIVO']
+                L --> M[Acceso a Panel de Conductor]
+                M --> N((LISTO PARA RECIBIR VIAJES))
+
+                style I fill:#e67e22,stroke:#333,stroke-width:2px
+                style L fill:#27ae60,stroke:#333,stroke-width:2px
+                style N fill:#2980b9,stroke:#fff,stroke-width:4px
+            </div>
+        </div>
+
+        <div class="notes">
+            <h3>📝 Puntos Críticos para Analizar:</h3>
+            <ul>
+                <li><strong>El "Cuello de Botella":</strong> El paso <code>I -> J</code> (Revisión) es donde el chofer
+                    puede quedarse esperando horas o días. ¿Queremos automatizar esto con IA visual más adelante?</li>
+                <li><strong>Rechazo:</strong> Si rechazamos, debemos ser específicos (ej: "La foto de la licencia está
+                    borrosa") para no frustrar al usuario.</li>
+                <li><strong>Validación Legal:</strong> ¿Necesitamos conectar con RUNT/SIMIT real o por ahora es
+                    validación visual manual?</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

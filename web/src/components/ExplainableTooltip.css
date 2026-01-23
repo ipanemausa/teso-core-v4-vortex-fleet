@@ -1,0 +1,70 @@
+/* Glassmorphism Tooltip Container */
+.xai-tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: help; /* Indicates interactivity */
+}
+
+/* The Tooltip Card (Hidden by default) */
+.xai-tooltip-card {
+  visibility: hidden;
+  width: 280px;
+  background: rgba(20, 20, 30, 0.95); /* Deep dark background */
+  color: #fff;
+  text-align: left;
+  border-radius: 12px;
+  padding: 12px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%; /* Position above calculation */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  /* Glassmorphism Effect */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  
+  /* Animation */
+  opacity: 0;
+  transition: opacity 0.3s, bottom 0.3s;
+  pointer-events: none; /* Prevent flickering */
+}
+
+/* Title styling */
+.xai-tooltip-title {
+  font-weight: 700;
+  color: #4ade80; /* Teso Green */
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Body styling */
+.xai-tooltip-body {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+/* Arrow/Triangle */
+.xai-tooltip-card::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(20, 20, 30, 0.95) transparent transparent transparent;
+}
+
+/* Show on Hover */
+.xai-tooltip-container:hover .xai-tooltip-card {
+  visibility: visible;
+  opacity: 1;
+  bottom: 115%; /* Slight float up animation */
+}

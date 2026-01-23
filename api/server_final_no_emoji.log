@@ -1,0 +1,97 @@
+INFO:     Will watch for changes in these directories: ['C:\\Users\\ipane\\Downloads\\app\\teso_core\\api']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [26184] using StatReload
+INFO:     Started server process [10788]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "C:\Users\ipane\Downloads\app\teso_core\api\main.py", line 60, in load_simulation_state
+    print(f"\U0001f4c2 LOADING STATE from {PERSISTENCE_DIR}...")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ipane\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4c2' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 571, in __aenter__
+    await self._router.startup()
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 673, in startup
+    handler()
+    ~~~~~~~^^
+  File "C:\Users\ipane\Downloads\app\teso_core\api\main.py", line 136, in load_cache_on_startup
+    j_data, x_bytes = load_simulation_state()
+                      ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ipane\Downloads\app\teso_core\api\main.py", line 69, in load_simulation_state
+    print(f"\u26a0\ufe0f LOAD FAILURE: {e}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ipane\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+ERROR:    Application startup failed. Exiting.
+--- [WARN] NO DATABASE_URL FOUND. RUNNING IN 'MEMORY-ONLY' MODE (LEGACY EXCEL). ---
+WARNING:  StatReload detected changes in 'main.py'. Reloading...
+INFO:     Started server process [14520]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "C:\Users\ipane\Downloads\app\teso_core\api\main.py", line 60, in load_simulation_state
+    print(f"\U0001f4c2 LOADING STATE from {PERSISTENCE_DIR}...")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ipane\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4c2' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 571, in __aenter__
+    await self._router.startup()
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 673, in startup
+    handler()
+    ~~~~~~~^^
+  File "C:\Users\ipane\Downloads\app\teso_core\api\main.py", line 136, in load_cache_on_startup
+    j_data, x_bytes = load_simulation_state()
+                      ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ipane\Downloads\app\teso_core\api\main.py", line 69, in load_simulation_state
+    print(f"\u26a0\ufe0f LOAD FAILURE: {e}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ipane\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+
+ERROR:    Application startup failed. Exiting.
+ --- [WARN] NO DATABASE_URL FOUND. RUNNING IN 'MEMORY-ONLY' MODE (LEGACY EXCEL). ---
+WARNING:  StatReload detected changes in 'main.py'. Reloading...
+INFO:     Started server process [8216]
+INFO:     Waiting for application startup.
+ERROR:    Traceback (most recent call last):
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 694, in lifespan
+    async with self.lifespan_context(app) as maybe_state:
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 571, in __aenter__
+    await self._router.startup()
+  File "C:\Users\ipane\Downloads\app\teso_core\api\venv\Lib\site-packages\starlette\routing.py", line 671, in startup
+    await handler()
+  File "C:\Users\ipane\Downloads\app\teso_core\api\main.py", line 183, in startup_event
+    print("--- \U0001f6e1\ufe0f TESO SYSTEM SELF-AUDIT: INITIATING ---")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ipane\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 4-5: character maps to <undefined>
+
+ERROR:    Application startup failed. Exiting.
+ --- [WARN] NO DATABASE_URL FOUND. RUNNING IN 'MEMORY-ONLY' MODE (LEGACY EXCEL). ---
+[WARN] LOAD FAILURE: 'charmap' codec can't encode character '\U0001f4c2' in position 0: character maps to <undefined>
+[INFO] SYSTEM CLEAN: No previous simulation found.

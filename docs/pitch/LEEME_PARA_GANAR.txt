@@ -1,0 +1,22 @@
+==================================================
+   🚀 LISTA DE CHEQUEO RÁPIDA - DEMO TESO
+==================================================
+
+1. INICIO:
+   - Doble clic en 'INICIAR_DEMO.bat'.
+   - Pon el navegador en Pantalla Completa (F11).
+   - Empieza en la PORTADA y narra la visión.
+
+2. BOTONES CLAVE (Recuerda sus colores):
+   - [VERDE] Abajo-Izquierda: IMPACTO SOCIAL (Para el Político).
+   - [MORADO] Abajo-Derecha: VISIÓN IA (Para el Inversor).
+   - [ROJO] Pestaña Vuelos: GOLPE DE DEMANDA (Para mostrar Reacción).
+   - [DORADO] Pestaña Clientes: SOLICITAR VIP (Para mostrar Exclusividad).
+
+3. FLUJO SUGERIDO:
+   Portada -> Mapa (Flota) -> Impacto Social -> Visión IA -> Clientes (Buscador) -> Agenda (Conflicto Aéreo) -> Cierre.
+
+4. RECORDATORIO:
+   No corras. Deja que las animaciones terminen. Tu voz guía la tecnología.
+
+¡ÉXITO!

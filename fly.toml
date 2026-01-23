@@ -1,0 +1,21 @@
+app = "teso-v3-staging"
+primary_region = "mia"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 7860
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb" # Increased for Pandas/Simulation load
+
+[env]
+  APP_ENV = "staging"
+  # Secrets should be set via 'fly secrets set' (e.g. HF_TOKEN)
