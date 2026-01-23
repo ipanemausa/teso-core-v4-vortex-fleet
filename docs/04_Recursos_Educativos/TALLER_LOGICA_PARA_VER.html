@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Taller de Lógica y Flujos - TESO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 40px auto;
+            color: #333;
+            background-color: #f4f6f8;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+
+        h3 {
+            color: #16a085;
+        }
+
+        .mermaid-box {
+            background: #2d3436;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .explanation {
+            background: #e8f6f3;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 5px solid #1abc9c;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>TALLER DE LÓGICA Y ARGUMENTACIÓN TÉCNICA</h1>
+        <p>Este documento es tu pizarra de entrenamiento. Aquí aprendemos a traducir "Ideas de Negocio" en
+            "Instrucciones para la Máquina".</p>
+
+        <h2>EJERCICIO 1: El Ciclo de Vida de un Viaje</h2>
+        <p><strong>Tu Visión (Lenguaje Natural):</strong><br>
+            "El cliente pide un viaje. El sistema verifica si tiene saldo. Si sí, busca conductores cercanos. Si
+            aceptan, asigna el viaje. Si no, rechaza."</p>
+
+        <h3>El Cerebro de la Máquina (Diagrama de Flujo):</h3>
+        <div class="mermaid-box">
+            graph TD<br>
+            &nbsp;&nbsp;A[Cliente Solicita Viaje] -->|Valida Crédito| B{¿Tiene Saldo?}<br>
+            &nbsp;&nbsp;B -->|No| C[Rechazar Pedido - Mostrar Error]<br>
+            &nbsp;&nbsp;B -->|Si| D[Crear Orden en Estado 'PENDING']<br>
+            &nbsp;&nbsp;D --> E[Agente IA: Busca Drivers en radio 2km]<br>
+            &nbsp;&nbsp;E --> F{¿Hay Drivers Disponibles?}<br>
+            &nbsp;&nbsp;F -->|No| G[Expandir radio a 5km]<br>
+            &nbsp;&nbsp;F -->|Si| H[Enviar Oferta a Driver]<br>
+            &nbsp;&nbsp;H --> I{¿Driver Acepta?}<br>
+            &nbsp;&nbsp;I -->|No| E2[Volver a buscar]<br>
+            &nbsp;&nbsp;I -->|Si| J[Asignar Viaje & Notificar Cliente]
+        </div>
+
+        <div class="explanation">
+            <h3>¿Por qué sirve esto?</h3>
+            <p>Al visualizar el proceso así, descubrimos los "Casos Borde" (Edge Cases):</p>
+            <ul>
+                <li>¿Qué pasa si el conductor rechaza? (El diagrama nos obliga a dibujar la flecha de retorno).</li>
+                <li>¿Qué pasa si no hay conductores en 5km? (Falta definir ese paso final).</li>
+            </ul>
+        </div>
+
+        <h2>EJERCICIO 2: (Espacio para tu práctica)</h2>
+        <p>Piensa en un proceso complejo (ej: Facturación Electrónica DIAN) y trata de imaginar este diagrama de "Si
+            pasa esto -> Entonces aquello".</p>
+    </div>
+</body>
+
+</html>

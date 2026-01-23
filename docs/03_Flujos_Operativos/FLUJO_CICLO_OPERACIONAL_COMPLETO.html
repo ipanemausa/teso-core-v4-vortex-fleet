@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Flujograma: Ciclo Operacional Completo TESO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f3fa;
+            color: #333;
+            margin: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag {
+            font-size: 0.5em;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+
+        .mermaid-box {
+            background: #2d3436;
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+            border-left: 6px solid #e74c3c;
+            margin-top: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .notes {
+            background: #fffbe6;
+            border-left: 5px solid #f1c40f;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>CICLO OPERACIONAL & FINANCIERO <span class="tag">TRAZABILIDAD TOTAL</span></h1>
+        <p>Este diagrama muestra el flujo "End-to-End" desde que el cliente corporativo (Argos) pide, hasta que el
+            dinero entra y sale, activando todas las auditorías.</p>
+
+        <div class="mermaid-box">
+            <div class="mermaid">
+                sequenceDiagram
+                autonumber
+                participant C as CLIENTE (Argos)
+                participant S as SISTEMA (Core Teso)
+                participant H as CHOFER (Tú + Bots)
+                participant FIN as MÓDULO FINANCIERO
+                participant DIAN as DIAN / GOBIERNO
+                participant AUD as AUDITORÍA (Logs)
+
+                Note over C,AUD: FASE 1: LA SOLICITUD & ASIGNACIÓN
+                C->>S: Solicita Viaje (Origen -> Destino)
+                S->>FIN: Valida Crédito Corporativo (Cupo Disponible?)
+                FIN-->>S: ✅ Aprobado (Pre-Hold Saldo)
+                S->>H: 📡 ALERTA DE DIFUSIÓN (Broadcast)
+
+                rect rgb(40, 40, 40)
+                Note right of S: ¡CARRERA! (Tú vs 99 Bots)
+                H-->>S: ¡ACEPTAR VIAJE! (Primer click gana)
+                end
+
+                S->>S: Valida Ganador (Milisegundos)
+                S->>H: ✅ Asigna a CHOFER (Bloquea a los demás)
+                S->>C: Notifica: "Tu blindada llega en 5 min"
+                AUD->>AUD: 📝 LOG: Asignación ID-9921 @ 14:00h
+
+                Note over C,AUD: FASE 2: EJECUCIÓN & TELEMETRÍA
+                H->>S: Inicia Viaje (Start)
+                loop Cada 10 seg
+                H->>S: GPS Update + Velocidad
+                S->>AUD: Valida Ruta Segura (Waze Check)
+                end
+
+                H->>S: FINALIZA VIAJE (Drop-off)
+
+                Note over C,AUD: FASE 3: EL NÚCLEO FINANCIERO (CRÍTICO)
+                S->>FIN: Calcular Tarifa Final (KM + Min + Recargos)
+                FIN->>C: Genera CUENTA DE COBRO (Digital)
+                FIN->>DIAN: 📡 EMITE FACTURA ELECTRÓNICA (XML)
+                DIAN-->>FIN: ✅ CUDE Aprobado
+
+                FIN->>FIN: Split de Pagos (Ledger)
+                Note right of FIN: 80% Costo Op -> Chofer (CxP)<br />20% Comisión -> Teso (Revenue)
+
+                FIN->>H: Actualiza Billetera Digital ("Saldo Pendiente")
+                AUD->>AUD: 📝 LOG: Transacción Cerrada. Hash #AF9921...
+
+                Note over C,AUD: VALIDACIÓN FINAL
+                C->>S: Califica Servicio (5 Estrellas)
+            </div>
+        </div>
+
+        <div class="notes">
+            <h3>🛡️ Puntos de Control Obligatorios (Hard Locks):</h3>
+            <ul>
+                <li>Si <strong>DIAN</strong> rechaza la factura, el sistema entra en alerta roja y no cierra el viaje
+                    administrativamente.</li>
+                <li>Si el <strong>GPS</strong> detecta desvío no autorizado, se dispara alerta de seguridad antes de
+                    finalizar.</li>
+                <li>El dinero del chofer queda en <strong>"Saldo Retenido"</strong> hasta que el cliente corporativo
+                    paga (30 días) o según política Teso (pago semanal).</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

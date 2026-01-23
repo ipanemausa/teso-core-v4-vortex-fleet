@@ -1,0 +1,14 @@
+# Docker Ignore (Security & Cleanliness)
+
+__pycache__
+venv/
+.env
+.env.*
+.git
+.vscode
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+TESO_MASTER_DATASET.xlsx
+TESO_FLIGHT_RECORDER.jsonl

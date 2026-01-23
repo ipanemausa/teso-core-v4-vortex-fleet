@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Glosario Universal de Comandos IA</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; color: #333; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #2980b9; margin-top: 30px; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin-bottom: 15px; background: #f9f9f9; padding: 15px; border-left: 5px solid #bdc3c7; border-radius: 4px; }
+        strong { color: #e74c3c; }
+        .code-block { background: #2d3436; color: #dfe6e9; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        .instructions { background: #dff9fb; border: 1px solid #c7ecee; padding: 20px; border-radius: 8px; margin-bottom: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="instructions">
+        <h3>📄 INSTRUCCIONES PARA GOOGLE DOCS / WORD</h3>
+        <p>Este archivo ya tiene el formato visual listo.</p>
+        <p>1. Presiona <b>CTRL + A</b> (para seleccionar todo).</p>
+        <p>2. Presiona <b>CTRL + C</b> (para copiar).</p>
+        <p>3. Ve a tu Google Doc y presiona <b>CTRL + V</b> (pegar).</p>
+    </div>
+
+    <h1>GLOSARIO UNIVERSAL DE COMANDOS Y CONCEPTOS PARA IA (NIVEL EXPERTO)</h1>
+    <p>Este documento recopila terminología avanzada para controlar Agentes de IA, desarrollo de software y orquestación de tareas complejas.</p>
+
+    <h2>1. COMANDOS DE CONTROL DE AGENTE (Agentic Control)</h2>
+    <p>Palabras clave para definir <i>cómo</i> debe trabajar la IA.</p>
+    <ul>
+        <li><strong>Scaffold (Andamiaje):</strong> "Crea la estructura de carpetas y archivos vacíos, sin código todavía. Solo el esqueleto."</li>
+        <li><strong>Bootstrap (Arranque):</strong> "Genera una versión mínima funcional (MVP) rápida y sucia para probar que el concepto funciona."</li>
+        <li><strong>Mock (Simular):</strong> "No uses datos reales ni bases de datos. Usa datos falsos (dummy data) 'quemados' en el código para probar la interfaz."</li>
+        <li><strong>Stub:</strong> "Crea la función pero déjala vacía, solo para que el código no se rompa mientras desarrollo lo demás."</li>
+        <li><strong>Refactor (Refactorizar):</strong> "Reescribe el código para que sea más limpio, eficiente y legible, SIN cambiar lo que hace externamente."</li>
+        <li><strong>Dry Run (Simulacro):</strong> "Dime exactamente qué archivos vas a tocar y qué líneas vas a cambiar antes de hacerlo. No ejecutes nada aún."</li>
+        <li><strong>Rethink (Replantear):</strong> "Detente. Tu enfoque actual está dando problemas. Borra tu 'plan mental' y propón una estrategia diferente desde cero."</li>
+        <li><strong>Verbose (Verbosidad):</strong> "Cuando ejecutes el comando, muéstrame TODO el output (logs) para poder depurar errores."</li>
+    </ul>
+
+    <h2>2. INGENIERÍA DE PROMPTS AVANZADA (Macro-Tasks)</h2>
+    <p>Técnicas para encadenar pensamientos y lograr objetivos grandes.</p>
+    <ul>
+        <li><strong>CoT (Chain of Thought / Cadena de Pensamiento):</strong><br>
+        <i>Definición:</i> Pedirle a la IA que "piense en voz alta" paso a paso antes de dar la solución final.<br>
+        <i>Comando:</i> "Piensa paso a paso. Primero analiza A, luego deduce B, y finalmente genera C."</li>
+        
+        <li><strong>ToT (Tree of Thoughts / Árbol de Pensamientos):</strong><br>
+        <i>Definición:</i> Pedirle a la IA que explore múltiples soluciones posibles simultáneamente y descarte las malas.<br>
+        <i>Comando:</i> "Propón 3 enfoques diferentes para solucionar este bug. Analiza los pros y contras de cada uno. Elige el mejor y ejecútalo."</li>
+
+        <li><strong>Few-Shot Prompting (Cebado con Ejemplos):</strong><br>
+        <i>Definición:</i> Darle a la IA 2 o 3 ejemplos de input/output esperado.<br>
+        <i>Comando:</i> "Quiero crear tarjetas de usuario. Aquí tienes 3 ejemplos de cómo me gustan... Ahora crea la número 4."</li>
+
+        <li><strong>Role Prompting (Asignación de Rol):</strong><br>
+        <i>Definición:</i> Convertir a la IA en un especialista.<br>
+        <i>Comando:</i> "Actúa como un Auditor de Ciberseguridad Senior." vs "Actúa como un Diseñador Gráfico Creativo."</li>
+    </ul>
+
+    <h2>3. TÉRMINOS TÉCNICOS DE DESARROLLO</h2>
+    <p>Conceptos recurrentes en proyectos modernos.</p>
+    <ul>
+        <li><strong>Destructuring:</strong> Extraer valores de objetos limpiamente. <code>const { nombre } = usuario;</code></li>
+        <li><strong>Hooks:</strong> Funciones de React que "enganchan" lógica (ej: useState para memoria).</li>
+        <li><strong>State (Estado):</strong> La "memoria" de la aplicación en ese instante.</li>
+        <li><strong>Props (Propiedades):</strong> Información que pasa de un componente Padre a un Hijo.</li>
+        <li><strong>Bundle:</strong> El archivo final "empaquetado" listo para producción.</li>
+    </ul>
+
+    <h2>4. ESTRATEGIAS MACRO (Nivel Superior)</h2>
+    <ul>
+        <li><strong>Orquestación:</strong> Coordinar múltiples agentes o herramientas para lograr una meta compleja.</li>
+        <li><strong>Iteración:</strong> Hacer una versión, recibir feedback, y mejorarla repetidamente.</li>
+        <li><strong>Single Source of Truth:</strong> Centralizar los datos en un solo lugar para evitar discrepancias.</li>
+    </ul>
+
+</body>
+</html>

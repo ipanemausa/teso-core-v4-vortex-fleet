@@ -1,0 +1,21 @@
+{
+  "name": "TESO Command Center",
+  "short_name": "TESO",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#050A14",
+  "theme_color": "#050A14",
+  "description": "Transporte Ejecutivo Sostenible & Operativo",
+  "icons": [
+    {
+      "src": "/teso.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/teso.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    }
+  ]
+}

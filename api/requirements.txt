@@ -1,0 +1,10 @@
+
+fastapi
+uvicorn
+gunicorn
+pandas
+openpyxl
+faker
+python-multipart
+sqlalchemy
+psycopg2-binary
