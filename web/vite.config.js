@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './', // CRITICAL: Ensures assets work on Hugging Face subpaths
   plugins: [react()],
   server: {
     host: true,
