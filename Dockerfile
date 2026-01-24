@@ -29,8 +29,18 @@ WORKDIR /app
 COPY api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy API Source Code
+# --- FIX: COPY SIMULATION MODULE ---
+# We recreate the package structure 'teso_core/simulation' 
+# so the import 'from teso_core.simulation...' works.
+COPY simulation/ ./teso_core/simulation/
+# Create an empty __init__.py to ensure teso_core is treated as a package if missing
+RUN touch teso_core/__init__.py
+
+# Copy API Source Code to root of /app
 COPY api/ .
+
+# Ensure /app is in PYTHONPATH so 'teso_core' can be imported
+ENV PYTHONPATH=/app
 
 # Copy Frontend Build from Stage 1 -> /app/static
 # FastAPI is configured to serve static files from ./static

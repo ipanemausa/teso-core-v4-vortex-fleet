@@ -264,7 +264,7 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
                 import sys
                 sys.path.append(base_dir) # Look in current dir first
                 sys.path.append(os.path.dirname(base_dir)) # Then parent
-                from generate_master_dataset import generate_dataset
+                from generate_dataset import generate_dataset
                 
                 # Generate it
                 generate_dataset()

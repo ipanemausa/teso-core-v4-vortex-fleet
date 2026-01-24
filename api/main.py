@@ -14,7 +14,16 @@ app = FastAPI(
     description="Backend Core for Teso Logistics & Financial Engine. Handles Server-Side Compute with MEANINGFUL PERSISTENCE."
 )
 
-from teso_core.simulation.core_v4 import simulate_core_v4
+# --- DYNAMIC IMPORT FIX ---
+try:
+    from teso_core.simulation.core_v4 import simulate_core_v4
+    print("✅ LOADED: teso_core.simulation.core_v4")
+except ImportError as e:
+    print(f"⚠️ WARNING: Could not import 'teso_core.simulation.core_v4': {e}")
+    print("ℹ️ RUNNING IN FALLBACK MODE: Simulation endpoints may trigger errors.")
+    # Define a dummy function to prevent NameError later
+    def simulate_core_v4(**kwargs):
+        return {"status": "error", "message": "Simulation Core not loaded."}
 
 # CORS Configuration
 app.add_middleware(
@@ -88,17 +97,29 @@ def run_simulation(days: int = 360, stress: bool = False):
     Updates the Global Cache.
     """
     print(f"--- RUNNING NEW SIMULATION ({days} DAYS, STRESS={stress}) ---")
-    excel_file, raw_data = generate_financial_simulation(days=days, stress_mode=stress)
-    
-    # Update Persistence (Memory)
-    GLOBAL_CACHE["excel_bytes"] = excel_file.getvalue()
-    GLOBAL_CACHE["json_data"] = raw_data
-    GLOBAL_CACHE["last_updated"] = datetime.now().isoformat()
-    
-    # Update Persistence (Disk)
-    save_simulation_state(raw_data, excel_file.getvalue())
-    
-    return {"status": "success", "message": f"Simulation regenerated for {days} days.", "summary": raw_data["summary"]}
+    try:
+        excel_file, raw_data = generate_financial_simulation(days=days, stress_mode=stress)
+        
+        # Update Persistence (Memory)
+        GLOBAL_CACHE["excel_bytes"] = excel_file.getvalue()
+        GLOBAL_CACHE["json_data"] = raw_data
+        GLOBAL_CACHE["last_updated"] = datetime.now().isoformat()
+        
+        # Update Persistence (Disk)
+        save_simulation_state(raw_data, excel_file.getvalue())
+        
+        return {"status": "success", "message": f"Simulation regenerated for {days} days.", "summary": raw_data["summary"]}
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"❌ SIMULATION CRASH: {error_details}")
+        # Return a 200 OK with error payload so frontend can display it instead of 500
+        return {
+            "status": "error", 
+            "message": "Simulation Engine Failed", 
+            "details": str(e),
+            "trace": error_details 
+        }
 
 @app.post("/api/simulate/core-v4")
 def simulate_core_v4_endpoint(payload: dict):
