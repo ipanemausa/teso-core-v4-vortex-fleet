@@ -110,7 +110,7 @@ def seed_database_from_excel(db: Session, excel_path: str):
         db.rollback()
         return False
 
-def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, cxc_days: int = 30, cxp_freq: int = 7, stress_mode: bool = False):
+def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, cxc_days: int = 30, cxp_freq: int = 7, stress_mode: bool = False, base_daily_services: int = 40, drivers_count: int = 45):
     """
     HYBRID ENGINE: DB First -> Excel Fallback
     """
@@ -247,41 +247,82 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
             cxc_data[c_name] += fare
 
     else:
-        # FALLBACK: LEGACY EXCEL READ (Original Logic)
-        print("💾 USING LEGACY EXCEL DRIVER (FALLBACK)")
-        if os.path.exists(real_data_path):
-            try:
-                df_real = pd.read_excel(real_data_path, sheet_name=0)
-            except Exception as e:
-                print(f"Read Error: {e}")
-                df_real = pd.DataFrame()
-        else:
-            # VORTEX FALLBACK: COMPUTE DATA IF NOT PRESENT
-            print("⚠️ MASTER DATASET MISSING. INITIATING VORTEX GENERATION PROTOCOL...")
-            try:
-                # Add root to path to import generator
-                # Add root to path to import generator
-                import sys
-                sys.path.append(base_dir) # Look in current dir first
-                sys.path.append(os.path.dirname(base_dir)) # Then parent
-                from generate_dataset import generate_dataset
+        # V4 REDUCED GENERATION LOGIC (Synthetic)
+        print(f"⚡ GENERANDO DATASET V4 SINTÉTICO ({days} DÍAS, {base_daily_services} OPS/DIA)...")
+        
+        # Generator Config
+        companies = [f"EMPRESA_{i}" for i in range(1, 21)] # 20 Corporates
+        drivers = [f"COND-{i:03d}" for i in range(1, drivers_count + 1)] # 45 Drivers
+        
+        current_date = start_date - timedelta(days=days) # Start from past
+        
+        for d in range(days):
+            daily_date = current_date + timedelta(days=d)
+            # Daily variance +/- 20%
+            daily_ops = int(base_daily_services * (0.8 + 0.4 * random.random()))
+            
+            for _ in range(daily_ops):
+                # 90% Corporate, 10% On-Demand
+                is_corporate = random.random() < 0.90
+                client = random.choice(companies) if is_corporate else "PARTICULAR"
+                tipo = "VAN" if is_corporate else "AUTO"
                 
-                # Generate it
-                generate_dataset()
+                # Logic: Fare
+                fare = 125000
+                toll = 18000
+                comm = fare * 0.20
+                driver_pay = fare - comm - toll
                 
-                # Now read it (it should exist now)
-                if os.path.exists(real_data_path):
-                    df_real = pd.read_excel(real_data_path, sheet_name=0)
-                else:
-                    # Retry checking root (generator saves to root usually)
-                    root_data_path = os.path.join(os.path.dirname(base_dir), 'TESO_MASTER_DATASET.xlsx')
-                    if os.path.exists(root_data_path):
-                        df_real = pd.read_excel(root_data_path, sheet_name=0)
-            except Exception as e:
-                print(f"❌ VORTEX GENERATION FAILED: {e}")
-                # Create empty DF to prevent crash
-                df_real = pd.DataFrame()
+                svc = {
+                     "ID": random.randint(100000, 999999),
+                     "FECHA": daily_date.isoformat(),
+                     "CLIENTE": client,
+                     "CONDUCTOR": random.choice(drivers),
+                     "VEHICULO": f"TES-{random.randint(100,999)}",
+                     "ESTADO": "FINALIZADO",
+                     "TARIFA": fare,
+                     "TIPO": tipo,
+                     "NOTAS": "Simulated V4 Event",
+                     "RUTA": "Ruta Optimizada",
+                     "status": "COMPLETED",
+                     "financials": {
+                        "totalValue": fare,
+                        "driverPayment": driver_pay,
+                        "toll": toll,
+                        "netRevenue": comm
+                     }
+                }
+                
+                # Apply V4 Chaos Logic
+                svc = apply_chaos_logic(svc, stress_mode=stress_mode)
+                
+                # Sync Status back to Spanish for Excel
+                status_map = {"COMPLETED": "FINALIZADO", "CANCELLED": "CANCELADO", "DELAYED": "RETRASADO", "NO_SHOW": "NO_SHOW"}
+                svc["ESTADO"] = status_map.get(svc.get("status", "COMPLETED"), "FINALIZADO")
+                
+                services_data.append(svc)
+                
+                # Cash Flow Events
+                days_offset = 30 if is_corporate else 0
+                inflow_date = daily_date + timedelta(days=days_offset)
+                
+                cash_flow_events.append({
+                    "FECHA": inflow_date,
+                    "TIPO": "INGRESO_COMISION",
+                    "MONTO": comm,
+                    "DETALLE": f"Comisión - {client}"
+                })
+                
+                # CXC
+                if client not in cxc_data: cxc_data[client] = 0
+                cxc_data[client] += fare
 
+        print(f"✅ V4 GENERATION COMPLETE: {len(services_data)} Services Created.")
+        
+        # Skip legacy reading (Ensure df_real is not defined or empty so the loop below is skipped)
+        # df_real = pd.DataFrame(services_data) <-- REMOVED
+
+        
         # Fallback Check
         if 'df_real' in locals() and not df_real.empty:
             print(f"🔄 PROCESSING {len(df_real)} ROWS FROM EXCEL...")
