@@ -7,7 +7,7 @@ import L from 'leaflet';
 
 // --- DYNAMIC IMPORTS (Fix for Circular Dependencies / ReferenceError) ---
 const LandingPage = lazy(() => import('./components/LandingPage'));
-// const Presentation = lazy(() => import('./components/Presentation'));
+const Presentation = lazy(() => import('./components/Presentation'));
 // const TripPreferencesModal = lazy(() => import('./components/TripPreferencesModal'));
 // const SharedRideView = lazy(() => import('./components/SharedRideView'));
 // const WebcamOverlay = lazy(() => import('./components/WebcamOverlay'));

@@ -7,13 +7,17 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from simulation_engine import generate_financial_simulation
 
 def main():
-    print("--- INICIANDO GENERACIÓN DE DATASET MAESTRO (360 DÍAS) ---")
-    print("... Aplicando Supuestos: 10% On-Demand, Regla Liquidez, Chaos Factors ...")
+    print("--- INICIANDO GENERACIÓN DE DATASET MAESTRO V4 REDUCIDO (360 DÍAS) ---")
+    print("... Aplicando Supuestos: 40 Servicios/Día, 10% On-Demand, Regla Liquidez, Chaos Factors ...")
     
-    # Generate 360 days of data (approx 86,400 rows)
-    excel_buffer, _ = generate_financial_simulation(days=360)
+    # Generate 360 days of data
+    excel_buffer, _ = generate_financial_simulation(
+        days=360, 
+        base_daily_services=40,  # V4 Assumption
+        drivers_count=15         # V4 Assumption: High Efficiency Fleet
+    )
     
-    output_filename = "TESO_MASTER_DATASET.xlsx"
+    output_filename = "TESO_MASTER_DATASET_V4.xlsx"
     
     # Save buffer to file
     with open(output_filename, "wb") as f:
