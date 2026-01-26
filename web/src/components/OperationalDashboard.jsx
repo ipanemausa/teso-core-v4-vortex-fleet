@@ -406,8 +406,8 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
         filteredServices.forEach(curr => {
             // HANDLE HYBRID DATA (Simulated vs Simple Request)
             const val = curr.financials?.totalValue || parseFloat((curr.fare || '0').replace(/[^0-9]/g, '')) || 0;
-            const cost = curr.financials?.totalCost || (val * 0.7);
-            const pay = curr.financials?.driverPayment || (val * 0.6);
+            const cost = curr.financials?.totalCost || (val * 0.80); // Fixed 20% Margin Rule (80% Cost)
+            const pay = curr.financials?.driverPayment || (val * 0.60);
 
             revenue += val;
             exactCost += cost;
@@ -804,15 +804,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                         ✖ SALIR
                     </TesoButton>
 
-                    {/* COUNT */}
-                    <div style={{ textAlign: 'right', marginLeft: '10px' }}>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', lineHeight: 1, color: '#00F0FF' }}>
-                            {filteredCount.toLocaleString()}
-                        </div>
-                        <small style={{ color: '#666', fontSize: '0.6rem' }}>SVC</small>
-                        {/* DEBUG DATE FILTER - REMOVE AFTER FIX */}
-                        {/* <div style={{ fontSize: '0.5rem', color: 'red' }}>F: {timeFilter}</div> */}
-                    </div>
+
                 </div>
             </div>
 
