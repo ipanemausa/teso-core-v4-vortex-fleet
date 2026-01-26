@@ -140,7 +140,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
     const [activeSheet, setActiveSheet] = useState('PROGRAMACION');
     const [isAuditMode, setIsAuditMode] = useState(false); // NEW: Tech Audit Toggle
     const [expandedClient, setExpandedClient] = useState(null);
-    const [timeFilter, setTimeFilter] = useState('ALL'); // 'TODAY', '7D', '30D', 'ALL'
+    const [timeFilter, setTimeFilter] = useState('Today'); // 'TODAY', '7D', '30D', 'ALL'
     const [isExporting, setIsExporting] = useState(false); // Export Loading State
 
     // --- WAR ROOM (SCENARIO BUILDER) STATE ---
