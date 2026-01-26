@@ -622,38 +622,7 @@ function App() {
   } 
   */
 
-  if (showOperationalDashboard) {
-    return (
-      <div className="hub-root" style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', background: '#000', overflow: 'hidden' }}>
-        {/* HUB NAVIGATION */}
-        {/* VORTEX FLEET HEADER */}
-        <nav style={{ padding: '0 20px', background: '#0B1120', borderBottom: '1px solid #00f2ff', display: 'flex', gap: '10px', alignItems: 'center', height: '60px', boxShadow: '0 0 15px rgba(0, 242, 255, 0.2)' }}>
-          <div style={{ fontWeight: '900', color: '#00f2ff', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}>TESO OPS</div>
-          <div style={{ width: '1px', height: '20px', background: '#333' }}></div>
-          <div style={{ color: '#fff', fontSize: '0.9rem', letterSpacing: '1px' }}>OPERACIÓN 35 / 80</div>
 
-          <div style={{ marginLeft: 'auto' }}>
-            <button onClick={() => setShowOperationalDashboard(false)} style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '5px 15px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>EXIT</button>
-          </div>
-        </nav>
-
-        {/* CONTENT - SINGLE VIEW */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'auto', background: '#0B1120' }}>
-          <OperationalDashboard
-            vehicles={vehicles}
-            requests={requests}
-            simulationData={simulationContext}
-            initialViewMode="ANALYTICS"
-            onRowClick={(row) => setActiveReq(row)}
-            onSimulateStress={simularDiaCritico}
-            onRunMacro={runMacroSequence}
-            onClose={() => setShowOperationalDashboard(false)}
-            onHome={() => { setShowLanding(true); setShowOperationalDashboard(false); }}
-          />
-        </div>
-      </div>
-    );
-  }
 
   // --- LANDING PAGE (GATEWAY) ---
   if (showLanding) {
@@ -1427,6 +1396,40 @@ function App() {
   }
   return (
     <main className="app-container">
+      {/* --- LAYER 3: OPERATIONAL DASHBOARD (OVERLAY, MAP ALIVE BENEATH) --- */}
+      {showOperationalDashboard && (
+        <div className="hub-root" style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          display: 'flex', flexDirection: 'column', background: '#000', overflow: 'hidden',
+          zIndex: 99999 // HIGHEST Z-INDEX
+        }}>
+          {/* HUB NAVIGATION */}
+          <nav style={{ padding: '0 20px', background: '#0B1120', borderBottom: '1px solid #00f2ff', display: 'flex', gap: '10px', alignItems: 'center', height: '60px', boxShadow: '0 0 15px rgba(0, 242, 255, 0.2)' }}>
+            <div style={{ fontWeight: '900', color: '#00f2ff', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}>TESO OPS</div>
+            <div style={{ width: '1px', height: '20px', background: '#333' }}></div>
+            <div style={{ color: '#fff', fontSize: '0.9rem', letterSpacing: '1px' }}>OPERACIÓN 35 / 80</div>
+
+            <div style={{ marginLeft: 'auto' }}>
+              <button onClick={() => setShowOperationalDashboard(false)} style={{ background: 'transparent', border: '1px solid #333', color: '#fff', padding: '5px 15px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>EXIT</button>
+            </div>
+          </nav>
+
+          {/* CONTENT - SINGLE VIEW */}
+          <div style={{ flex: 1, position: 'relative', overflow: 'auto', background: '#0B1120' }}>
+            <OperationalDashboard
+              vehicles={vehicles}
+              requests={requests}
+              simulationData={simulationContext}
+              initialViewMode="ANALYTICS"
+              onRowClick={(row) => setActiveReq(row)}
+              onSimulateStress={simularDiaCritico}
+              onRunMacro={runMacroSequence}
+              onClose={() => setShowOperationalDashboard(false)}
+              onHome={() => { setShowLanding(true); setShowOperationalDashboard(false); }}
+            />
+          </div>
+        </div>
+      )}
       {/* GLOBAL PDF MODAL */}
       {previewPdf && (
         <div style={{
