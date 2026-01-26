@@ -268,6 +268,26 @@ const RadarController = ({ setPlanes }) => {
   return null;
 };
 
+// --- SAFE CONNECTION LINES COMPONENT ---
+const ConnectionLines = ({ highlighted, vehicles, requests }) => {
+  if (!highlighted || !highlighted.vehicleId || !highlighted.requestId) return null;
+
+  const v = vehicles.find(v => v.id === highlighted.vehicleId);
+  const r = requests.find(r => r.id === highlighted.requestId);
+
+  if (!v || !r) return null;
+  // Safety check for lat/lng
+  if (typeof v.lat !== 'number' || typeof r.lat !== 'number') return null;
+
+  return (
+    <>
+      <Polyline positions={[[v.lat, v.lng], [r.lat, r.lng]]} color="#39FF14" dashArray="5, 10" weight={2} />
+      <Circle center={[v.lat, v.lng]} radius={300} pathOptions={{ color: '#39FF14', fillColor: '#39FF14', fillOpacity: 0.2 }} />
+      <Circle center={[r.lat, r.lng]} radius={300} pathOptions={{ color: 'gold', fillColor: 'gold', fillOpacity: 0.2 }} />
+    </>
+  );
+};
+
 
 
 function App() {
@@ -1859,7 +1879,7 @@ function App() {
         )}
 
         {/* MAP CONTAINER (RESTORED) */}
-        <MapContainer center={[6.23, -75.58]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+        <MapContainer key="teso-map-v1" center={[6.23, -75.58]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
           {/* AUTO FOCUS COMPONENT */}
           <FlyToActive activeReq={requests.find(r => r.id === activeRequestId)} />
 
@@ -1883,20 +1903,8 @@ function App() {
 
           ))}
 
-          {/* HIGHLIGHTED CONNECTION LINE */}
-          {highlighted && highlighted.vehicleId && highlighted.requestId && (() => {
-            const v = vehicles.find(v => v.id === highlighted.vehicleId);
-            const r = requests.find(r => r.id === highlighted.requestId);
-            if (v && r) {
-              return (
-                <>
-                  <Polyline positions={[[v.lat, v.lng], [r.lat, r.lng]]} color="#39FF14" dashArray="5, 10" weight={2} />
-                  <Circle center={[v.lat, v.lng]} radius={300} pathOptions={{ color: '#39FF14', fillColor: '#39FF14', fillOpacity: 0.2 }} />
-                  <Circle center={[r.lat, r.lng]} radius={300} pathOptions={{ color: 'gold', fillColor: 'gold', fillOpacity: 0.2 }} />
-                </>
-              );
-            }
-          })()}
+          {/* HIGHLIGHTED CONNECTION LINE (Allocated Component) */}
+          <ConnectionLines highlighted={highlighted} vehicles={vehicles} requests={requests} points={planes} />
 
           {/* HIGHLIGHTED FLIGHT */}
           {highlighted && highlighted.flightId && (() => {
