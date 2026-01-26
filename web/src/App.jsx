@@ -623,7 +623,7 @@ function App() {
             vehicles={vehicles}
             requests={requests}
             simulationData={simulationContext}
-            initialViewMode="CORE"
+            initialViewMode="ANALYTICS"
             onRowClick={(row) => setActiveReq(row)}
             onSimulateStress={simularDiaCritico}
             onRunMacro={runMacroSequence}
