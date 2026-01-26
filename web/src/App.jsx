@@ -1907,7 +1907,7 @@ function App() {
 
         {/* MAP CONTAINER (RESTORED) */}
         <ErrorBoundary>
-          <MapContainer key="teso-map-v1" center={[6.23, -75.58]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+          <MapContainer key="teso-map-v1" center={[6.23, -75.58]} zoom={12} style={{ height: '100vh', width: '100vw', background: 'red', position: 'fixed', top: 0, left: 0, zIndex: 0 }} zoomControl={false}>
             <TileLayer
               className="cyberpunk-map-tiles"
               attribution='© Osm'
