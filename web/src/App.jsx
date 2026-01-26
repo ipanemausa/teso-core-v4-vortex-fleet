@@ -22,11 +22,17 @@ const OperationalDashboard = lazy(() => import('./components/OperationalDashboar
 function FlyToActive({ activeReq }) {
   const map = useMap();
   useEffect(() => {
-    if (activeReq) {
-      map.flyTo([activeReq.lat, activeReq.lng], 14, {
-        duration: 2.0,
-        easeLinearity: 0.5
-      });
+    if (!map || !map.flyTo || !map._leaflet_id) return; // FIX: Ensure Map is Ready
+
+    if (activeReq && typeof activeReq.lat === 'number' && typeof activeReq.lng === 'number') {
+      try {
+        map.flyTo([activeReq.lat, activeReq.lng], 14, {
+          duration: 2.0,
+          easeLinearity: 0.5
+        });
+      } catch (e) {
+        console.warn("FlyTo Error (Ignored):", e);
+      }
     }
   }, [activeReq, map]);
   return null;
@@ -212,12 +218,12 @@ const RadarController = ({ setPlanes }) => {
 
     // Safety Force-Update to prevent race condition
     try {
-      if (!map.getBounds) return;
+      if (!map || !map.getBounds || !map._leaflet_id) return;
     } catch (e) { return; }
 
     const safeUpdate = () => {
       try {
-        if (!map || !map.getBounds || !map.getCenter) return;
+        if (!map || !map.getBounds || !map.getCenter || !map._leaflet_id) return; // FIX: Strict Leaflet Check
         const bounds = map.getBounds();
         const center = map.getCenter();
         const deathBounds = bounds.pad(0.2);
