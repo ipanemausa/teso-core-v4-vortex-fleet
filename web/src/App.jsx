@@ -639,7 +639,7 @@ function App() {
   if (showLanding) {
     return (
       <Suspense fallback={<div style={{ height: '100vh', width: '100vw', background: '#000', color: '#39FF14', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace' }}><h1>TESO OS v3.0 (VORTEX)</h1><p>INITIALIZING NEURAL CORE...</p></div>}>
-        <LandingPage onEnter={() => { setShowOperationalDashboard(true); setShowLanding(false); }} />
+        <LandingPage onEnter={() => { setShowOperationalDashboard(false); setShowLanding(false); }} />
       </Suspense>
     );
   }
