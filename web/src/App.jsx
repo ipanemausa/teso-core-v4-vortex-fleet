@@ -1418,7 +1418,7 @@ function App() {
               vehicles={vehicles}
               requests={requests}
               simulationData={simulationContext}
-              initialViewMode="ANALYTICS"
+              initialViewMode={dashboardViewMode}
               onRowClick={(row) => setActiveReq(row)}
               onSimulateStress={simularDiaCritico}
               onRunMacro={runMacroSequence}
@@ -1665,7 +1665,7 @@ function App() {
               { id: 'AGENDA', icon: '📅' },
               { id: 'FINANZAS', icon: '💰' },
               { id: 'MERCADEO', icon: '📢' },
-              { id: 'NIVEL 3', icon: '💎', action: () => { setShowOperationalDashboard(true); addLog('💎 NIVEL 3: CORE OPERATIVO ANEXADO.'); } }
+              { id: 'CORE V4', icon: '🔋', action: () => { setShowOperationalDashboard(true); setDashboardViewMode('CORE'); addLog('🔋 CORE V4: SISTEMA CENTRAL ACTIVADO.'); } }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -1871,9 +1871,9 @@ function App() {
               }}
               onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.color = '#ffd700'; }}
               onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = '#fff'; }}
-              title="Abrir NIVEL 3 (Core Operativo)"
+              title="Abrir CORE V4 (Sistema Central)"
             >
-              <div style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 0 5px rgba(255,215,0,0.5))' }}>💎</div>
+              <div style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 0 5px rgba(0, 255, 128, 0.5))' }}>🔋</div>
             </button>
 
           </div>
