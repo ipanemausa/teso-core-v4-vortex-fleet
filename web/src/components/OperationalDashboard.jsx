@@ -37,7 +37,7 @@ const formatCurrency = (amount) => {
     }).format(amount);
 };
 
-const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS', onRowClick, simulationData: propSimulationData, onClose, onRegenerate, onSimulateStress, onRunMacro }) => {
+const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS', onRowClick, simulationData: propSimulationData, onClose, onHome, onRegenerate, onSimulateStress, onRunMacro }) => {
 
     // --- STATE ---
     const [simulationData, setSimulationData] = useState(propSimulationData || null);
@@ -795,14 +795,25 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                         </TesoButton>
                     </div>
 
-                    {/* CLOSE BUTTON */}
-                    <TesoButton
-                        variant="danger"
-                        size="sm"
-                        onClick={onClose}
-                    >
-                        ✖ SALIR
-                    </TesoButton>
+                    {/* NAVIGATION BUTTONS */}
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <TesoButton
+                            variant="secondary"
+                            size="sm"
+                            onClick={onHome}
+                            title="Ir al Inicio (Landing)"
+                        >
+                            🏠 INICIO
+                        </TesoButton>
+                        <TesoButton
+                            variant="danger"
+                            size="sm"
+                            onClick={onClose}
+                            title="Volver al Mapa (Capa 2)"
+                        >
+                            🗺️ MAPA
+                        </TesoButton>
+                    </div>
 
 
                 </div>

@@ -627,6 +627,7 @@ function App() {
             onSimulateStress={simularDiaCritico}
             onRunMacro={runMacroSequence}
             onClose={() => setShowOperationalDashboard(false)}
+            onHome={() => { setShowLanding(true); setShowOperationalDashboard(false); }}
           />
         </div>
       </div>
@@ -1462,6 +1463,76 @@ function App() {
           📡 RADAR JMC: <span style={{ color: '#39FF14' }}>ONLINE</span>
         </div>
 
+        {/* 4. BOTTOM CENTER COMMANDS (OPTIMIZE, AUDIT, SECURITY) */}
+        {!showOperationalDashboard && !showLanding && (
+          <div style={{
+            position: 'absolute', bottom: '100px', left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', gap: '15px', zIndex: 999
+          }}>
+            {[
+              { label: 'Optimize Routes', icon: '✨', color: '#00F0FF' },
+              { label: 'Financial Audit', icon: '✨', color: '#FFD700' },
+              { label: 'Security Scan', icon: '✨', color: '#39FF14' }
+            ].map(btn => (
+              <button key={btn.label} style={{
+                background: 'rgba(0,0,0,0.8)', border: `1px solid ${btn.color}`, color: btn.color,
+                padding: '10px 20px', borderRadius: '30px', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '0.8rem',
+                boxShadow: `0 0 10px ${btn.color}40`, backdropFilter: 'blur(4px)'
+              }}>
+                <span style={{ fontSize: '1.2rem', marginBottom: '2px' }}>{btn.icon}</span>
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 5. CHAT BAR (Ask Teso Operations AI...) */}
+        {!showOperationalDashboard && !showLanding && (
+          <div style={{
+            position: 'absolute', bottom: '90px', right: '370px', zIndex: 999,
+            display: 'flex', alignItems: 'center', gap: '10px'
+          }}>
+            <div style={{
+              background: 'rgba(0,0,0,0.8)', border: '1px solid #00F0FF', borderRadius: '50px',
+              padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '10px',
+              width: '400px', boxShadow: '0 0 15px rgba(0, 240, 255, 0.2)'
+            }}>
+              <span>🤖</span>
+              <input
+                placeholder="abre el excel de programacion..."
+                style={{ background: 'transparent', border: 'none', color: '#fff', width: '100%', outline: 'none' }}
+              />
+              <span>🎤</span>
+              <button style={{ background: '#00F0FF', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer' }}>➤</button>
+            </div>
+          </div>
+        )}
+
+        {/* 6. TOP LEFT BUTTONS (VISION IA, CONECTAR MOVIL) */}
+        {!showOperationalDashboard && !showLanding && (
+          <div style={{
+            position: 'absolute', top: '100px', left: '20px', zIndex: 999,
+            display: 'flex', flexDirection: 'column', gap: '15px'
+          }}>
+            <button style={{
+              background: 'rgba(255, 0, 255, 0.1)', border: '1px solid #FF00FF', color: '#FF00FF',
+              padding: '10px 20px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold',
+              display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 0 15px rgba(255, 0, 255, 0.2)'
+            }}>
+              🧠 VISIÓN IA
+            </button>
+            <button onClick={() => openQR()} style={{
+              background: 'rgba(255, 255, 255, 0.1)', border: '1px solid #fff', color: '#fff',
+              padding: '10px 20px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold',
+              display: 'flex', alignItems: 'center', gap: '10px'
+            }}>
+              📱 CONECTAR MÓVIL
+            </button>
+          </div>
+        )}
+
+
         {/* --- LAYER 2: MAP HUB INTERFACE --- */}
 
         {/* 1. TOP NAVIGATION (GLASS TABS) */}
@@ -1585,12 +1656,24 @@ function App() {
               ))}
             </div>
 
-            {/* PITCH DECK FOOTER BUTTON */}
-            <div style={{ marginTop: 'auto', paddingTop: '10px' }}>
+            {/* PITCH DECK & SOURCE FOOTER BUTTONS */}
+            <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => window.open('https://github.com/ipanemausa/teso_core', '_blank')}
+                style={{
+                  flex: 1, padding: '12px',
+                  background: '#1a1a1a', color: '#fff', fontWeight: 'bold',
+                  border: '1px solid #333', borderRadius: '50px',
+                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px',
+                  fontSize: '0.8rem'
+                }}
+              >
+                👾 SOURCE (GIT)
+              </button>
               <button
                 onClick={() => setShowPresentation(true)}
                 style={{
-                  width: '100%', padding: '12px',
+                  flex: 1, padding: '12px',
                   background: '#FFD700', color: '#000', fontWeight: 'bold',
                   border: 'none', borderRadius: '50px',
                   boxShadow: '0 0 20px rgba(255, 215, 0, 0.4)',
