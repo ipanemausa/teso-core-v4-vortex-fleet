@@ -215,37 +215,25 @@ const RadarController = ({ setPlanes }) => {
       if (!map.getBounds) return;
     } catch (e) { return; }
 
-    // Initial spawn if empty
-    setPlanes(prev => {
-      if (prev.length === 0) {
-        try {
-          const bounds = map.getBounds();
-          const center = map.getCenter();
-
-          // Create 6 random planes inside
-          const randomPlanes = Array.from({ length: 6 }).map(() => {
-            const p = createPlane(bounds, center);
-            p.lat = center.lat + (Math.random() - 0.5) * (bounds.getNorth() - bounds.getSouth());
-            p.lng = center.lng + (Math.random() - 0.5) * (bounds.getEast() - bounds.getWest());
-            return p;
-          });
-          return randomPlanes;
-        } catch (e) {
-          console.warn("Radar Init Skipped:", e);
-          return [];
-        }
-      }
-      return prev;
-    });
-
-    const interval = setInterval(() => {
+    const safeUpdate = () => {
       try {
-        if (!map || !map.getBounds) return;
+        if (!map || !map.getBounds || !map.getCenter) return;
         const bounds = map.getBounds();
         const center = map.getCenter();
         const deathBounds = bounds.pad(0.2);
 
         setPlanes(prevPlanes => {
+          // Initialize if empty
+          if (prevPlanes.length === 0) {
+            return Array.from({ length: 6 }).map(() => {
+              const p = createPlane(bounds, center);
+              p.lat = center.lat + (Math.random() - 0.5) * (bounds.getNorth() - bounds.getSouth());
+              p.lng = center.lng + (Math.random() - 0.5) * (bounds.getEast() - bounds.getWest());
+              return p;
+            });
+          }
+
+          // Update existing
           let currentPlanes = [...prevPlanes];
           while (currentPlanes.length < 6) {
             currentPlanes.push(createPlane(bounds, center));
@@ -262,8 +250,15 @@ const RadarController = ({ setPlanes }) => {
             return { ...p, lat: nextLat, lng: nextLng };
           });
         });
-      } catch (err) { }
-    }, 100);
+      } catch (err) {
+        // Silent fail on map destruction
+      }
+    };
+
+    // Initial run
+    // safeUpdate(); // Skip initial sync run to avoid strict mode collisions
+
+    const interval = setInterval(safeUpdate, 800);
 
     return () => clearInterval(interval);
   }, [map, setPlanes]);
@@ -1910,12 +1905,13 @@ function App() {
           {/* HIGHLIGHTED CONNECTION LINE (RESTORED) */}
           <ConnectionLines highlighted={highlighted} vehicles={vehicles} requests={requests} points={planes} />
 
-          {/* HIGHLIGHTED FLIGHT (RESTORED) */}
+          {/* HIGHLIGHTED FLIGHT (RESTORED & SAFEGUARDED) */}
           {highlighted && highlighted.flightId && (() => {
             const f = planes.find(p => p.id === highlighted.flightId);
-            if (f) {
+            if (f && typeof f.lat === 'number' && typeof f.lng === 'number') {
               return <Circle center={[f.lat, f.lng]} radius={2000} pathOptions={{ color: '#00F0FF', fillColor: '#00F0FF', fillOpacity: 0.1, dashArray: '10, 10' }} />;
             }
+            return null;
           })()}
 
           {/* VEHICLES (Blue - Supply) */}
