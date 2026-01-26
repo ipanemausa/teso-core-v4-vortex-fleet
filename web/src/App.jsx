@@ -208,58 +208,61 @@ const RadarController = ({ setPlanes }) => {
   const map = useMap();
 
   useEffect(() => {
-    // Initial spawn if empty (spawn scattered INSIDE view for immediate effect)
+    if (!map) return;
+
+    // Safety Force-Update to prevent race condition
+    try {
+      if (!map.getBounds) return;
+    } catch (e) { return; }
+
+    // Initial spawn if empty
     setPlanes(prev => {
       if (prev.length === 0) {
-        const bounds = map.getBounds();
-        const center = map.getCenter();
+        try {
+          const bounds = map.getBounds();
+          const center = map.getCenter();
 
-        // Create 6 random planes inside
-        const randomPlanes = Array.from({ length: 6 }).map(() => {
-          const p = createPlane(bounds, center);
-          // Override spawn pos to be inside
-          p.lat = center.lat + (Math.random() - 0.5) * (bounds.getNorth() - bounds.getSouth());
-          p.lng = center.lng + (Math.random() - 0.5) * (bounds.getEast() - bounds.getWest());
-          return p;
-        });
-
-        return randomPlanes;
+          // Create 6 random planes inside
+          const randomPlanes = Array.from({ length: 6 }).map(() => {
+            const p = createPlane(bounds, center);
+            p.lat = center.lat + (Math.random() - 0.5) * (bounds.getNorth() - bounds.getSouth());
+            p.lng = center.lng + (Math.random() - 0.5) * (bounds.getEast() - bounds.getWest());
+            return p;
+          });
+          return randomPlanes;
+        } catch (e) {
+          console.warn("Radar Init Skipped:", e);
+          return [];
+        }
       }
       return prev;
     });
 
     const interval = setInterval(() => {
-      const bounds = map.getBounds();
-      const center = map.getCenter();
+      try {
+        if (!map || !map.getBounds) return;
+        const bounds = map.getBounds();
+        const center = map.getCenter();
+        const deathBounds = bounds.pad(0.2);
 
-      // Use extended bounds for "Death Zone" (so they disappear only when well off screen)
-      const deathBounds = bounds.pad(0.2);
-
-      setPlanes(prevPlanes => {
-        let currentPlanes = [...prevPlanes];
-
-        // 1. Respawn if count < 6
-        while (currentPlanes.length < 6) {
-          currentPlanes.push(createPlane(bounds, center));
-        }
-
-        // 2. Move & Check
-        return currentPlanes.map(p => {
-          const nextLat = p.lat + (Math.cos(p.heading * Math.PI / 180) * p.speed);
-          const nextLng = p.lng + (Math.sin(p.heading * Math.PI / 180) * p.speed);
-
-          if (!deathBounds.contains([nextLat, nextLng])) {
-            // Respawn new plane entering from edge of CURRENT view
-            return createPlane(bounds, center);
+        setPlanes(prevPlanes => {
+          let currentPlanes = [...prevPlanes];
+          while (currentPlanes.length < 6) {
+            currentPlanes.push(createPlane(bounds, center));
           }
 
-          return {
-            ...p,
-            lat: nextLat,
-            lng: nextLng
-          };
+          return currentPlanes.map(p => {
+            const nextLat = p.lat + (Math.cos(p.heading * Math.PI / 180) * p.speed);
+            const nextLng = p.lng + (Math.sin(p.heading * Math.PI / 180) * p.speed);
+
+            if (!deathBounds.contains([nextLat, nextLng])) {
+              return createPlane(bounds, center);
+            }
+
+            return { ...p, lat: nextLat, lng: nextLng };
+          });
         });
-      });
+      } catch (err) { }
     }, 100);
 
     return () => clearInterval(interval);
@@ -1900,10 +1903,7 @@ function App() {
             { lat: 6.246, lng: -75.569, r: 600 },
             { lat: 6.200, lng: -75.578, r: 500 }
           ].map((h, i) => (
-            <React.Fragment key={i}>
-              <Circle center={[h.lat, h.lng]} radius={h.r} pathOptions={{ color: '#A020F0', fillColor: '#A020F0', fillOpacity: 0.6, stroke: false, className: 'ai-heat-pulse' }} />
-            </React.Fragment>
-
+            <Circle key={i} center={[h.lat, h.lng]} radius={h.r} pathOptions={{ color: '#A020F0', fillColor: '#A020F0', fillOpacity: 0.6, stroke: false, className: 'ai-heat-pulse' }} />
           ))}
 
           {/* HIGHLIGHTED CONNECTION LINE (Allocated Component) */}
