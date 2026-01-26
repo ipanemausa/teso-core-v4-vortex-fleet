@@ -15,7 +15,7 @@ const Presentation = lazy(() => import('./components/Presentation'));
 // const GastroDashboard = lazy(() => import('./components/GastroDashboard'));
 const OperationalDashboard = lazy(() => import('./components/OperationalDashboard'));
 // const LogisticsDashboard = lazy(() => import('./components/LogisticsDashboard'));
-import { CoreV4VortexFleet } from './views/CoreV4VortexFleet';
+// import { CoreOperativo } from './views/CoreOperativo'; // Removed to prevent conflict, handled in child
 
 
 // --- HELPER TO AUTO-FOCUS MAP ---
@@ -601,7 +601,7 @@ function App() {
         {/* HUB NAVIGATION */}
         {/* VORTEX FLEET HEADER */}
         <nav style={{ padding: '0 20px', background: '#0B1120', borderBottom: '1px solid #00f2ff', display: 'flex', gap: '10px', alignItems: 'center', height: '60px', boxShadow: '0 0 15px rgba(0, 242, 255, 0.2)' }}>
-          <div style={{ fontWeight: '900', color: '#00f2ff', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}>TESO VORTEX FLEET</div>
+          <div style={{ fontWeight: '900', color: '#00f2ff', fontSize: '1.2rem', letterSpacing: '2px', textTransform: 'uppercase' }}>TESO OPS</div>
           <div style={{ width: '1px', height: '20px', background: '#333' }}></div>
           <div style={{ color: '#fff', fontSize: '0.9rem', letterSpacing: '1px' }}>OPERACIÓN 35 / 80</div>
 
@@ -612,7 +612,15 @@ function App() {
 
         {/* CONTENT - SINGLE VIEW */}
         <div style={{ flex: 1, position: 'relative', overflow: 'auto', background: '#0B1120' }}>
-          <CoreV4VortexFleet />
+          <OperationalDashboard
+            vehicles={vehicles}
+            requests={requests}
+            simulationData={simulationContext}
+            initialViewMode="ANALYTICS"
+            onSimulateStress={simularDiaCritico}
+            onRunMacro={runMacroSequence}
+            onClose={() => setShowOperationalDashboard(false)}
+          />
         </div>
       </div>
     );
@@ -1447,50 +1455,87 @@ function App() {
           📡 RADAR JMC: <span style={{ color: '#39FF14' }}>ONLINE</span>
         </div>
 
-        {/* TOP NAV - INDIVIDUAL GLASS BUTTONS */}
-        <div style={{
-          position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 1000,
-          display: 'flex', gap: '8px',
-          maxWidth: '98%',
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-          paddingBottom: '5px'
-        }}>
-          {[
-            { id: 'FLOTA', icon: '🚙' },
-            { id: 'ORDENES', icon: '📦' },
-            { id: 'VUELOS', icon: '✈️' },
-            { id: 'CLIENTES', icon: '🏢' },
-            { id: 'AGENDA', icon: '📅' },
-            { id: 'FINANZAS', icon: '💰' },
-            { id: 'MERCADEO', icon: '📢' }
-          ].map(tab => (
+        {/* --- LAYER 2: MAP COMMAND INTERFACE (V6 STYLE) --- */}
+
+        {/* V6 COMMAND DOCK (Floating Bottom Bar) */}
+        {!showOperationalDashboard && !showLanding && (
+          <div style={{
+            position: 'absolute',
+            bottom: '30px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '30px',
+            zIndex: 9999, // Always on top of map
+            padding: '12px 40px',
+            borderRadius: '24px',
+            background: 'rgba(10, 15, 30, 0.85)',
+            border: '1px solid rgba(0, 242, 255, 0.3)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0, 242, 255, 0.1)',
+            backdropFilter: 'blur(12px)'
+          }}>
+
+            {/* 1. HOME (Landing) */}
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setShowLanding(true)}
               style={{
-                background: activeTab === tab.id ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                color: activeTab === tab.id ? '#00F0FF' : 'rgba(255, 255, 255, 0.85)',
-                border: activeTab === tab.id ? '1px solid #00F0FF' : '1px solid rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(8px)',
-                padding: '8px 15px',
-                borderRadius: '50px',
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex', alignItems: 'center', gap: '6px',
-                boxShadow: activeTab === tab.id ? '0 0 15px rgba(0, 240, 255, 0.2)' : '0 2px 10px rgba(0,0,0,0.1)',
-                minWidth: 'auto',
-                whiteSpace: 'nowrap'
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
+                color: '#fff', transition: 'all 0.2s', width: '50px'
               }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.color = '#00f2ff'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = '#fff'; }}
+              title="Volver al Inicio"
             >
-              <span style={{ fontSize: '1.2em' }}>{tab.icon}</span>
-              {tab.id}
+              <div style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 0 5px rgba(0,242,255,0.5))' }}>🏠</div>
             </button>
-          ))}
-        </div>
+
+            {/* 2. FIRE (Stress Mode - The "Red Button") */}
+            <button
+              onClick={simularDiaCritico}
+              style={{
+                background: 'rgba(255, 68, 68, 0.1)',
+                border: '1px solid #ff4444',
+                borderRadius: '50%',
+                width: '60px', height: '60px',
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#ff4444', transition: 'all 0.2s',
+                boxShadow: '0 0 15px rgba(255, 68, 68, 0.2)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)';
+                e.currentTarget.style.background = 'rgba(255, 68, 68, 0.3)';
+                e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 68, 68, 0.6)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)';
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.2)';
+              }}
+              title="SIMULACRO DÍA CRÍTICO (Stress Test)"
+            >
+              <div style={{ fontSize: '2rem' }}>🔥</div>
+            </button>
+
+            {/* 3. CORE (Dashboard/Table) */}
+            <button
+              onClick={() => setShowOperationalDashboard(true)}
+              style={{
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
+                color: '#fff', transition: 'all 0.2s', width: '50px'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.color = '#ffd700'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = '#fff'; }}
+              title="Abrir Core Operativo (Datos)"
+            >
+              <div style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 0 5px rgba(255,215,0,0.5))' }}>📊</div>
+            </button>
+
+          </div>
+        )}
 
         {/* MAP CONTAINER (RESTORED) */}
         <MapContainer center={[6.23, -75.58]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>

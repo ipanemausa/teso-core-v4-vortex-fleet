@@ -42,6 +42,10 @@ COPY api/ .
 # Ensure /app is in PYTHONPATH so 'teso_core' can be imported
 ENV PYTHONPATH=/app
 
+# --- FIX: COPY DATASET ---
+# Required for Vortex Engine to run simulations
+COPY TESO_MASTER_DATASET.xlsx .
+
 # Copy Frontend Build from Stage 1 -> /app/static
 # FastAPI is configured to serve static files from ./static
 COPY --from=frontend_builder /app/web/dist ./static

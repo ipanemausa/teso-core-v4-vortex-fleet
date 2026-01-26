@@ -18,6 +18,7 @@ import { logAuditEvent } from '../utils/auditLogger';
 import ExplainableTooltip from './ExplainableTooltip';
 import TesoButton from './ui/TesoButton';
 import StatusBadge from './ui/StatusBadge';
+import { CoreOperativo } from '../views/CoreOperativo';
 
 // HELPER: Date Parser
 const parseItemDate = (dateStr) => {
@@ -53,42 +54,77 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
 
 
 
-    // --- FETCH DATA FROM BACKEND ---
+    // --- FETCH DATA FROM BACKEND (V4 ENGINE) ---
     useEffect(() => {
         if (simulationData) return; // If passed as prop, use it
 
         const loadBackendData = async () => {
-            console.log("📡 CONNECTING TO TESO BRAIN...");
+            console.log("📡 CONNECTING TO TESO OPS V4...");
             setLoading(true);
             try {
-                const apiUrl = import.meta.env.VITE_API_URL || '';
-                const res = await fetch(`${apiUrl}/api/simulation/data?days=90`);
-                if (!res.ok) throw new Error("Brain Offline");
+                const apiUrl = 'https://teso-api-dev.fly.dev'; // Force Production URL
 
-                const data = await res.json();
-                console.log("✅ BRAIN CONNECTED:", data);
+                // 1. GET V4 STATS
+                const res = await fetch(`${apiUrl}/api/simulate/core-v4`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cars: 15, avg_trips_per_day: 40, days: 360 })
+                });
 
-                // ADAPTER: Map Backend 'detailed_cash_flow' -> Frontend 'bankTransactions'
-                const rawTransactions = data.detailed_cash_flow || [];
-                const bankTransactions = rawTransactions.map(tx => ({
-                    date: tx.FECHA,
-                    amount: tx.MONTO,
-                    description: tx.DETALLE,
-                    type: tx.TIPO.startsWith('INGRESO') ? 'INCOME' : 'EXPENSE',
-                    category: tx.TIPO,
-                    ref: `TX-${Math.floor(Math.random() * 10000)}`, // Fallback ref
-                    clientName: tx.DETALLE?.split('-')[1]?.trim() || 'TESO SYSTEM'
+                if (!res.ok) throw new Error("Ops Engine Offline");
+                const v4Result = await res.json();
+                console.log("✅ OPS CONNECTED:", v4Result);
+
+                // 2. GENERATE CLIENT-SIDE DATASET (For Map & Graphs)
+                // 40 trips * 360 days = 14,400 rows (Manageable in memory)
+                const totalTrips = v4Result.operational?.annual_trips || 14400;
+                const cars = v4Result.operational?.cars || 15;
+
+                // Generate fast
+                const services = new Array(totalTrips);
+                const baseDate = new Date();
+                baseDate.setDate(baseDate.getDate() - 360);
+
+                for (let i = 0; i < totalTrips; i++) {
+                    const carId = (i % cars) + 1;
+                    // Distribute dates over 360 days
+                    const dayOffset = Math.floor(i / 40);
+                    const tripDate = new Date(baseDate);
+                    tripDate.setDate(tripDate.getDate() + dayOffset);
+
+                    services[i] = {
+                        id: `TRIP-${i}`,
+                        date: tripDate.toISOString(),
+                        lat: 6.24 + (Math.random() * 0.08 - 0.04), // Medellín
+                        lng: -75.58 + (Math.random() * 0.08 - 0.04),
+                        status: 'COMPLETED',
+                        financials: {
+                            totalValue: 125000,
+                            driverPayment: 82000,
+                            netRevenue: 25000
+                        },
+                        plate: `TES-${100 + carId}`,
+                        driver_name: `Cond. ${carId}`
+                    };
+                }
+
+                // 3. STUB BANK TRANSACTIONS (For Graph Consistency)
+                const bankTransactions = services.filter((_, i) => i % 10 === 0).map(s => ({
+                    date: s.date,
+                    amount: 25000, // Net Revenue
+                    type: 'INCOME',
+                    description: 'Comisión Teso Ops'
                 }));
 
                 setSimulationData({
-                    ...data,
+                    ...v4Result,
+                    services: services, // Populates Map & Table
                     bankTransactions: bankTransactions
                 });
 
             } catch (err) {
-                console.error("❌ BRAIN ERROR:", err);
+                console.error("❌ OPS ERROR:", err);
                 setError(err.message);
-                // Fallback?
             } finally {
                 setLoading(false);
             }
@@ -606,6 +642,12 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
             flexDirection: 'column',
             fontFamily: "var(--font-main)" // Tokenized
         }}>
+            {/* VIEW MODE: CORE OPERATIVO */}
+            {viewMode === 'CORE' && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 200, overflowY: 'auto' }}>
+                    <CoreOperativo />
+                </div>
+            )}
 
             {/* PDF PREVIEW MODAL */}
             {previewPdf && (
@@ -630,28 +672,37 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                 </div>
             )}
 
+            {/* UNIFIED HEADER (Replaces Legacy V3) */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid #333', paddingBottom: '5px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: 'var(--text-xl)', color: 'var(--color-text-primary)', letterSpacing: '1px' }}>CORE OPERATIVO V3 (FIXED)</h1>
-                        <StatusBadge status="active">● SISTEMA ACTIVO</StatusBadge>
+                        <h1 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', letterSpacing: '1px' }}>MAP HUB</h1>
+                        <StatusBadge status="active">● LIVE TRACKING</StatusBadge>
                     </div>
                     {/* MODE SWITCHER */}
-                    <div style={{ display: 'flex', background: 'var(--color-border-subtle)', borderRadius: 'var(--radius-md)', padding: '3px' }}>
+                    <div style={{ display: 'flex', background: '#222', borderRadius: '4px', padding: '3px' }}>
+                        <TesoButton
+                            variant={viewMode === 'ANALYTICS' ? 'active' : 'ghost'}
+                            size="sm"
+                            style={viewMode === 'ANALYTICS' ? { background: '#FFD700', color: '#000', fontWeight: 'bold' } : {}}
+                            onClick={() => setViewMode('ANALYTICS')}
+                        >
+                            MAP EXPLORER
+                        </TesoButton>
+                        <TesoButton
+                            variant={viewMode === 'CORE' ? 'active' : 'ghost'}
+                            size="sm" // Smaller
+                            style={viewMode === 'CORE' ? { background: '#00f2ff', color: '#000', fontWeight: 'bold' } : {}}
+                            onClick={() => setViewMode('CORE')}
+                        >
+                            CORE DATA
+                        </TesoButton>
                         <TesoButton
                             variant={viewMode === 'LIVE_OPS' ? 'active' : 'ghost'}
                             size="sm"
                             onClick={() => setViewMode('LIVE_OPS')}
                         >
-                            LIVE EVENTS
-                        </TesoButton>
-                        <TesoButton
-                            variant={viewMode === 'ANALYTICS' ? 'active' : 'ghost'} // Using active variant which maps to KPI Positive, or we can add a 'gold' variant later
-                            size="sm"
-                            style={viewMode === 'ANALYTICS' ? { background: '#FFD700', color: '#000' } : {}} // Override for Gold preference until tokenized
-                            onClick={() => setViewMode('ANALYTICS')}
-                        >
-                            SHEET ANALYTICS
+                            AI TASK FORCE
                         </TesoButton>
                     </div>
                 </div>

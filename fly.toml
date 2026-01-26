@@ -1,5 +1,5 @@
-app = "teso-v3-staging"
-primary_region = "mia"
+app = "teso-api-dev"
+primary_region = "iad"
 
 [build]
   dockerfile = "Dockerfile"
@@ -13,9 +13,9 @@ primary_region = "mia"
   processes = ["app"]
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "1gb" # Increased for Pandas/Simulation load
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "2048mb"
 
 [env]
-  APP_ENV = "staging"
-  # Secrets should be set via 'fly secrets set' (e.g. HF_TOKEN)
+  APP_ENV = "production"
