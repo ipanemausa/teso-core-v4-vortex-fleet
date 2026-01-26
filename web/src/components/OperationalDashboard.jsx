@@ -1076,7 +1076,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                                                         </span>
                                                     </div>
                                                     <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                                                        {isAuditMode ? `ID: ${node.id.substring(0, 4)}-${Math.floor(Math.random() * 999)} | Lat: ${Math.floor(Math.random() * 20)}ms` : node.role}
+                                                        {isAuditMode ? `ID: ${(node.id || '').toString().substring(0, 4)}-${Math.floor(Math.random() * 999)} | Lat: ${Math.floor(Math.random() * 20)}ms` : node.role}
                                                     </div>
 
                                                     {/* LIVE LOG IN NODE */}
@@ -1489,7 +1489,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                                                         <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
                                                             {r.financials ? formatCurrency(r.financials.totalValue) : (r.fare || '-')}
                                                         </td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{r.pin || r.id.substring(0, 4)}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{r.pin || (r.id ? r.id.toString().substring(0, 4) : '????')}</td>
                                                     </tr>
                                                 ))}
                                             {activeSheet === 'CXC' && analytics.topClients.length === 0 && (

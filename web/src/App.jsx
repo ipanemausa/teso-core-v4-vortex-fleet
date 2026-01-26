@@ -623,7 +623,7 @@ function App() {
             vehicles={vehicles}
             requests={requests}
             simulationData={simulationContext}
-            initialViewMode="ANALYTICS"
+            initialViewMode="CORE"
             onSimulateStress={simularDiaCritico}
             onRunMacro={runMacroSequence}
             onClose={() => setShowOperationalDashboard(false)}
@@ -1462,9 +1462,149 @@ function App() {
           📡 RADAR JMC: <span style={{ color: '#39FF14' }}>ONLINE</span>
         </div>
 
-        {/* --- LAYER 2: MAP COMMAND INTERFACE (V6 STYLE) --- */}
+        {/* --- LAYER 2: MAP HUB INTERFACE --- */}
 
-        {/* V6 COMMAND DOCK (Floating Bottom Bar) */}
+        {/* 1. TOP NAVIGATION (GLASS TABS) */}
+        {!showOperationalDashboard && !showLanding && (
+          <div style={{
+            position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 1000,
+            display: 'flex', gap: '8px',
+            maxWidth: '98%',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            paddingBottom: '5px'
+          }}>
+            {[
+              { id: 'FLOTA', icon: '🚙' },
+              { id: 'ORDENES', icon: '📦' },
+              { id: 'VUELOS', icon: '✈️' },
+              { id: 'CLIENTES', icon: '🏢' },
+              { id: 'AGENDA', icon: '📅' },
+              { id: 'FINANZAS', icon: '💰' },
+              { id: 'MERCADEO', icon: '📢' },
+              { id: 'CORE', icon: '📊', action: () => setShowOperationalDashboard(true) } // Button to go to Layer 3
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={tab.action || (() => setActiveTab(tab.id))}
+                style={{
+                  background: activeTab === tab.id ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                  color: activeTab === tab.id ? '#00F0FF' : 'rgba(255, 255, 255, 0.85)',
+                  border: activeTab === tab.id ? '1px solid #00F0FF' : '1px solid rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(8px)',
+                  padding: '8px 15px',
+                  borderRadius: '50px',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  boxShadow: activeTab === tab.id ? '0 0 15px rgba(0, 240, 255, 0.2)' : '0 2px 10px rgba(0,0,0,0.1)',
+                  minWidth: 'auto',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span style={{ fontSize: '1.2em' }}>{tab.icon}</span>
+                {tab.id}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 2. RIGHT PANEL (TESO OPS CONSOLE) */}
+        {!showOperationalDashboard && !showLanding && (
+          <div style={{
+            position: 'absolute', top: '0', right: '0', bottom: '0', width: '350px',
+            background: 'rgba(5, 10, 20, 0.95)', borderLeft: '1px solid #333',
+            zIndex: 1000, overflowY: 'auto', padding: '20px',
+            display: 'flex', flexDirection: 'column', gap: '20px'
+          }}>
+            {/* HEADER */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2 style={{ color: '#fff', margin: 0, fontSize: '1.2rem', fontFamily: 'Courier New' }}>TESO OPS</h2>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>UNIDADES: {vehicles.length} | OPS: {requests.length}</small>
+              </div>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <button title="Home" onClick={() => setShowLanding(true)} style={{ background: '#333', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer' }}>🏠</button>
+                <button title="Stress Mode" onClick={simularDiaCritico} style={{ background: '#333', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', color: 'red' }}>⚡</button>
+              </div>
+            </div>
+
+            {/* SEARCH */}
+            <input
+              placeholder="🔍 Buscar Orden, Unidad, Cliente [ENTER]"
+              onKeyDown={handleGlobalSearch}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchTerm}
+              style={{ background: '#111', border: '1px solid #333', color: '#fff', padding: '10px', borderRadius: '4px', width: '100%' }}
+            />
+
+            {/* ACTION BUTTONS (BIG) */}
+            <button onClick={() => runMacroSequence()} className="btn-neon" style={{ width: '100%', padding: '15px' }}>▶ INICIAR</button>
+            <button onClick={() => autoAssignRef.current && autoAssignRef.current()} className="btn-neon" style={{ width: '100%', padding: '15px', color: '#39FF14', borderColor: '#39FF14' }}>⚡ DESPACHO INTELIGENTE</button>
+
+            {/* CORPORATE INPUT (RESTORED) */}
+            <div style={{ display: 'flex', gap: '5px' }}>
+              <input
+                placeholder="🏢 Escriba Empresa ("
+                value={corpInput}
+                onChange={(e) => setCorpInput(e.target.value)}
+                style={{ background: '#111', border: '1px solid #333', color: '#fff', padding: '10px', flex: 1, borderRadius: '4px' }}
+              />
+              <button
+                onClick={() => {
+                  addLog(`🚀 DEPLOY: Iniciando protocolo para ${corpInput || 'CLIENTE_GENERICO'}`);
+                  if (corpInput.toLowerCase().includes('argos')) speak('Iniciando protocolo Argos. Despliegue de flota prioritario.');
+                }}
+                style={{ background: 'linear-gradient(45deg, #FF4444, #990000)', border: 'none', color: 'white', fontWeight: 'bold', padding: '0 15px', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                🚀 DESPLEGAR
+              </button>
+            </div>
+
+            {/* CONSOLE LOGS */}
+            <div style={{ background: '#000', padding: '10px', borderRadius: '4px', height: '150px', overflowY: 'auto', border: '1px solid #00F0FF', fontSize: '0.7rem', fontFamily: 'monospace' }}>
+              <strong style={{ color: '#00F0FF', display: 'block', marginBottom: '5px' }}>CONSOLE.LOG :: SYSTEM EVENTS</strong>
+              {logs.map((l, i) => (
+                <div key={i} style={{ marginBottom: '3px' }}>
+                  <span style={{ color: '#666' }}>[{l.time}]</span> <span style={{ color: '#fff' }}>{l.msg}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* LIST: VEHICLES (Simplified) */}
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <h3 style={{ color: '#333', borderBottom: '1px solid #333', fontSize: '0.8rem' }}>UNIDADES EN LÍNEA ({vehicles.filter(v => v.status === 'available').length})</h3>
+              {vehicles.slice(0, 10).map(v => (
+                <div key={v.id} style={{ padding: '8px', borderBottom: '1px solid #222', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#fff' }}>{v.id}</span>
+                  <span style={{ color: v.status === 'available' ? '#39FF14' : 'orange', fontSize: '0.7rem' }}>● {v.status.toUpperCase()}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* PITCH DECK FOOTER BUTTON */}
+            <div style={{ marginTop: 'auto', paddingTop: '10px' }}>
+              <button
+                onClick={() => setShowPresentation(true)}
+                style={{
+                  width: '100%', padding: '12px',
+                  background: '#FFD700', color: '#000', fontWeight: 'bold',
+                  border: 'none', borderRadius: '50px',
+                  boxShadow: '0 0 20px rgba(255, 215, 0, 0.4)',
+                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px'
+                }}
+              >
+                ✨ PITCH DECK
+              </button>
+            </div>
+
+          </div>
+        )}
+
+        {/* 3. V6 COMMAND DOCK (Floating Bottom) - KEEPING AS REQUESTED "WITH ALL BUTTONS" */}
         {!showOperationalDashboard && !showLanding && (
           <div style={{
             position: 'absolute',
@@ -1474,7 +1614,7 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             gap: '30px',
-            zIndex: 9999, // Always on top of map
+            zIndex: 9999,
             padding: '12px 40px',
             borderRadius: '24px',
             background: 'rgba(10, 15, 30, 0.85)',
@@ -1482,6 +1622,7 @@ function App() {
             boxShadow: '0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0, 242, 255, 0.1)',
             backdropFilter: 'blur(12px)'
           }}>
+
 
             {/* 1. HOME (Landing) */}
             <button
