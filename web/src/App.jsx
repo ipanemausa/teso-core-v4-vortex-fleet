@@ -26,12 +26,14 @@ function FlyToActive({ activeReq }) {
 
     if (activeReq && typeof activeReq.lat === 'number' && typeof activeReq.lng === 'number') {
       try {
-        map.flyTo([activeReq.lat, activeReq.lng], 14, {
-          duration: 2.0,
-          easeLinearity: 0.5
-        });
+        if (map && map.flyTo && map._leaflet_id) { // DOUBLE CHECK
+          map.flyTo([activeReq.lat, activeReq.lng], 14, {
+            duration: 2.0,
+            easeLinearity: 0.5
+          });
+        }
       } catch (e) {
-        console.warn("FlyTo Error (Ignored):", e);
+        // console.warn("FlyTo Error (Ignored):", e);
       }
     }
   }, [activeReq, map]);
@@ -258,6 +260,7 @@ const RadarController = ({ setPlanes }) => {
         });
       } catch (err) {
         // Silent fail on map destruction
+        // console.warn("Map access error suppressed"); 
       }
     };
 
