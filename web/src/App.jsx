@@ -2,6 +2,7 @@ import { Suspense, lazy, useState, useEffect, useRef } from 'react'; // Added Su
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, Polyline, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import ErrorBoundary from './components/ErrorBoundary';
 
 
 
@@ -1895,173 +1896,175 @@ function App() {
         )}
 
         {/* MAP CONTAINER (RESTORED) */}
-        <MapContainer key="teso-map-v1" center={[6.23, -75.58]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+        <ErrorBoundary>
+          <MapContainer key="teso-map-v1" center={[6.23, -75.58]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
 
-          {/* AUTO FOCUS COMPONENT (DISABLED FOR STABILITY) */}
-          {/* <FlyToActive activeReq={requests.find(r => r.id === activeRequestId)} /> */}
+            {/* AUTO FOCUS COMPONENT (DISABLED FOR STABILITY) */}
+            {/* <FlyToActive activeReq={requests.find(r => r.id === activeRequestId)} /> */}
 
-          {/* RESPONSIVE RADAR CONTROLLER (RESTORED) */}
-          <RadarController setPlanes={setPlanes} />
+            {/* RESPONSIVE RADAR CONTROLLER (RESTORED) */}
+            {/* <RadarController setPlanes={setPlanes} /> */}
 
-          <TileLayer
-            className="cyberpunk-map-tiles"
-            attribution='© Osm'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {/* AI HEATMAP LAYERS */}
-          {isHeatmap && [
-            { lat: 6.208, lng: -75.566, r: 800 },
-            { lat: 6.246, lng: -75.569, r: 600 },
-            { lat: 6.200, lng: -75.578, r: 500 }
-          ].map((h, i) => (
-            <Circle key={i} center={[h.lat, h.lng]} radius={h.r} pathOptions={{ color: '#A020F0', fillColor: '#A020F0', fillOpacity: 0.6, stroke: false, className: 'ai-heat-pulse' }} />
-          ))}
+            <TileLayer
+              className="cyberpunk-map-tiles"
+              attribution='© Osm'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {/* AI HEATMAP LAYERS */}
+            {isHeatmap && [
+              { lat: 6.208, lng: -75.566, r: 800 },
+              { lat: 6.246, lng: -75.569, r: 600 },
+              { lat: 6.200, lng: -75.578, r: 500 }
+            ].map((h, i) => (
+              <Circle key={i} center={[h.lat, h.lng]} radius={h.r} pathOptions={{ color: '#A020F0', fillColor: '#A020F0', fillOpacity: 0.6, stroke: false, className: 'ai-heat-pulse' }} />
+            ))}
 
-          {/* HIGHLIGHTED CONNECTION LINE (RESTORED) */}
-          <ConnectionLines highlighted={highlighted} vehicles={vehicles} requests={requests} points={planes} />
+            {/* HIGHLIGHTED CONNECTION LINE (RESTORED) */}
+            {/* <ConnectionLines highlighted={highlighted} vehicles={vehicles} requests={requests} points={planes} /> */}
 
-          {/* HIGHLIGHTED FLIGHT (RESTORED & SAFEGUARDED) */}
-          {highlighted && highlighted.flightId && (() => {
-            const f = planes.find(p => p.id === highlighted.flightId);
-            if (f && typeof f.lat === 'number' && typeof f.lng === 'number') {
-              return <Circle center={[f.lat, f.lng]} radius={2000} pathOptions={{ color: '#00F0FF', fillColor: '#00F0FF', fillOpacity: 0.1, dashArray: '10, 10' }} />;
-            }
-            return null;
-          })()}
+            {/* HIGHLIGHTED FLIGHT (RESTORED & SAFEGUARDED) */}
+            {highlighted && highlighted.flightId && (() => {
+              const f = planes.find(p => p.id === highlighted.flightId);
+              if (f && typeof f.lat === 'number' && typeof f.lng === 'number') {
+                return <Circle center={[f.lat, f.lng]} radius={2000} pathOptions={{ color: '#00F0FF', fillColor: '#00F0FF', fillOpacity: 0.1, dashArray: '10, 10' }} />;
+              }
+              return null;
+            })()}
 
-          {/* VEHICLES (Blue - Supply) */}
-          {vehicles.filter(v => v && typeof v.lat === 'number' && typeof v.lng === 'number').map(v => (
-            <Marker key={v.id} position={[v.lat, v.lng]} icon={null} >
-              <Tooltip direction="top" offset={[0, -20]} opacity={1}>
-                <div style={{ textAlign: 'center', background: '#050A14', color: '#fff', padding: '8px', borderRadius: '4px', border: '1px solid #0078D7' }}>
-                  <strong style={{ color: '#0078D7' }}>🚙 {v.id}</strong><br />
-                  <span style={{ fontSize: '0.8rem' }}>{v.driver}</span><br />
-                  <span style={{ fontSize: '0.7rem', color: v.status === 'available' ? '#39FF14' : 'orange' }}>{v.status === 'available' ? '● DISPONIBLE' : '● OCUPADO'}</span>
-                </div>
-              </Tooltip>
-            </Marker>
-          ))}
-
-          {/* REQUESTS (Yellow - Demand) */}
-          {requests.filter(r => r && typeof r.lat === 'number' && typeof r.lng === 'number').map((r, i) => (
-            <Marker
-              key={r.id}
-              position={[r.lat, r.lng]}
-              icon={null}
-              zIndexOffset={r.id === activeRequestId ? 1000 : 0}
-              eventHandlers={{ click: () => setActiveRequestId(r.id) }}
-            >
-              <Tooltip direction="top" offset={[0, -20]} opacity={1} permanent={r.id === activeRequestId}>
-                <div style={{
-                  textAlign: 'left',
-                  background: '#050A14',
-                  color: '#fff',
-                  padding: '12px',
-                  borderRadius: '6px',
-                  border: r.status === 'assigned' ? '1px solid #39FF14' : '1px solid orange',
-                  minWidth: '220px',
-                  boxShadow: '0 0 15px rgba(0,0,0,0.8)'
-                }}>
-
-                  {/* HEADER */}
-                  <div style={{
-                    borderBottom: '1px solid #333',
-                    paddingBottom: '5px', marginBottom: '8px',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                  }}>
-                    <span style={{ color: r.status === 'assigned' ? 'gold' : '#aaa', fontWeight: 'bold' }}>ORDEN #{r.id.split('-').pop()}</span>
-                    <span style={{ fontSize: '0.7rem', color: '#666' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            {/* VEHICLES (Blue - Supply) */}
+            {vehicles.filter(v => v && typeof v.lat === 'number' && typeof v.lng === 'number').map(v => (
+              <Marker key={v.id} position={[v.lat, v.lng]} icon={null} >
+                <Tooltip direction="top" offset={[0, -20]} opacity={1}>
+                  <div style={{ textAlign: 'center', background: '#050A14', color: '#fff', padding: '8px', borderRadius: '4px', border: '1px solid #0078D7' }}>
+                    <strong style={{ color: '#0078D7' }}>🚙 {v.id}</strong><br />
+                    <span style={{ fontSize: '0.8rem' }}>{v.driver}</span><br />
+                    <span style={{ fontSize: '0.7rem', color: v.status === 'available' ? '#39FF14' : 'orange' }}>{v.status === 'available' ? '● DISPONIBLE' : '● OCUPADO'}</span>
                   </div>
+                </Tooltip>
+              </Marker>
+            ))}
 
-                  {/* CONTENT BASED ON STATE */}
-                  {r.status === 'verifying' ? (
-                    <div style={{ animation: 'pulse 1s infinite', textAlign: 'center', padding: '10px 0' }}>
-                      <div style={{ color: '#00F0FF', fontWeight: 'bold' }}>💳 VERIFICANDO CXC</div>
-                      <small style={{ color: '#888' }}>Conectando con Pasarela...</small>
+            {/* REQUESTS (Yellow - Demand) */}
+            {requests.filter(r => r && typeof r.lat === 'number' && typeof r.lng === 'number').map((r, i) => (
+              <Marker
+                key={r.id}
+                position={[r.lat, r.lng]}
+                icon={null}
+                zIndexOffset={r.id === activeRequestId ? 1000 : 0}
+                eventHandlers={{ click: () => setActiveRequestId(r.id) }}
+              >
+                <Tooltip direction="top" offset={[0, -20]} opacity={1} permanent={r.id === activeRequestId}>
+                  <div style={{
+                    textAlign: 'left',
+                    background: '#050A14',
+                    color: '#fff',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    border: r.status === 'assigned' ? '1px solid #39FF14' : '1px solid orange',
+                    minWidth: '220px',
+                    boxShadow: '0 0 15px rgba(0,0,0,0.8)'
+                  }}>
+
+                    {/* HEADER */}
+                    <div style={{
+                      borderBottom: '1px solid #333',
+                      paddingBottom: '5px', marginBottom: '8px',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                    }}>
+                      <span style={{ color: r.status === 'assigned' ? 'gold' : '#aaa', fontWeight: 'bold' }}>ORDEN #{r.id.split('-').pop()}</span>
+                      <span style={{ fontSize: '0.7rem', color: '#666' }}>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                  ) : (
-                    <div style={{ fontSize: '0.85rem' }}>
-                      <div style={{ marginBottom: '4px' }}><span style={{ color: '#888' }}>CLIENTE:</span> <strong style={{ color: '#fff' }}>{r.paxName}</strong></div>
 
-                      {/* SHOW FLIGHT IF EXISTS */}
-                      {r.flightId && (
-                        <div style={{ marginBottom: '4px' }}><span style={{ color: '#888' }}>VUELO:</span> <span style={{ color: '#00F0FF' }}>{r.flightId}</span></div>
-                      )}
-
-                      <div style={{ marginBottom: '8px' }}><span style={{ color: '#888' }}>DESTINO:</span> {r.dest}</div>
-
-                      {/* FINANCIAL AUDIT */}
-                      <div style={{ marginBottom: '8px', borderTop: '1px solid #333', paddingTop: '4px', fontSize: '0.75rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span>FACTURACIÓN:</span> <span style={{ color: '#aaa' }}>CREDITO CXC</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span>REF DIAN:</span> <span style={{ color: '#00F0FF' }}>FE-{r.id.split('-')[1] || 'PEND'}</span>
-                        </div>
+                    {/* CONTENT BASED ON STATE */}
+                    {r.status === 'verifying' ? (
+                      <div style={{ animation: 'pulse 1s infinite', textAlign: 'center', padding: '10px 0' }}>
+                        <div style={{ color: '#00F0FF', fontWeight: 'bold' }}>💳 VERIFICANDO CXC</div>
+                        <small style={{ color: '#888' }}>Conectando con Pasarela...</small>
                       </div>
+                    ) : (
+                      <div style={{ fontSize: '0.85rem' }}>
+                        <div style={{ marginBottom: '4px' }}><span style={{ color: '#888' }}>CLIENTE:</span> <strong style={{ color: '#fff' }}>{r.paxName}</strong></div>
 
-                      <div style={{ background: 'rgba(57, 255, 20, 0.05)', padding: '8px', borderRadius: '4px', border: '1px dashed #333' }}>
-                        {r.assignedVehicle ? (
-                          <>
-                            <div style={{ marginBottom: '2px' }}><span style={{ color: '#888' }}>ASIGNADO A:</span> <strong style={{ color: '#39FF14' }}>{r.assignedDriver}</strong></div>
-                            <div style={{ marginBottom: '4px' }}><span style={{ color: '#888' }}>UNIDAD:</span> {r.assignedVehicle}</div>
-                            <div style={{ borderTop: '1px solid #333', paddingTop: '4px', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                              <span style={{ color: 'gold', fontWeight: 'bold' }}>PIN: {r.pin}</span>
-                              <span style={{ color: '#00F0FF' }}>ETA: {r.eta} min</span>
-                            </div>
-                          </>
-                        ) : (
-                          <span style={{ color: 'orange' }}>⏳ Buscando unidad...</span>
+                        {/* SHOW FLIGHT IF EXISTS */}
+                        {r.flightId && (
+                          <div style={{ marginBottom: '4px' }}><span style={{ color: '#888' }}>VUELO:</span> <span style={{ color: '#00F0FF' }}>{r.flightId}</span></div>
                         )}
+
+                        <div style={{ marginBottom: '8px' }}><span style={{ color: '#888' }}>DESTINO:</span> {r.dest}</div>
+
+                        {/* FINANCIAL AUDIT */}
+                        <div style={{ marginBottom: '8px', borderTop: '1px solid #333', paddingTop: '4px', fontSize: '0.75rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>FACTURACIÓN:</span> <span style={{ color: '#aaa' }}>CREDITO CXC</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>REF DIAN:</span> <span style={{ color: '#00F0FF' }}>FE-{r.id.split('-')[1] || 'PEND'}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ background: 'rgba(57, 255, 20, 0.05)', padding: '8px', borderRadius: '4px', border: '1px dashed #333' }}>
+                          {r.assignedVehicle ? (
+                            <>
+                              <div style={{ marginBottom: '2px' }}><span style={{ color: '#888' }}>ASIGNADO A:</span> <strong style={{ color: '#39FF14' }}>{r.assignedDriver}</strong></div>
+                              <div style={{ marginBottom: '4px' }}><span style={{ color: '#888' }}>UNIDAD:</span> {r.assignedVehicle}</div>
+                              <div style={{ borderTop: '1px solid #333', paddingTop: '4px', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'gold', fontWeight: 'bold' }}>PIN: {r.pin}</span>
+                                <span style={{ color: '#00F0FF' }}>ETA: {r.eta} min</span>
+                              </div>
+                            </>
+                          ) : (
+                            <span style={{ color: 'orange' }}>⏳ Buscando unidad...</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </Tooltip>
-            </Marker>
-          ))}
+                    )}
+                  </div>
+                </Tooltip>
+              </Marker>
+            ))}
 
-          {/* PLANE RADAR MARKERS */}
-          {planes.filter(p => p && typeof p.lat === 'number' && typeof p.lng === 'number').map(p => (
-            <Marker key={p.id} position={[p.lat, p.lng]} icon={null} >
+            {/* PLANE RADAR MARKERS */}
+            {planes.filter(p => p && typeof p.lat === 'number' && typeof p.lng === 'number').map(p => (
+              <Marker key={p.id} position={[p.lat, p.lng]} icon={null} >
+                <Tooltip direction="top" offset={[0, -20]} opacity={1}>
+                  <div style={{ textAlign: 'center', background: '#050A14', color: '#fff', padding: '8px', borderRadius: '4px', border: '1px solid #00F0FF' }}>
+                    <strong style={{ color: '#00F0FF', fontSize: '1rem' }}>✈️ {p.id}</strong><br />
+                    <span style={{ fontSize: '0.8rem', color: '#ccc' }}>{p.airline} • {p.from}</span><br />
+                    <hr style={{ borderColor: '#333', margin: '4px 0' }} />
+                    <strong style={{ color: '#39FF14' }}>⇧ {p.alt} ft  |  🚀 {p.spd} kts</strong>
+                  </div>
+                </Tooltip>
+              </Marker>
+            ))}
+
+            {/* STATIC AIRPORT MARKERS */}
+            <Marker position={[6.2215, -75.5900]} icon={getAirportIcon('EOH')}>
               <Tooltip direction="top" offset={[0, -20]} opacity={1}>
-                <div style={{ textAlign: 'center', background: '#050A14', color: '#fff', padding: '8px', borderRadius: '4px', border: '1px solid #00F0FF' }}>
-                  <strong style={{ color: '#00F0FF', fontSize: '1rem' }}>✈️ {p.id}</strong><br />
-                  <span style={{ fontSize: '0.8rem', color: '#ccc' }}>{p.airline} • {p.from}</span><br />
-                  <hr style={{ borderColor: '#333', margin: '4px 0' }} />
-                  <strong style={{ color: '#39FF14' }}>⇧ {p.alt} ft  |  🚀 {p.spd} kts</strong>
+                <div style={{ background: '#050A14', color: '#FF5722', fontWeight: 'bold', padding: '5px', border: '1px solid #FF5722', borderRadius: '4px', fontSize: '0.7rem' }}>
+                  EOH
                 </div>
               </Tooltip>
             </Marker>
-          ))}
 
-          {/* STATIC AIRPORT MARKERS */}
-          <Marker position={[6.2215, -75.5900]} icon={getAirportIcon('EOH')}>
-            <Tooltip direction="top" offset={[0, -20]} opacity={1}>
-              <div style={{ background: '#050A14', color: '#FF5722', fontWeight: 'bold', padding: '5px', border: '1px solid #FF5722', borderRadius: '4px', fontSize: '0.7rem' }}>
-                EOH
-              </div>
-            </Tooltip>
-          </Marker>
+            <Marker position={[6.1645, -75.4231]} icon={getAirportIcon('JMC')}>
+              <Tooltip direction="top" offset={[0, -20]} opacity={1}>
+                <div style={{ background: '#050A14', color: '#FF5722', fontWeight: 'bold', padding: '5px', border: '1px solid #FF5722', borderRadius: '4px', fontSize: '0.7rem' }}>
+                  JMC
+                </div>
+              </Tooltip>
+            </Marker>
 
-          <Marker position={[6.1645, -75.4231]} icon={getAirportIcon('JMC')}>
-            <Tooltip direction="top" offset={[0, -20]} opacity={1}>
-              <div style={{ background: '#050A14', color: '#FF5722', fontWeight: 'bold', padding: '5px', border: '1px solid #FF5722', borderRadius: '4px', fontSize: '0.7rem' }}>
-                JMC
-              </div>
-            </Tooltip>
-          </Marker>
+            {/* PARKED PLANES AT EOH */}
+            <Marker position={[6.2220, -75.5910]} icon={parkedPlaneIcon} />
+            <Marker position={[6.2210, -75.5890]} icon={parkedPlaneIcon} />
 
-          {/* PARKED PLANES AT EOH */}
-          <Marker position={[6.2220, -75.5910]} icon={parkedPlaneIcon} />
-          <Marker position={[6.2210, -75.5890]} icon={parkedPlaneIcon} />
+            {/* PARKED PLANES AT JMC */}
+            <Marker position={[6.1650, -75.4240]} icon={parkedPlaneIcon} />
+            <Marker position={[6.1635, -75.4220]} icon={parkedPlaneIcon} />
+            <Marker position={[6.1640, -75.4250]} icon={parkedPlaneIcon} />
 
-          {/* PARKED PLANES AT JMC */}
-          <Marker position={[6.1650, -75.4240]} icon={parkedPlaneIcon} />
-          <Marker position={[6.1635, -75.4220]} icon={parkedPlaneIcon} />
-          <Marker position={[6.1640, -75.4250]} icon={parkedPlaneIcon} />
-
-        </MapContainer>
+          </MapContainer>
+        </ErrorBoundary>
 
 
 
