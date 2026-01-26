@@ -1365,7 +1365,11 @@ function App() {
 
 
   if (showLanding && userRole === 'admin') {
-    return <LandingPage onEnter={() => setShowLanding(false)} />;
+    return (
+      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#000', color: '#00F0FF' }}>LOADING SYSTEM...</div>}>
+        <LandingPage onEnter={() => setShowLanding(false)} />
+      </Suspense>
+    );
   }
 
   if (userRole === 'client') {
@@ -1414,17 +1418,19 @@ function App() {
 
           {/* CONTENT - SINGLE VIEW */}
           <div style={{ flex: 1, position: 'relative', overflow: 'auto', background: '#0B1120' }}>
-            <OperationalDashboard
-              vehicles={vehicles}
-              requests={requests}
-              simulationData={simulationContext}
-              initialViewMode={dashboardViewMode}
-              onRowClick={(row) => setActiveReq(row)}
-              onSimulateStress={simularDiaCritico}
-              onRunMacro={runMacroSequence}
-              onClose={() => setShowOperationalDashboard(false)}
-              onHome={() => { setShowLanding(true); setShowOperationalDashboard(false); }}
-            />
+            <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#00F0FF' }}>LOADING DASHBOARD...</div>}>
+              <OperationalDashboard
+                vehicles={vehicles}
+                requests={requests}
+                simulationData={simulationContext}
+                initialViewMode={dashboardViewMode}
+                onRowClick={(row) => setActiveReq(row)}
+                onSimulateStress={simularDiaCritico}
+                onRunMacro={runMacroSequence}
+                onClose={() => setShowOperationalDashboard(false)}
+                onHome={() => { setShowLanding(true); setShowOperationalDashboard(false); }}
+              />
+            </Suspense>
           </div>
         </div>
       )}
