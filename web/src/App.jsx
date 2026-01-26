@@ -1887,11 +1887,11 @@ function App() {
         {/* MAP CONTAINER (RESTORED) */}
         <MapContainer key="teso-map-v1" center={[6.23, -75.58]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={false}>
 
-          {/* AUTO FOCUS COMPONENT (DISABLED FOR DEBUG) */}
+          {/* AUTO FOCUS COMPONENT (DISABLED FOR STABILITY) */}
           {/* <FlyToActive activeReq={requests.find(r => r.id === activeRequestId)} /> */}
 
-          {/* RESPONSIVE RADAR CONTROLLER (DISABLED FOR DEBUG) */}
-          {/* <RadarController setPlanes={setPlanes} /> */}
+          {/* RESPONSIVE RADAR CONTROLLER (RESTORED) */}
+          <RadarController setPlanes={setPlanes} />
 
           <TileLayer
             className="cyberpunk-map-tiles"
@@ -1907,16 +1907,16 @@ function App() {
             <Circle key={i} center={[h.lat, h.lng]} radius={h.r} pathOptions={{ color: '#A020F0', fillColor: '#A020F0', fillOpacity: 0.6, stroke: false, className: 'ai-heat-pulse' }} />
           ))}
 
-          {/* HIGHLIGHTED CONNECTION LINE (DISABLED FOR DEBUG) */}
-          {/* <ConnectionLines highlighted={highlighted} vehicles={vehicles} requests={requests} points={planes} /> */}
+          {/* HIGHLIGHTED CONNECTION LINE (RESTORED) */}
+          <ConnectionLines highlighted={highlighted} vehicles={vehicles} requests={requests} points={planes} />
 
-          {/* HIGHLIGHTED FLIGHT (DISABLED FOR DEBUG) */}
-          {/* {highlighted && highlighted.flightId && (() => {
+          {/* HIGHLIGHTED FLIGHT (RESTORED) */}
+          {highlighted && highlighted.flightId && (() => {
             const f = planes.find(p => p.id === highlighted.flightId);
             if (f) {
               return <Circle center={[f.lat, f.lng]} radius={2000} pathOptions={{ color: '#00F0FF', fillColor: '#00F0FF', fillOpacity: 0.1, dashArray: '10, 10' }} />;
             }
-          })()} */}
+          })()}
 
           {/* VEHICLES (Blue - Supply) */}
           {vehicles.filter(v => v && typeof v.lat === 'number' && typeof v.lng === 'number').map(v => (
