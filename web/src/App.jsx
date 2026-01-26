@@ -624,6 +624,7 @@ function App() {
             requests={requests}
             simulationData={simulationContext}
             initialViewMode="CORE"
+            onRowClick={(row) => setActiveReq(row)}
             onSimulateStress={simularDiaCritico}
             onRunMacro={runMacroSequence}
             onClose={() => setShowOperationalDashboard(false)}
@@ -1419,6 +1420,95 @@ function App() {
               <button onClick={() => setPreviewPdf(null)} style={{ background: 'red', color: '#fff', border: 'none', padding: '5px 15px', cursor: 'pointer', borderRadius: '4px' }}>CERRAR</button>
             </div>
             <iframe src={previewPdf} style={{ width: '100%', height: '100%', border: 'none' }}></iframe>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW SERVICE DETAIL MODAL (RESTORED) */}
+      {activeReq && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          background: 'rgba(0,0,0,0.85)', zIndex: 99999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(5px)'
+        }} onClick={() => setActiveReq(null)}>
+          <div style={{
+            background: '#0B1120', border: '1px solid #00f2ff', borderRadius: '12px',
+            width: '500px', maxWidth: '90%', padding: '25px',
+            boxShadow: '0 0 30px rgba(0, 242, 255, 0.3)', position: 'relative'
+          }} onClick={e => e.stopPropagation()}>
+
+            <button
+              onClick={() => setActiveReq(null)}
+              style={{ position: 'absolute', top: '15px', right: '15px', background: 'transparent', border: 'none', color: '#fff', fontSize: '1.2rem', cursor: 'pointer' }}
+            >✖</button>
+
+            <h2 style={{ margin: '0 0 20px 0', color: '#00f2ff', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
+              📝 DETALLE DE SERVICIO
+            </h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', color: '#ccc' }}>
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>ID OPERACIÓN</small>
+                <div style={{ color: '#fff', fontFamily: 'monospace', fontSize: '1.2rem' }}>{activeReq.id}</div>
+              </div>
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>PIN DE SEGURIDAD</small>
+                <div style={{ color: '#fbbf24', fontWeight: 'bold' }}>{activeReq.pin || '####'}</div>
+              </div>
+
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>EMPRESA / CLIENTE</small>
+                <div style={{ color: '#fff', fontWeight: 'bold' }}>{activeReq.client || activeReq.paxName || 'N/A'}</div>
+              </div>
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>PASAJERO</small>
+                <div style={{ color: '#fff' }}>{activeReq.pax || activeReq.paxName}</div>
+              </div>
+
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>CONDUCTOR ASIGNADO</small>
+                <div style={{ color: '#39FF14' }}>{activeReq.assignedDriver || activeReq.driverName || 'Por Asignar'}</div>
+              </div>
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>VEHÍCULO</small>
+                <div style={{ color: '#38bdf8' }}>{activeReq.assignedVehicle || activeReq.vehiclePlate || '---'}</div>
+              </div>
+
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>RUTA / DESTINO</small>
+                <div style={{ color: '#fff' }}>{activeReq.route || activeReq.dest}</div>
+              </div>
+              <div>
+                <small style={{ color: '#666', fontSize: '0.7rem' }}>VUELO ASOCIADO</small>
+                <div style={{ color: '#fbbf24' }}>{activeReq.flight || activeReq.flightId || 'N/A'}</div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '20px', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#aaa' }}>VALOR SERVICIO</span>
+                <span style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(activeReq.financials?.totalValue || activeReq.fare || 0)}
+                </span>
+              </div>
+              <div style={{ height: '1px', background: '#333', margin: '10px 0' }}></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                <span style={{ color: '#aaa' }}>PAGO CONDUCTOR (80%)</span>
+                <span style={{ color: '#39FF14' }}>
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(activeReq.financials?.driverPay || (activeReq.fare || 0) * 0.8)}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+              <button style={{ flex: 1, background: '#00f2ff', border: 'none', padding: '12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
+                📍 VER EN MAPA
+              </button>
+              <button style={{ flex: 1, background: '#333', color: '#fff', border: 'none', padding: '12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
+                📄 GENERAR VOUCHER
+              </button>
+            </div>
+
           </div>
         </div>
       )}
