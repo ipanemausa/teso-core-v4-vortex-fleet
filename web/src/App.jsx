@@ -1907,13 +1907,71 @@ function App() {
 
         {/* MAP CONTAINER (RESTORED) */}
         <ErrorBoundary>
-          <MapContainer key="teso-map-v1" center={[6.23, -75.58]} zoom={12} style={{ height: '100vh', width: '100vw', background: 'red', position: 'fixed', top: 0, left: 0, zIndex: 0 }} zoomControl={false}>
+          <MapContainer
+            key="teso-map-v4-stable"
+            center={[6.23, -75.58]}
+            zoom={12}
+            style={{ height: '100vh', width: '100vw', background: '#0a0f1a', position: 'fixed', top: 0, left: 0, zIndex: 0 }}
+            zoomControl={false}
+            whenCreated={mapInstance => {
+              setTimeout(() => { mapInstance.invalidateSize(); }, 500);
+            }}
+          >
             <TileLayer
               className="cyberpunk-map-tiles"
               attribution='© Osm'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {/* ATOMIC MAP: ALL CHILDREN REMOVED FOR DEBUGGING */}
+
+            <FlyToActive activeReq={activeReq} />
+
+            {vehicles.map(v => (
+              <Marker
+                key={v.id}
+                position={[v.lat, v.lng]}
+                icon={vehicleIcon}
+                eventHandlers={{
+                  click: () => {
+                    setHighlighted({ vehicleId: v.id });
+                    addLog(`🚙 UNIDAD ${v.id} SELECCIONADA. Cond: ${v.driver}`);
+                  }
+                }}
+              >
+                <Tooltip direction="top" offset={[0, -20]} opacity={0.9} permanent={highlighted?.vehicleId === v.id}>
+                  <div style={{ background: '#000', color: v.status === 'busy' ? 'orange' : '#39FF14', border: '1px solid currentColor', padding: '2px 5px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold' }}>
+                    {v.id}
+                  </div>
+                </Tooltip>
+              </Marker>
+            ))}
+
+            {activeReq && (
+              <Marker position={[activeReq.lat, activeReq.lng]} icon={passengerIcon}>
+                <Popup>
+                  <div style={{ color: '#000' }}>
+                    <strong>{activeReq.id}</strong><br />
+                    {activeReq.paxName}
+                  </div>
+                </Popup>
+              </Marker>
+            )}
+
+            {planes.map(p => (
+              <Marker key={p.id} position={[p.lat, p.lng]} icon={p.status === 'LANDED' ? parkedPlaneIcon : planeDivIcon}>
+                <Tooltip direction="right" offset={[10, 0]} opacity={0.8} permanent>
+                  <div style={{ fontSize: '9px', bg: 'transparent', color: '#00F0FF', textShadow: '0 0 2px black' }}>
+                    ✈ {p.id}
+                  </div>
+                </Tooltip>
+              </Marker>
+            ))}
+
+            {routes.map(r => (
+              <Polyline key={r.id} positions={r.path} color={r.color} weight={3} dashArray="5, 10" />
+            ))}
+
+            <Circle center={[6.20, -75.57]} radius={1500} pathOptions={{ color: '#39FF14', fillColor: '#39FF14', fillOpacity: 0.05, dashArray: '4, 8' }} />
+
           </MapContainer>
         </ErrorBoundary>
 
