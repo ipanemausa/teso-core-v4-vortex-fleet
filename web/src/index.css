@@ -1,352 +1,189 @@
-@import "tailwindcss";
-
+/* Global CSS Reset */
 html,
 body,
 #root {
-    height: 100%;
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
     margin: 0;
     padding: 0;
     overflow: hidden;
-    box-shadow: none !important;
-    outline: none !important;
-    border: none !important;
-    -webkit-tap-highlight-color: transparent;
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Clean modern font */
 }
 
-*:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
 
+/** Leaflet Map Container Tweaks */
 .leaflet-container {
     width: 100%;
     height: 100%;
-    z-index: 1;
     background: #0a0f1a;
-    /* Match theme background to prevent white flicker */
+    z-index: 1;
+    /* Ensure it sits below UI overlays */
+    transition: all 0.5s ease-in-out;
 }
 
-/* Make the map look Cyberpunk using CSS filters on standard tiles */
+/** CYBERPUNK MAP TILES (Dark Mode) */
 .cyberpunk-map-tiles {
-    filter: invert(100%) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+    filter:
+        grayscale(100%) invert(95%) contrast(120%) brightness(0.7) hue-rotate(180deg) sepia(20%) saturate(150%) drop-shadow(0 0 5px rgba(0, 240, 255, 0.2));
+    /* The result is a deep, dark blue-black map with cyan-tinted roads */
 }
 
-:root {
-    /* --- COLOR PALETTE (Strict Semantics) --- */
-    --color-bg-app: #050A14;
-    --color-bg-panel: rgba(5, 10, 20, 0.9);
-    --color-border-subtle: rgba(255, 255, 255, 0.1);
-
-    /* KPI / Status Colors */
-    --color-kpi-positive: #39FF14;
-    /* Neon Green */
-    --color-kpi-warning: #FF5722;
-    /* Neon Orange */
-    --color-kpi-danger: #EF4444;
-    /* Red */
-    --color-primary: #00F0FF;
-    /* Neon Blue */
-
-    /* Text Colors */
-    --color-text-primary: #FFFFFF;
-    --color-text-secondary: #AAAAAA;
-    --color-text-muted: #666666;
-
-    /* Legacy Mappings (Backward Compatibility during migration) */
-    --bg-dark: var(--color-bg-app);
-    --neon-blue: var(--color-primary);
-    --neon-orange: var(--color-kpi-warning);
-    --neon-green: var(--color-kpi-positive);
-    --glass-bg: var(--color-bg-panel);
-    --glass-border: 1px solid rgba(0, 240, 255, 0.2);
-
-    /* --- TYPOGRAPHY --- */
-    --font-main: 'Outfit', sans-serif;
-    --font-mono: 'Courier New', monospace;
-
-    /* --- SPACING --- */
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 40px;
-
-    /* --- BORDERS & EFFECTS --- */
-    --radius-sm: 4px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-
-    /* Shadows */
-    --shadow-glow-blue: 0 0 15px rgba(0, 240, 255, 0.2);
-    --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.4);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background-color: var(--bg-dark);
-    color: #fff;
-    font-family: 'Courier New', monospace;
-    overflow: hidden;
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
-}
-
-#root {
-    width: 100%;
-    height: 100%;
-}
-
-/* KINETIC ANIMATIONS */
-@keyframes scanline {
+/* Animations */
+@keyframes pulse {
     0% {
-        top: 0%;
-        opacity: 0;
+        opacity: 0.5;
+        box-shadow: 0 0 5px red;
     }
 
     50% {
         opacity: 1;
-    }
-
-    100% {
-        top: 100%;
-        opacity: 0;
-    }
-}
-
-/* ... existing animations ... */
-@keyframes pulse-red {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.4);
-    }
-
-    70% {
-        box-shadow: 0 0 0 10px rgba(255, 87, 34, 0);
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
-    }
-}
-
-@keyframes pulse-green {
-    0% {
-        box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4);
-    }
-
-    70% {
-        box-shadow: 0 0 0 10px rgba(57, 255, 20, 0);
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(57, 255, 20, 0);
-    }
-}
-
-@keyframes pulse-opacity {
-    0% {
-        opacity: 0.5;
-        transform: scale(0.95);
-    }
-
-    50% {
-        opacity: 0.8;
-        transform: scale(1.05);
+        box-shadow: 0 0 15px red;
     }
 
     100% {
         opacity: 0.5;
-        transform: scale(0.95);
+        box-shadow: 0 0 5px red;
     }
 }
 
-.ai-heat-pulse {
-    animation: pulse-opacity 3s infinite ease-in-out;
-    transform-origin: center;
-    transform-box: fill-box;
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-/* COMPONENT CLASSES */
-/* COMPONENT CLASSES */
-.btn-neon {
-    background: rgba(255, 255, 255, 0.05);
-    /* Lighter, clearer glass */
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: var(--neon-blue);
-    padding: 0.8rem 1.5rem;
-    font-family: inherit;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
-    z-index: 100;
-    backdrop-filter: blur(8px);
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.btn-neon:hover {
-    background: rgba(0, 240, 255, 0.15);
-    color: #fff;
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-    transform: translateY(-2px);
-}
-
-.btn-neon.active {
-    background: var(--neon-blue);
-    color: #000;
-    box-shadow: 0 0 10px var(--neon-blue);
-}
-
-.btn-alert {
-    border-color: var(--neon-orange);
-    color: var(--neon-orange);
-}
-
-.btn-alert:hover {
-    background: var(--neon-orange);
-    color: #000;
-    box-shadow: 0 0 20px var(--neon-orange);
-}
-
-/* Scanline removed to reduce flicker/distraction */
-.scan-line {
-    display: none;
-}
-
-.status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-}
-
-.status-dot.active {
-    background: var(--neon-green);
-    animation: pulse-green 2s infinite;
-}
-
-.status-dot.alert {
-    background: var(--neon-orange);
-    animation: pulse-red 2s infinite;
-}
-
-/* Scrollbar styling */
+/* Scrollbar Styling (Webkit) */
 ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-dark);
+    background: #000;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--neon-blue);
+    background: #333;
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--neon-orange);
+    background: #555;
 }
 
-/* --- MOBILE RESPONSIVE LAYOUT --- */
-.app-container {
-    display: grid;
-    grid-template-columns: 70% 30%;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-}
 
-/* UI UTILITY CLASSES (Replaces inline styles for responsiveness) */
-.map-ui-top-nav {
-    position: absolute;
-    top: 20px;
-    left: 50px;
-    z-index: 1000;
-    display: flex;
-    gap: 10px;
-    background: rgba(5, 10, 20, 0.9);
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #00F0FF;
+/* MAP UI SPECIFIC CLASSES FOR RESPONSIVE ADJUSTMENTS */
+
+.map-ui-top-left {
+    /* No special mobile rules yet */
 }
 
 .map-ui-radar-badge {
     position: absolute;
-    top: 20px;
-    right: 20px;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid #00F0FF;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    color: #00F0FF;
-}
-
-.map-ui-bottom-left {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    z-index: 1000;
-}
-
-.map-ui-bottom-right {
-    position: absolute;
-    bottom: 120px;
-    /* Moved UP to avoid Agentic Bar (bottom: 40px + height) */
-    right: 20px;
-    z-index: 1000;
+    background: rgba(0, 10, 20, 0.8);
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 5px 10px;
+    backdrop-filter: blur(4px);
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-end;
+    align-items: center;
+    gap: 5px;
 }
 
-/* MOBILE OVERRIDES (< 768px) */
+
+/* PLANE MARKER STYLES */
+.plane-marker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 32px;
+    /* Ensure emoji is large enough */
+    line-height: 1;
+    text-shadow: 0 0 10px cyan;
+    /* Glow effect */
+}
+
+/* PARKED PLANE MARKER STYLES */
+.parked-plane-marker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 20px;
+    line-height: 1;
+    filter: grayscale(100%);
+}
+
+
+/* MEDIA QUERY FOR MOBILE BREAKPOINT (iPhone 14 Pro Max / Standard phones) */
 @media (max-width: 768px) {
-    .app-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: 55% 45%;
-        /* More space for controls on mobile */
+
+    /* HIDE V6 SIDEBAR ON MOBILE - Should rely on bottom tabs/modal instead or hamburger */
+    .teso-ops-sidebar {
+        display: none;
+        /* Or transform to a drawer */
     }
 
-    .map-ui-top-nav {
-        left: 50%;
-        transform: translateX(-50%);
-        /* Center horizontally */
-        top: 10px;
-        padding: 5px;
-        width: 95%;
-        justify-content: center;
-        flex-wrap: wrap;
-        /* Allow wrapping if needed */
-        gap: 5px;
-    }
-
-    .btn-neon {
-        padding: 0.5rem 0.8rem;
-        /* Smaller buttons */
-        font-size: 0.75rem;
-    }
-
-    .map-ui-radar-badge {
+    /* Adjust Main Sidebar to be a drawer or hidden */
+    /* Assuming "aside" is the sidebar */
+    aside {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
         top: auto;
-        bottom: 10px;
-        right: auto;
+        height: 60vh;
+        width: 100% !important;
+        border-left: none;
+        border-top: 1px solid #333;
+        z-index: 2000;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    aside.active {
+        transform: translateY(0);
+    }
+
+    /* Floating Action Button for Menu */
+    .mobile-menu-fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 2001;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #00F0FF;
+        color: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    }
+
+    /* Adjust Map UI Elements */
+    .map-ui-top-left {
+        top: 20px !important;
+        left: 10px !important;
+    }
+
+
+    /* Connect Radar Button (Top Right on Desktop -> ?? on Mobile) */
+    .map-ui-radar-badge {
+        top: auto !important;
+        bottom: 90px;
+        /* Above bottom navigation */
         left: 10px;
+        right: auto !important;
         /* Connect Radar moves to bottom left on mobile to avoid nav */
         font-size: 0.6rem;
         padding: 2px 8px;
