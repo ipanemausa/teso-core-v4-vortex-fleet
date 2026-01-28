@@ -20,24 +20,64 @@ const OperationalDashboard = lazy(() => import('./components/OperationalDashboar
 
 
 // --- HELPER TO AUTO-FOCUS MAP ---
+// --- HELPER TO AUTO-FOCUS MAP ---
 function FlyToActive({ activeReq }) {
   const map = useMap();
-  useEffect(() => {
-    if (!map || !map.flyTo || !map._leaflet_id) return; // FIX: Ensure Map is Ready
+  const isMountedRef = useRef(true);
 
-    if (activeReq && typeof activeReq.lat === 'number' && typeof activeReq.lng === 'number') {
-      try {
-        if (map && map.flyTo && map._leaflet_id) { // DOUBLE CHECK
-          map.flyTo([activeReq.lat, activeReq.lng], 14, {
-            duration: 2.0,
-            easeLinearity: 0.5
-          });
-        }
-      } catch (e) {
-        // console.warn("FlyTo Error (Ignored):", e);
+  useEffect(() => {
+    return () => { isMountedRef.current = false; };
+  }, []);
+
+  useEffect(() => {
+    // FIX: Stronger guards against destroyed map instances
+    if (!map || !activeReq || !isMountedRef.current) return;
+
+    // Check if map container is still in DOM and map instance is valid
+    try {
+      // Leaflet internals check (private properties, but often necessary for this specific crash)
+      if (!map._leaflet_id || (map._container && !document.body.contains(map._container))) {
+        console.warn("FlyToActive: Map instance appears invalid or unmounted.");
+        return;
       }
+
+      if (typeof activeReq.lat === 'number' && typeof activeReq.lng === 'number') {
+        map.flyTo([activeReq.lat, activeReq.lng], 14, {
+          duration: 2.0,
+          easeLinearity: 0.5
+        });
+      }
+    } catch (e) {
+      console.warn("FlyTo Error (Safe Catch):", e);
     }
   }, [activeReq, map]);
+  return null;
+}
+
+// --- MAP INITIALIZER COMPONENT (Replaces whenCreated) ---
+// --- MAP INITIALIZER COMPONENT (Safe V4 Implementation) ---
+function MapInitializer() {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+
+    // Invalidate size after mount to correct layout issues
+    const timer = setTimeout(() => {
+      try {
+        // Check if map is still valid and mounted before accessing
+        if (map && map._leaflet_id && map.getContainer()) {
+          map.invalidateSize();
+        }
+      } catch (e) {
+        // Silent catch for map destruction race conditions
+      }
+    }, 500);
+
+    // CLEANUP: Prevent execution if component unmounts
+    return () => clearTimeout(timer);
+  }, [map]);
+
   return null;
 }
 
@@ -155,7 +195,9 @@ const FLIGHT_DATA = [
   { id: 'LA4050', from: 'BOG', status: 'LANDED', eta: '17:55', pax: 8, luggage: 'Mano' },
 ];
 
-// --- RESPONSIVE RADAR CONTROLLER ---
+
+
+// --- RESPONSIVE RADAR CONTROLLER (SAFE IMPLEMENTATION) ---
 const createPlane = (bounds, center) => {
   const airlines = ['AA', 'AV', 'LA', 'CM', 'NK', 'IB', 'DL', 'AM'];
   const markets = ['MIA', 'MAD', 'BOG', 'PTY', 'JFK', 'SCL', 'LIM', 'MEX'];
@@ -169,8 +211,6 @@ const createPlane = (bounds, center) => {
   const lngSpan = east - west;
 
   // SPAWN LOGIC: 
-  // Pick a random side (Top, Bottom, Left, Right)
-  // Position slightly OUTSIDE the view (padding) so they fly IN
   const PADDING = latSpan * 0.1;
   const edge = Math.floor(Math.random() * 4);
   let lat, lng;
@@ -189,23 +229,16 @@ const createPlane = (bounds, center) => {
     lng = east + PADDING;
   }
 
-  // Calculate heading towards a random point near the center (scattered)
-  // This ensures they cross the screen
   const targetLat = center.lat + (Math.random() - 0.5) * (latSpan * 0.5);
   const targetLng = center.lng + (Math.random() - 0.5) * (lngSpan * 0.5);
-
   const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
-
-  // Speed relative to view size (so they don't fly too fast or slow on zoom)
-  // Base speed roughly traverses screen in ~30-60 seconds
   const speed = (latSpan * 0.005) + (Math.random() * (latSpan * 0.005));
 
   return {
     id: `${airline}${Math.floor(100 + Math.random() * 900)}`,
     airline,
     from: markets[Math.floor(Math.random() * markets.length)],
-    lat,
-    lng,
+    lat, lng,
     heading: angleToCenter,
     speed: speed,
     alt: 10000 + Math.floor(Math.random() * 5000),
@@ -219,14 +252,11 @@ const RadarController = ({ setPlanes }) => {
   useEffect(() => {
     if (!map) return;
 
-    // Safety Force-Update to prevent race condition
-    try {
-      if (!map || !map.getBounds || !map._leaflet_id) return;
-    } catch (e) { return; }
-
     const safeUpdate = () => {
       try {
-        if (!map || !map.getBounds || !map.getCenter || !map._leaflet_id) return; // FIX: Strict Leaflet Check
+        // STRICT SAFETY CHECK: Core fix for the crash
+        if (!map || !map._leaflet_id || !map.getContainer()) return;
+
         const bounds = map.getBounds();
         const center = map.getCenter();
         const deathBounds = bounds.pad(0.2);
@@ -234,12 +264,7 @@ const RadarController = ({ setPlanes }) => {
         setPlanes(prevPlanes => {
           // Initialize if empty
           if (prevPlanes.length === 0) {
-            return Array.from({ length: 6 }).map(() => {
-              const p = createPlane(bounds, center);
-              p.lat = center.lat + (Math.random() - 0.5) * (bounds.getNorth() - bounds.getSouth());
-              p.lng = center.lng + (Math.random() - 0.5) * (bounds.getEast() - bounds.getWest());
-              return p;
-            });
+            return Array.from({ length: 6 }).map(() => createPlane(bounds, center));
           }
 
           // Update existing
@@ -255,21 +280,15 @@ const RadarController = ({ setPlanes }) => {
             if (!deathBounds.contains([nextLat, nextLng])) {
               return createPlane(bounds, center);
             }
-
             return { ...p, lat: nextLat, lng: nextLng };
           });
         });
       } catch (err) {
-        // Silent fail on map destruction
-        // console.warn("Map access error suppressed"); 
+        // Silent fail to prevent crash loop
       }
     };
 
-    // Initial run
-    // safeUpdate(); // Skip initial sync run to avoid strict mode collisions
-
     const interval = setInterval(safeUpdate, 800);
-
     return () => clearInterval(interval);
   }, [map, setPlanes]);
 
@@ -1913,10 +1932,9 @@ function App() {
             zoom={12}
             style={{ height: '100vh', width: '100vw', background: '#0a0f1a', position: 'fixed', top: 0, left: 0, zIndex: 0 }}
             zoomControl={false}
-            whenCreated={mapInstance => {
-              setTimeout(() => { mapInstance.invalidateSize(); }, 500);
-            }}
           >
+            <MapInitializer />
+            <RadarController setPlanes={setPlanes} />
             <TileLayer
               className="cyberpunk-map-tiles"
               attribution='© Osm'
