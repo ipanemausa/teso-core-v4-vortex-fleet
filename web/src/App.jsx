@@ -1930,7 +1930,7 @@ function App() {
             key="teso-map-v4-stable"
             center={[6.23, -75.58]}
             zoom={12}
-            style={{ height: '100vh', width: '100vw', background: '#0a0f1a', position: 'fixed', top: 0, left: 0, zIndex: 0 }}
+            style={{ height: '100%', width: '100%', background: '#0a0f1a', position: 'absolute', top: 0, left: 0, zIndex: 0 }}
             zoomControl={false}
           >
             <MapInitializer />
@@ -1975,7 +1975,7 @@ function App() {
             )}
 
             {planes.map(p => (
-              <Marker key={p.id} position={[p.lat, p.lng]} icon={p.status === 'LANDED' ? parkedPlaneIcon : planeDivIcon}>
+              <Marker key={p.id} position={[p.lat, p.lng]} icon={p.status === 'LANDED' ? parkedPlaneIcon : planeDivIcon(p.heading)}>
                 <Tooltip direction="right" offset={[10, 0]} opacity={0.8} permanent>
                   <div style={{ fontSize: '9px', bg: 'transparent', color: '#00F0FF', textShadow: '0 0 2px black' }}>
                     ✈ {p.id}
@@ -2296,6 +2296,7 @@ function App() {
                           onMouseLeave={() => {
                             setHoveredOrder(null);
                           }}
+                          onClick={() => setHighlighted(prev => prev?.vehicleId === v.id ? null : { vehicleId: v.id })}
                           style={{
                             borderLeft: v.status === 'available' ? '3px solid #39FF14' : '3px solid orange',
                             // Visual cue for highlighted item
@@ -2484,6 +2485,7 @@ function App() {
                         }}
                         onMouseEnter={(e) => r.source === 'LIVE' && setHoveredOrder({ ...r, x: e.clientX, y: e.clientY })}
                         onMouseLeave={() => setHoveredOrder(null)}
+                        onClick={() => r.source === 'LIVE' && setActiveRequestId(r.id)}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
