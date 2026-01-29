@@ -2336,10 +2336,16 @@ function App() {
                       // Let's keep it visible but maybe clearer it's the master list.
                     }
 
-                    // Sort: Date asc, then Time asc
                     allOrders.sort((a, b) => {
+                      // 1. PRIORITY: Active vs Scheduled
+                      const scoreA = (a.status === 'assigned' || a.status === 'verifying') ? 2 : (a.status === 'PROGRAMADO' ? 1 : 0);
+                      const scoreB = (b.status === 'assigned' || b.status === 'verifying') ? 2 : (b.status === 'PROGRAMADO' ? 1 : 0);
+                      if (scoreA !== scoreB) return scoreB - scoreA; // High score first
+
+                      // 2. Date Sort
                       if (a.dateSort !== b.dateSort) return a.dateSort - b.dateSort;
-                      // Parse times for correct hour sort (e.g. 14:30 vs 08:00)
+
+                      // 3. Time Sort
                       const timeA = a.timeSort || '00:00';
                       const timeB = b.timeSort || '00:00';
                       return timeA.localeCompare(timeB);
