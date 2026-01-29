@@ -2029,8 +2029,10 @@ function App() {
                   {isLive ? '⏸ PAUSAR SIMULACIÓN' : '▶ INICIAR SIMULACIÓN'}
                 </button>
                 <button className="btn-neon" onClick={() => {
-                  setActiveModule('OPTIMIZE'); // VISUALIZATION
-                  setTimeout(autoAssign, 1000); // LOGIC
+                  autoAssign(); // Run Logic
+                  setActiveTab('ORDENES'); // Switch to Orders List
+                  setFilterToday(false); // Show TOTAL (All dates)
+                  addLog('⚡ DESPACHO INTELIGENTE: Visualizando Planilla Maestra Completa.');
                 }} disabled={requests.length === 0}>
                   ⚡ DESPACHO INTELIGENTE
                 </button>
@@ -3292,7 +3294,7 @@ function App() {
                 <div style={{ gridColumn: 'span 2' }}><strong>EMPRESA:</strong> <span style={{ color: '#aaa', fontWeight: 'bold' }}>{hoveredOrder.company}</span></div>
               )}
 
-              <div style={{ gridColumn: 'span 2' }}><strong>DESTINO:</strong> {hoveredOrder.dest.substring(0, 25)}...</div>
+              <div style={{ gridColumn: 'span 2' }}><strong>DESTINO:</strong> {(hoveredOrder.dest || '').substring(0, 25)}...</div>
 
               {hoveredOrder.flightId && (
                 <div style={{ gridColumn: 'span 2', color: '#00F0FF' }}>
