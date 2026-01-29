@@ -28,3 +28,41 @@
 .leaflet-tooltip.glass-tooltip:before {
   display: none !important;
 }
+
+/* Custom Popup Styles for Leaflet (Glassmorphism) */
+.glass-popup .leaflet-popup-content-wrapper,
+.glass-popup .leaflet-popup-tip {
+  background: rgba(10, 15, 30, 0.9) !important;
+  /* Dark glass */
+  color: #fff !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(0, 240, 255, 0.5) !important;
+  /* Cyan border */
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3) !important;
+  border-radius: 8px !important;
+}
+
+.glass-popup .leaflet-popup-content {
+  margin: 0 !important;
+  /* Reset default Leaflet margin */
+  width: auto !important;
+}
+
+.glass-popup a.leaflet-popup-close-button {
+  color: #00F0FF !important;
+  /* Cyan close button */
+  font-size: 16px !important;
+  padding: 4px !important;
+}
+
+/* NUCLEAR OPTION: Force Dark Mode on All Popups if class fails */
+.leaflet-popup-content-wrapper {
+  background: rgba(10, 15, 30, 0.95) !important;
+  color: #fff !important;
+  border: 1px solid rgba(0, 240, 255, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.leaflet-popup-tip {
+  background: rgba(10, 15, 30, 0.95) !important;
+}

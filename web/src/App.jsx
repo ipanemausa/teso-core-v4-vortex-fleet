@@ -84,6 +84,8 @@ function MapInitializer() {
 // --- ICONS CONFIGURATION ---
 
 import { vehicleIcon, passengerIcon, planeDivIcon, getAirportIcon, parkedPlaneIcon } from './utils/mapIcons';
+import { PlaneMarker } from './components/PlaneMarker';
+
 
 
 // --- DATA GENERATORS ---
@@ -341,6 +343,8 @@ function App() {
   const [dashboardViewMode, setDashboardViewMode] = useState('LIVE_OPS'); // NEW: Control Dashboard View from Agent
   const [activeView, setActiveView] = useState('MAP'); // FIX: Missing state variable
   const setViewMode = setActiveView; // FIX: Alias for legacy calls
+  const [selectedFlightId, setSelectedFlightId] = useState(null); // SYNC: Flight selection state
+
   // AUTO-DEV: Disabled for strict production parity via ?mode=dev
   const [isDevMode, setIsDevMode] = useState(false);
   const [activeHubTab, setActiveHubTab] = useState('core-v3'); // NEW: Hub State
@@ -471,7 +475,7 @@ function App() {
 
     // Map Services
     const mappedServices = (normalizeData.services || []).map(svc => ({
-      id: svc.ID,
+      id: String(svc.ID),
       date: svc.FECHA,
       clientId: svc.CLIENTE, // Using Name as ID for simplicity in visualizer
       driverId: svc.CONDUCTOR,
@@ -610,6 +614,12 @@ function App() {
           addLog(`✅ NUBE SINCRONIZADA: ${cloudData.services.length} Operaciones cargadas.`);
           // FIX: Slice(0,60) to verify Jan Data appears. Before was slice(-60) which is Dec.
           setRequests(cloudData.services.slice(0, 60));
+
+          // GENERATE CLIENTS & FUTURE BOOKINGS (Hybrid: Real + Sim)
+          const genClients = generateCompanies(80);
+          setClients(genClients);
+          setFutureBookings(generateFutureBookings(40, genClients));
+
           localStorage.setItem('TESO_SIM_STATE_V3', JSON.stringify(cloudData));
         }
       } else {
@@ -620,6 +630,11 @@ function App() {
           setSimulationContext(freshData);
           if (freshData.vehicles) setVehicles(freshData.vehicles.slice(0, 15));
           setRequests(freshData.services.slice(0, 60)); // Ensure services are visible
+
+          // GENERATE CLIENTS Fallback
+          const genClients = generateCompanies(80);
+          setClients(genClients);
+          setFutureBookings(generateFutureBookings(40, genClients));
         }
       }
     };
@@ -1666,33 +1681,7 @@ function App() {
             )}
 
             {planes.map(p => (
-              <Marker key={p.id} position={[p.lat, p.lng]} icon={p.status === 'LANDED' ? parkedPlaneIcon : planeDivIcon(p.heading)}>
-                <Tooltip direction="top" offset={[0, -20]} opacity={1} className="glass-tooltip">
-                  <div style={{ padding: '8px 12px', minWidth: '140px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
-                      <span style={{ color: '#00F0FF', fontWeight: 'bold', fontSize: '13px' }}>✈ {p.id}</span>
-                      <span style={{ fontSize: '10px', color: '#888' }}>{p.status}</span>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', color: '#ccc' }}>
-                      <div>
-                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase' }}>Altitud</div>
-                        <div style={{ color: '#fff' }}>{p.alt ? p.alt.toLocaleString() : '---'} ft</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase' }}>Speed</div>
-                        <div style={{ color: '#39FF14' }}>{p.spd ? p.spd : '---'} kts</div>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop: '6px', fontSize: '10px', color: '#aaa', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <span>📍 {p.from}</span>
-                      <span style={{ color: '#555' }}>➔</span>
-                      <span style={{ color: '#fff' }}>MDE</span>
-                    </div>
-                  </div>
-                </Tooltip>
-              </Marker>
+              <PlaneMarker key={p.id} p={p} isSelected={selectedFlightId === p.id} />
             ))}
 
             {routes.map(r => (
@@ -1813,86 +1802,7 @@ function App() {
 
 
 
-        {/* 3. V6 COMMAND DOCK (Floating Bottom) - KEEPING AS REQUESTED "WITH ALL BUTTONS" */}
-        {!showOperationalDashboard && !showLanding && (
-          <div style={{
-            position: 'absolute',
-            bottom: '30px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '30px',
-            zIndex: 9999,
-            padding: '12px 40px',
-            borderRadius: '24px',
-            background: 'rgba(10, 15, 30, 0.85)',
-            border: '1px solid rgba(0, 242, 255, 0.3)',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0, 242, 255, 0.1)',
-            backdropFilter: 'blur(12px)'
-          }}>
 
-
-            {/* 1. HOME (Landing) */}
-            <button
-              onClick={() => setShowLanding(true)}
-              style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-                color: '#fff', transition: 'all 0.2s', width: '50px'
-              }}
-              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.color = '#00f2ff'; }}
-              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = '#fff'; }}
-              title="Volver al Inicio"
-            >
-              <div style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 0 5px rgba(0,242,255,0.5))' }}>🏠</div>
-            </button>
-
-            {/* 2. FIRE (Stress Mode - The "Red Button") */}
-            <button
-              onClick={simularDiaCritico}
-              style={{
-                background: 'rgba(255, 68, 68, 0.1)',
-                border: '1px solid #ff4444',
-                borderRadius: '50%',
-                width: '60px', height: '60px',
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#ff4444', transition: 'all 0.2s',
-                boxShadow: '0 0 15px rgba(255, 68, 68, 0.2)'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)';
-                e.currentTarget.style.background = 'rgba(255, 68, 68, 0.3)';
-                e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 68, 68, 0.6)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-                e.currentTarget.style.background = 'rgba(255, 68, 68, 0.1)';
-                e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.2)';
-              }}
-              title="SIMULACRO DÍA CRÍTICO (Stress Test)"
-            >
-              <div style={{ fontSize: '2rem' }}>🔥</div>
-            </button>
-
-            {/* 3. CORE (Dashboard/Table) */}
-            <button
-              onClick={() => setShowOperationalDashboard(true)}
-              style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-                color: '#fff', transition: 'all 0.2s', width: '50px'
-              }}
-              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.color = '#ffd700'; }}
-              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = '#fff'; }}
-              title="Abrir CORE V4 (Sistema Central)"
-            >
-              <div style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 0 5px rgba(0, 255, 128, 0.5))' }}>🔋</div>
-            </button>
-
-          </div>
-        )}
 
         {/* MAP CONTAINER (RESTORED) */}
 
@@ -1931,6 +1841,7 @@ function App() {
                 </div>
               </div>
               <button title="Volver al Inicio" onClick={() => setShowLanding(true)} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(5px)', border: '1px solid #FF5722', color: '#FF5722', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🏠</button>
+              <button title="Simulacro Día Crítico" onClick={simularDiaCritico} style={{ background: 'rgba(255,0,0,0.1)', backdropFilter: 'blur(5px)', border: '1px solid red', color: 'red', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', marginLeft: '5px' }}>🔥</button>
             </div>
 
             {/* SEARCH BAR */}
@@ -2273,7 +2184,7 @@ function App() {
                             <div style={{ marginTop: '4px', padding: '4px', background: 'rgba(255, 165, 0, 0.1)', border: '1px dashed orange', borderRadius: '4px' }}>
                               <div style={{ color: 'orange', fontSize: '0.7rem' }}>ORDEN ACTIVA:</div>
                               <div style={{ color: '#fff' }}>{v.currentClient}</div>
-                              {v.currentOrderId && <div style={{ color: '#888', fontSize: '0.7rem' }}>REF: {v.currentOrderId.split('-').pop()}</div>}
+                              {v.currentOrderId && <div style={{ color: '#888', fontSize: '0.7rem' }}>REF: {String(v.currentOrderId).split('-').pop()}</div>}
                             </div>
                           )}
                         </div>
@@ -2393,7 +2304,7 @@ function App() {
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <strong style={{ color: '#fff' }}>#{r.id.split('-').pop()}</strong>
+                            <strong style={{ color: '#fff' }}>#{String(r.id).split('-').pop()}</strong>
                             <span style={{ fontSize: '0.7rem', background: '#222', padding: '2px 6px', borderRadius: '4px', color: '#ccc' }}>
                               {r.dateLabel} - {r.timeSort || 'ASAP'}
                             </span>
@@ -2568,11 +2479,36 @@ function App() {
                           <div key={i} className="fids-row" style={{
                             display: 'flex', padding: '8px 10px',
                             borderBottom: '1px solid #222',
-                            background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                            background: selectedFlightId === f.id ? 'rgba(0, 240, 255, 0.2)' : (i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent'),
                             fontSize: '0.8rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            borderLeft: selectedFlightId === f.id ? '3px solid #00F0FF' : '3px solid transparent'
                           }}
+                            onClick={() => {
+                              setSelectedFlightId(f.id);
+                              addLog(`✈️ MONITORIZANDO VUELO ${f.id} EN MAPA.`);
+                              // setShowOperationalDashboard(false); // OPTIONAL: Keep open to show flow
+                              // setViewMode('MAP'); 
+
+                              // SYNC HACK: Ensure this flight exists on map if it's not landed
+                              // User Rule: "If I choose a flight and it hasn't landed, the plane must appear."
+                              if (f.status !== 'ATERRIZÓ') {
+                                setPlanes(prev => {
+                                  // 1. Check if exists
+                                  const exists = prev.find(p => p.id === f.id);
+                                  if (exists) return prev;
+
+                                  // 2. If not, rename the first available plane or create one
+                                  const newPlanes = [...prev];
+                                  if (newPlanes.length > 0) {
+                                    newPlanes[0] = { ...newPlanes[0], id: f.id, from: f.city, status: f.status };
+                                    return newPlanes;
+                                  }
+                                  return prev;
+                                });
+                              }
+                            }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.background = 'rgba(0, 240, 255, 0.1)';
                               if (displayOps > 0) {
@@ -2580,7 +2516,7 @@ function App() {
                               }
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.background = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+                              e.currentTarget.style.background = selectedFlightId === f.id ? 'rgba(0, 240, 255, 0.2)' : (i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent');
                             }}
                           >
                             <span style={{ width: '40px', color: '#fff' }}>{f.time}</span>
