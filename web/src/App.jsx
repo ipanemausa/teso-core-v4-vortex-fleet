@@ -3500,7 +3500,7 @@ function App() {
               onClose={() => setShowSharedLink(false)}
             />
           </Suspense>
-        )
+        )}
       {/* --- LEFT VERTICAL DOCK (RESTORED) --- */}
       {!showOperationalDashboard && (
         <div className="glass-panel" style={{
