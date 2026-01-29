@@ -2726,8 +2726,8 @@ function App() {
                 </div>
 
                 {/* SUB-NAVIGATION TABS */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '5px' }}>
-                  {['DASHBOARD', 'CXC', 'CXP', 'BANCOS', 'EGRESOS'].map(tab => (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '5px' }}>
+                  {['DASHBOARD', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'PAGOS'].map(tab => (
                     <button
                       key={tab}
                       onClick={() => setFinanceTab(tab)}
@@ -2823,6 +2823,54 @@ function App() {
                         <span style={{ color: 'red' }}>● NOMINA (65%)</span>
                         <span style={{ color: 'orange' }}>● COMBUSTIBLE (20%)</span>
                         <span style={{ color: 'yellow' }}>● OTROS (15%)</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {financeTab === 'PAGOS' && (
+                    <div style={{ animation: 'fadeIn 0.5s' }}>
+                      <h4 style={{ color: '#39FF14', margin: '10px 0' }}>PASARELA DE PAGOS & TRANSFERENCIAS</h4>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                        <div
+                          style={{ background: '#111', padding: '15px', borderRadius: '8px', border: '1px solid #333', cursor: 'pointer', textAlign: 'center' }}
+                          className="hover-card"
+                          onClick={() => addLog('💳 INICIANDO PAGO NÓMINA: CONECTANDO API BANCOLOMBIA...')}
+                        >
+                          <div style={{ fontSize: '2rem' }}>👥</div>
+                          <h4 style={{ margin: '10px 0' }}>PAGO NÓMINA</h4>
+                          <p style={{ fontSize: '0.8rem', color: '#888' }}>Dispersión masiva a 145 cuentas.</p>
+                          <button className="btn-neon" style={{ marginTop: '10px', width: '100%' }}>INICIAR</button>
+                        </div>
+
+                        <div
+                          style={{ background: '#111', padding: '15px', borderRadius: '8px', border: '1px solid #333', cursor: 'pointer', textAlign: 'center' }}
+                          className="hover-card"
+                          onClick={() => addLog('⛽ INICIANDO PAGO PROVEEDORES: GASOLINA (TERPEL)...')}
+                        >
+                          <div style={{ fontSize: '2rem' }}>⛽</div>
+                          <h4 style={{ margin: '10px 0' }}>PAGO PROVEEDORES</h4>
+                          <p style={{ fontSize: '0.8rem', color: '#888' }}>Facturas vencidas: 2</p>
+                          <button className="btn-neon" style={{ marginTop: '10px', width: '100%', borderColor: 'orange', color: 'orange' }}>PAGAR ($57M)</button>
+                        </div>
+                      </div>
+
+                      <div style={{ background: '#050a10', padding: '10px', borderRadius: '5px' }}>
+                        <h5 style={{ color: '#aaa', margin: '0 0 10px 0' }}>ÚLTIMAS TRANSACCIONES (WOMPI / PSE)</h5>
+                        <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px', borderBottom: '1px solid #222' }}>
+                            <span>TX-992381 (Uber Wompi)</span>
+                            <span style={{ color: '#39FF14' }}>APROBADO</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px', borderBottom: '1px solid #222' }}>
+                            <span>TX-992382 (Pago PSE)</span>
+                            <span style={{ color: '#39FF14' }}>APROBADO</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px', borderBottom: '1px solid #222' }}>
+                            <span>TX-992383 (Tarjeta Crédito)</span>
+                            <span style={{ color: 'red' }}>RECHAZADO (FONDOS)</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -3651,7 +3699,8 @@ function App() {
             { label: 'VISIÓN IA', icon: '🧠', action: () => { setIsHeatmap(prev => !prev); if (!isHeatmap) speak('Activando capas de visión artificial.'); }, color: '#A020F0' },
             { label: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE'), color: 'orange' },
             { label: 'SIMULACRO', icon: '🔥', action: () => setActiveModule('SIMULATION'), color: 'red' },
-            { label: 'PITCH DECK', icon: '📢', action: () => startTransition(() => setShowPresentation(true)), color: '#ff0055' }
+            { label: 'PITCH DECK', icon: '📢', action: () => startTransition(() => setShowPresentation(true)), color: '#ff0055' },
+            { label: 'WHATSAPP', icon: '💬', action: () => window.open('https://wa.me/?text=Hola%20TESO', '_blank'), color: '#25D366' }
           ].map((item, i) => (
             <button
               key={i}
