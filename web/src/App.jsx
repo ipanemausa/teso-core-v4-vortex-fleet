@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Tooltip, Polyline, Circle, useM
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import ErrorBoundary from './components/ErrorBoundary';
+// FORCE REBUILD: 2026-01-29 15:35 v2 - FIX DUPLICATES
 
 
 
@@ -1724,51 +1725,7 @@ function App() {
 
         {/* RADAR STATUS BADGE - REPOSITIONED */}
         {/* UNIFIED LEFT VERTICAL MENU (PILL STYLE) - REPLACES RADAR & SCATTERED BUTTONS */}
-        {!showOperationalDashboard && !showLanding && (
-          <div className="left-glass-dock" style={{
-            position: 'absolute', top: '50%', left: '20px', transform: 'translateY(-50%)',
-            display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 1000
-          }}>
-            {[
-              { name: 'RADAR JMC', icon: '📡', action: () => setActiveModule('RADAR'), color: '#39FF14', active: activeModule === 'RADAR' },
-              { name: 'VISIÓN IA', icon: '🧠', action: () => { setIsHeatmap(true); setActiveModule('VISION'); }, active: isHeatmap || activeModule === 'VISION', color: '#A020F0' },
-              { name: 'CONECTAR MÓVIL', icon: '📱', action: openQR },
-              { name: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core', '_blank') },
-              { name: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true) },
-              { name: 'PITCH DECK', icon: '📢', action: () => setShowPresentation(true) },
-              { name: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE') },
-              { name: 'AUDIT', icon: '📊', action: () => setActiveModule('AUDIT') },
-              { name: 'SIMULACRO', icon: '🔥', action: () => { simularDiaCritico(); setActiveModule('SIMULATION'); }, color: 'red', border: 'red' },
-              { name: 'SECURITY', icon: '🛡️', action: () => setActiveModule('SECURITY'), color: '#39FF14' }
-            ].map((item, index) => (
-              <button
-                key={index}
-                onClick={item.action}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  background: item.active ? `rgba(0, 240, 255, 0.15)` : 'rgba(10, 20, 30, 0.85)',
-                  border: `1px solid ${item.border || (item.active ? item.color || '#00F0FF' : 'rgba(255,255,255,0.1)')}`,
-                  color: item.color || (item.active ? item.color || '#00F0FF' : '#fff'),
-                  padding: '8px 16px', borderRadius: '50px', cursor: 'pointer',
-                  backdropFilter: 'blur(12px)', transition: 'all 0.2s ease-out',
-                  textAlign: 'left', minWidth: '180px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateX(5px)';
-                  e.currentTarget.style.background = 'rgba(0, 240, 255, 0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateX(0)';
-                  e.currentTarget.style.background = item.active ? `rgba(0, 240, 255, 0.15)` : 'rgba(10, 20, 30, 0.85)';
-                }}
-              >
-                <span style={{ fontSize: '1.2rem', minWidth: '24px', textAlign: 'center' }}>{item.icon}</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', letterSpacing: '0.5px', fontFamily: 'Inter, sans-serif' }}>{item.name}</span>
-              </button>
-            ))}
-          </div>
-        )}
+
 
         {/* 5. CHAT BAR (Ask Teso Operations AI...) - MOVED TO BOTTOM LEFT */}
         {!showOperationalDashboard && !showLanding && (
@@ -1816,7 +1773,6 @@ function App() {
               { id: 'AGENDA', icon: '📅' },
               { id: 'FINANZAS', icon: '💰' },
               { id: 'MERCADEO', icon: '📢' },
-              { id: 'PITCH DECK', icon: '🎤', action: () => React.startTransition(() => setShowPresentation(true)) }, // FIX: Error 426
               { id: 'CORE V4', icon: '🔋', action: () => { setShowOperationalDashboard(true); setDashboardViewMode('CORE'); addLog('🔋 CORE V4: SISTEMA CENTRAL ACTIVADO.'); } }
             ].map(tab => (
               <button
