@@ -1696,44 +1696,50 @@ function App() {
         {/* --- LAYER 2: UI OVERLAYS (Buttons, Lists, HUD) --- */}
 
         {/* RADAR STATUS BADGE - REPOSITIONED */}
-        <div className="map-ui-radar-badge" style={{ top: '60px', right: '20px', fontSize: '0.7rem' }}>
-          📡 RADAR JMC: <span style={{ color: '#39FF14' }}>ONLINE</span>
-        </div>
-
-        {/* UNIFIED LEFT COMMAND DOCK */}
+        {/* UNIFIED LEFT VERTICAL MENU (PILL STYLE) - REPLACES RADAR & SCATTERED BUTTONS */}
         {!showOperationalDashboard && !showLanding && (
           <div className="left-glass-dock" style={{
             position: 'absolute', top: '50%', left: '20px', transform: 'translateY(-50%)',
-            display: 'flex', flexDirection: 'column', gap: '15px', zIndex: 1000,
-            background: 'rgba(5, 10, 20, 0.75)', backdropFilter: 'blur(12px)',
-            padding: '15px 10px', borderRadius: '16px', border: '1px solid rgba(0, 240, 255, 0.15)',
-            boxShadow: '0 0 30px rgba(0,0,0,0.6)'
+            display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 1000
           }}>
-            {/* 1. HOME */}
-            <button onClick={() => setShowLanding(true)} title="Inicio" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', transition: 'transform 0.2s', filter: 'drop-shadow(0 0 5px rgba(0,240,255,0.3))' }}>🏠</button>
-
-            {/* 2. CORE V4 */}
-            <button onClick={() => setShowOperationalDashboard(true)} title="Core V4" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', transition: 'transform 0.2s' }}>🔋</button>
-
-            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '2px 5px' }} />
-
-            {/* 3. VISION IA */}
-            <button onClick={() => setIsHeatmap(!isHeatmap)} title="Visión IA" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: isHeatmap ? '#A020F0' : '#ccc', transition: 'color 0.2s' }}>🧠</button>
-
-            {/* 4. MOBILE */}
-            <button onClick={openQR} title="Conectar Móvil" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: '#fff' }}>📱</button>
-
-            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '2px 5px' }} />
-
-            {/* 5. TOOLS */}
-            <button title="Optimize" style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#00F0FF' }}>✨</button>
-            <button title="Audit" style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#FFD700' }}>📊</button>
-            <button title="Security" style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#39FF14' }}>🛡️</button>
-
-            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '2px 5px' }} />
-
-            {/* 6. FIRE */}
-            <button onClick={simularDiaCritico} title="Simulacro" style={{ background: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.4)', borderRadius: '8px', fontSize: '1.4rem', cursor: 'pointer', padding: '5px' }}>🔥</button>
+            {[
+              { name: 'RADAR JMC', icon: '📡', action: () => addLog('📡 RADAR JMC: ESTATUS ONLINE - SEÑAL FUERTE'), color: '#39FF14', active: true },
+              { name: 'VISIÓN IA', icon: '🧠', action: () => setIsHeatmap(!isHeatmap), active: isHeatmap, color: '#A020F0' },
+              { name: 'CONECTAR MÓVIL', icon: '📱', action: openQR },
+              { name: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core', '_blank') },
+              { name: 'TEST BOOKING', icon: '🎫', action: () => { const mock = clients[0] || { name: 'TEST CORP', tier: 'S' }; simulateVipRequest(mock); } },
+              { name: 'PITCH DECK', icon: '📢', action: () => addLog('📂 PITCH DECK: MODO PRESENTACIÓN ACTIVADO.') },
+              { name: 'OPTIMIZE', icon: '✨', action: () => addLog('✨ OPTIMIZANDO FLOTA...') },
+              { name: 'AUDIT', icon: '📊', action: () => addLog('📊 INICIANDO AUDITORÍA...') },
+              { name: 'SIMULACRO', icon: '🔥', action: simularDiaCritico, color: 'red', border: 'red' },
+              { name: 'SECURITY', icon: '🛡️', action: () => addLog('🛡️ MONITOR DE SEGURIDAD ACTIVO'), color: '#39FF14' }
+            ].map((item, index) => (
+              <button
+                key={index}
+                onClick={item.action}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  background: item.active ? `rgba(0, 240, 255, 0.15)` : 'rgba(10, 20, 30, 0.85)',
+                  border: `1px solid ${item.border || (item.active ? item.color || '#00F0FF' : 'rgba(255,255,255,0.1)')}`,
+                  color: item.color || (item.active ? item.color || '#00F0FF' : '#fff'),
+                  padding: '8px 16px', borderRadius: '50px', cursor: 'pointer',
+                  backdropFilter: 'blur(12px)', transition: 'all 0.2s ease-out',
+                  textAlign: 'left', minWidth: '180px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateX(5px)';
+                  e.currentTarget.style.background = 'rgba(0, 240, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = item.active ? `rgba(0, 240, 255, 0.15)` : 'rgba(10, 20, 30, 0.85)';
+                }}
+              >
+                <span style={{ fontSize: '1.2rem', minWidth: '24px', textAlign: 'center' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', letterSpacing: '0.5px', fontFamily: 'Inter, sans-serif' }}>{item.name}</span>
+              </button>
+            ))}
           </div>
         )}
 
