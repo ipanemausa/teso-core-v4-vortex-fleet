@@ -3486,6 +3486,55 @@ function App() {
 
 
 
+      {/* --- LEFT VERTICAL DOCK (RESTORED) --- */}
+      {!showOperationalDashboard && (
+        <div className="glass-panel" style={{
+          position: 'fixed', left: 20, top: '50%', transform: 'translateY(-50%)',
+          display: 'flex', flexDirection: 'column', gap: '8px',
+          padding: '12px', borderRadius: '16px', border: 'none',
+          background: 'transparent', // NO BOX
+          zIndex: 1100
+        }}>
+          {[
+            { label: 'RADAR JMC', icon: '📡', action: () => setActiveModule('RADAR'), color: '#39FF14' },
+            { label: 'VISIÓN IA', icon: '🧠', action: () => setActiveModule('VISION'), color: '#A020F0' },
+            { label: 'CONECTAR MÓVIL', icon: '📱', action: () => setShowWebcam(prev => !prev), color: '#3b82f6' },
+            { label: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core-v4-vortex-fleet', '_blank'), color: '#aaa' },
+            { label: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true), color: 'gold' },
+            { label: 'PITCH DECK', icon: '📢', action: () => React.startTransition(() => setShowPresentation(true)), color: '#ff0055' },
+            { label: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE'), color: 'orange' },
+            { label: 'AUDIT', icon: '📊', action: () => setActiveModule('AUDIT'), color: '#00F0FF' },
+            { label: 'SIMULACRO', icon: '🔥', action: () => setActiveModule('SIMULATION'), color: 'red' },
+            { label: 'SECURITY', icon: '🛡️', action: () => setActiveModule('SECURITY'), color: '#00F0FF' }
+          ].map((item, i) => (
+            <button
+              key={i}
+              className="dock-item"
+              onClick={item.action}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                background: 'rgba(255,255,255,0.03)', border: 'none',
+                padding: '10px 15px', borderRadius: '12px', color: '#fff',
+                cursor: 'pointer', transition: 'all 0.2s',
+                textAlign: 'left', minWidth: '160px',
+                borderLeft: `3px solid ${item.color}`
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                e.currentTarget.style.transform = 'translateX(0)';
+              }}
+            >
+              <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* DASHBOARD LAYER (Toggle between OPS and WMS) */}
       {
         activeView === 'DASHBOARD' && (
