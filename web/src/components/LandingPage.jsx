@@ -47,6 +47,10 @@ export default function LandingPage({ onEnter }) {
             {/* --- GLOBAL STYLES --- */}
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap');
+                
+                :root {
+                    --neon-green: #39FF14;
+                }
 
                 @keyframes float {
                     0% { transform: translateY(0px); }
