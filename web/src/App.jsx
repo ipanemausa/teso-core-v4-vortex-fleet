@@ -3700,7 +3700,8 @@ function App() {
             { label: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE'), color: 'orange' },
             { label: 'SIMULACRO', icon: '🔥', action: () => setActiveModule('SIMULATION'), color: 'red' },
             { label: 'PITCH DECK', icon: '📢', action: () => startTransition(() => setShowPresentation(true)), color: '#ff0055' },
-            { label: 'WHATSAPP', icon: '💬', action: () => window.open('https://wa.me/?text=Hola%20TESO', '_blank'), color: '#25D366' }
+            { label: 'WHATSAPP', icon: '💬', action: () => window.open('https://wa.me/?text=Hola%20TESO', '_blank'), color: '#25D366' },
+            { label: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core-v4-vortex-fleet', '_blank'), color: '#aaa' }
           ].map((item, i) => (
             <button
               key={i}
