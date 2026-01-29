@@ -438,6 +438,7 @@ function App() {
   const [showWebcam, setShowWebcam] = useState(false); // NEW: SELFIE MODE
   const [showTripPreferences, setShowTripPreferences] = useState(false); // NEW: SPIKE UI STATE
   const [showSharedLink, setShowSharedLink] = useState(false); // NEW: SHARE RIDE STATE
+  const [showPresentation, setShowPresentation] = useState(false); // RESTORED: Pitch Deck State
 
   // --- VOICE AGENT (FREE / NATIVE) ---
   const speak = (text) => {
@@ -3500,7 +3501,68 @@ function App() {
             />
           </Suspense>
         )
-      }
+      {/* --- LEFT VERTICAL DOCK (RESTORED) --- */}
+      {!showOperationalDashboard && (
+        <div className="glass-panel" style={{
+          position: 'fixed', left: 20, top: '50%', transform: 'translateY(-50%)',
+          display: 'flex', flexDirection: 'column', gap: '8px',
+          padding: '12px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'rgba(5, 10, 20, 0.6)', backdropFilter: 'blur(10px)',
+          zIndex: 1100
+        }}>
+          {[
+            { label: 'RADAR JMC', icon: '📡', action: () => setActiveModule('RADAR'), color: '#39FF14' },
+            { label: 'VISIÓN IA', icon: '🧠', action: () => setActiveModule('VISION'), color: '#A020F0' },
+            { label: 'CONECTAR MÓVIL', icon: '📱', action: () => setShowWebcam(prev => !prev), color: '#3b82f6' },
+            { label: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core-v4-vortex-fleet', '_blank'), color: '#aaa' },
+            { label: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true), color: 'gold' },
+            { label: 'PITCH DECK', icon: '📢', action: () => setShowPresentation(true), color: '#ff0055' },
+            { label: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE'), color: 'orange' },
+            { label: 'AUDIT', icon: '📊', action: () => setActiveModule('AUDIT'), color: '#00F0FF' },
+            { label: 'SIMULACRO', icon: '🔥', action: () => setActiveModule('SIMULATION'), color: 'red' },
+            { label: 'SECURITY', icon: '🛡️', action: () => setActiveModule('SECURITY'), color: '#00F0FF' }
+          ].map((item, i) => (
+            <button
+              key={i}
+              className="dock-item"
+              onClick={item.action}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                background: 'rgba(255,255,255,0.03)', border: 'none',
+                padding: '10px 15px', borderRadius: '12px', color: '#fff',
+                cursor: 'pointer', transition: 'all 0.2s',
+                textAlign: 'left', minWidth: '160px',
+                borderLeft: `3px solid ${item.color}`
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                e.currentTarget.style.transform = 'translateX(0)';
+              }}
+            >
+              <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{item.label}</span>
+            </button>
+          ))}
+
+          {/* VOICE INPUT BAR */}
+          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#000', borderRadius: '20px', padding: '5px 10px', border: '1px solid #39FF14' }}>
+              <span style={{ fontSize: '1.2rem' }}>🤖</span>
+              <input
+                placeholder="Consultar Operaciones..."
+                style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '0.7rem', flex: 1, marginLeft: '5px' }}
+              />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#39FF14' }}></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
 
 
       {/* DASHBOARD LAYER (Toggle between OPS and WMS) */}
@@ -3528,6 +3590,17 @@ function App() {
       {/* FULL SCREEN MODULE RENDERER */}
       {activeModule && (
         <FullScreenModule view={activeModule} onClose={() => setActiveModule(null)} systemData={{ requests, vehicles, logs, onSimulate: simularDiaCritico }} />
+      )}
+
+      {/* PRESENTATION LAYER (RESTORED) */}
+      {showPresentation && (
+        <Suspense fallback={<div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#00F0FF', zIndex: 9999 }}>Initializing Neural Deck...</div>}>
+          <Presentation
+            onClose={() => setShowPresentation(false)}
+            control={presentationControl}
+            setControl={setPresentationControl}
+          />
+        </Suspense>
       )}
 
     </main >
