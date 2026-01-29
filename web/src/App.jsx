@@ -1381,8 +1381,10 @@ function App() {
       const updatedVehicles = [...vehicles];
 
       const updatedRequests = requests.map((req) => {
-        // If request is unassigned AND we still have vehicles left
-        if (!req.assignedVehicle && availVehicleIndex < availVehicles.length) {
+        // FORCE ASSIGNMENT if unassigned OR assigned to placeholder
+        const needsAssignment = !req.assignedVehicle || req.assignedVehicle === 'Simulated Car' || req.assignedVehicle === 'Unassigned';
+
+        if (needsAssignment && availVehicleIndex < availVehicles.length) {
           const vehicle = availVehicles[availVehicleIndex];
           availVehicleIndex++; // Move to next available vehicle
 
@@ -1390,8 +1392,10 @@ function App() {
           const vehicleToUpdate = updatedVehicles.find(v => v.id === vehicle.id);
           if (vehicleToUpdate) {
             vehicleToUpdate.status = 'busy';
-            vehicleToUpdate.currentOrderId = req.id; // AUDIT LINK
-            vehicleToUpdate.currentClient = req.paxName; // AUDIT LINK
+            vehicleToUpdate.currentOrderId = req.id;
+            vehicleToUpdate.currentClient = req.paxName || req.company;
+            // Force visual update on map marker too if needed by adding a timestamp or flag
+            vehicleToUpdate.lastUpdate = Date.now();
           }
 
           assignedCount++;
@@ -1399,6 +1403,7 @@ function App() {
             ...req,
             assignedVehicle: vehicle.id,
             assignedDriver: vehicle.driver,
+            status: 'assigned', // Ensure status is assigned
             eta: Math.floor(Math.random() * 5 + 2)
           };
         }
