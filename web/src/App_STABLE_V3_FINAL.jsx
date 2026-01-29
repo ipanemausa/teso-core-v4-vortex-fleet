@@ -3453,7 +3453,7 @@ function App() {
         }}>
           {[
             { label: 'RADAR JMC', icon: '📡', action: () => setActiveModule('RADAR'), color: '#39FF14' },
-            { label: 'VISIÓN IA', icon: '🧠', action: () => { setIsHeatmap(prev => !prev); if (!isHeatmap) speak('Activando capas de visión artificial.'); }, color: '#A020F0' },
+            { label: 'VISIÓN IA', icon: '🧠', action: () => setActiveModule('VISION'), color: '#A020F0' },
             { label: 'CONECTAR MÓVIL', icon: '📱', action: () => setShowWebcam(prev => !prev), color: '#3b82f6' },
             { label: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core-v4-vortex-fleet', '_blank'), color: '#aaa' },
             { label: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true), color: 'gold' },
