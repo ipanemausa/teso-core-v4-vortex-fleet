@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState, useEffect, useRef } from 'react'; // Added Suspense, lazy, hooks
+import { startTransition, Suspense, lazy, useState, useEffect, useRef } from 'react'; // Added Suspense, lazy, hooks
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, Polyline, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -3457,7 +3457,7 @@ function App() {
             { label: 'CONECTAR MÓVIL', icon: '📱', action: () => setShowWebcam(prev => !prev), color: '#3b82f6' },
             { label: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core-v4-vortex-fleet', '_blank'), color: '#aaa' },
             { label: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true), color: 'gold' },
-            { label: 'PITCH DECK', icon: '📢', action: () => React.startTransition(() => setShowPresentation(true)), color: '#ff0055' },
+            { label: 'PITCH DECK', icon: '📢', action: () => startTransition(() => setShowPresentation(true)), color: '#ff0055' },
             { label: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE'), color: 'orange' },
             { label: 'AUDIT', icon: '📊', action: () => setActiveModule('AUDIT'), color: '#00F0FF' },
             { label: 'SIMULACRO', icon: '🔥', action: () => setActiveModule('SIMULATION'), color: 'red' },
