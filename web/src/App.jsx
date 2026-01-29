@@ -3571,8 +3571,18 @@ const FullScreenModule = ({ view, onClose, systemData }) => {
             <h2>SISTEMA DE MONITOREO ACTIVO</h2>
             <p>Todas las unidades están reportando telemetría segura.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '30px' }}>
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} style={{ background: '#000', height: '100px', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>CAM FEED {i} (OFFLINE)</div>
+              {[
+                'https://images.unsplash.com/photo-1542259648-842273188177?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1625232770624-b1528c504a58?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1565514020125-333e387c10b7?auto=format&fit=crop&w=300&q=80',
+                'https://images.unsplash.com/photo-1473186578172-c141e6798cf4?auto=format&fit=crop&w=300&q=80'
+              ].map((img, i) => (
+                <div key={i} style={{ position: 'relative', height: '120px', border: '1px solid #333', overflow: 'hidden', borderRadius: '4px' }}>
+                  <img src={img} alt="Cam" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6, filter: 'grayscale(100%) contrast(1.2)' }} />
+                  <div style={{ position: 'absolute', top: 5, left: 5, fontSize: '0.6rem', color: '#39FF14', background: 'rgba(0,0,0,0.8)', padding: '2px 5px', border: '1px solid #39FF14' }}>REC ● CAM-0{i + 1}</div>
+                </div>
               ))}
             </div>
           </div>
