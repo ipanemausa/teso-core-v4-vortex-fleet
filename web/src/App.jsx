@@ -438,7 +438,7 @@ function App() {
   const [showWebcam, setShowWebcam] = useState(false); // NEW: SELFIE MODE
   const [showTripPreferences, setShowTripPreferences] = useState(false); // NEW: SPIKE UI STATE
   const [showSharedLink, setShowSharedLink] = useState(false); // NEW: SHARE RIDE STATE
-  const [showPresentation, setShowPresentation] = useState(false); // RESTORED: Pitch Deck State
+
 
   // --- VOICE AGENT (FREE / NATIVE) ---
   const speak = (text) => {
