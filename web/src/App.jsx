@@ -1707,8 +1707,8 @@ function App() {
               { name: 'VISIÓN IA', icon: '🧠', action: () => setIsHeatmap(!isHeatmap), active: isHeatmap, color: '#A020F0' },
               { name: 'CONECTAR MÓVIL', icon: '📱', action: openQR },
               { name: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core', '_blank') },
-              { name: 'TEST BOOKING', icon: '🎫', action: () => { const mock = clients[0] || { name: 'TEST CORP', tier: 'S' }; simulateVipRequest(mock); } },
-              { name: 'PITCH DECK', icon: '📢', action: () => addLog('📂 PITCH DECK: MODO PRESENTACIÓN ACTIVADO.') },
+              { name: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true) },
+              { name: 'PITCH DECK', icon: '📢', action: () => setShowPresentation(true) },
               { name: 'OPTIMIZE', icon: '✨', action: () => addLog('✨ OPTIMIZANDO FLOTA...') },
               { name: 'AUDIT', icon: '📊', action: () => addLog('📊 INICIANDO AUDITORÍA...') },
               { name: 'SIMULACRO', icon: '🔥', action: simularDiaCritico, color: 'red', border: 'red' },
@@ -1743,24 +1743,24 @@ function App() {
           </div>
         )}
 
-        {/* 5. CHAT BAR (Ask Teso Operations AI...) - CENTERED ABOVE DOCK */}
+        {/* 5. CHAT BAR (Ask Teso Operations AI...) - MOVED TO BOTTOM LEFT */}
         {!showOperationalDashboard && !showLanding && (
           <div style={{
-            position: 'absolute', bottom: '110px', left: '50%', transform: 'translateX(-50%)', zIndex: 999,
+            position: 'absolute', bottom: '20px', left: '20px', zIndex: 999,
             display: 'flex', alignItems: 'center', gap: '10px'
           }}>
             <div style={{
-              background: 'rgba(0,0,0,0.8)', border: '1px solid #00F0FF', borderRadius: '50px',
-              padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '10px',
-              width: '350px', boxShadow: '0 0 15px rgba(0, 240, 255, 0.2)'
+              background: 'rgba(0,0,0,0.85)', border: '1px solid #00F0FF', borderRadius: '50px',
+              padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '10px',
+              width: '320px', boxShadow: '0 0 20px rgba(0, 240, 255, 0.2)', backdropFilter: 'blur(10px)'
             }}>
               <span style={{ fontSize: '1.2rem' }}>🤖</span>
               <input
                 placeholder="Consultar Operaciones..."
-                style={{ background: 'transparent', border: 'none', color: '#fff', width: '100%', outline: 'none', fontSize: '0.8rem' }}
+                style={{ background: 'transparent', border: 'none', color: '#fff', width: '100%', outline: 'none', fontSize: '0.85rem' }}
               />
               <span style={{ fontSize: '1.2rem' }}>🎤</span>
-              <button style={{ background: '#00F0FF', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>➤</button>
+              <button style={{ background: '#00F0FF', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>➤</button>
             </div>
           </div>
         )}
@@ -3326,76 +3326,7 @@ function App() {
         )
       }
 
-      {/* SOURCE CODE SECURE LINK */}
-      <a
-        href="https://github.com/ipanemausa/https-github.com-ipanemausa-teso"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '180px', // Left of Pitch Deck button
-          zIndex: 9000,
-          background: '#111',
-          color: '#fff',
-          border: '1px solid #333',
-          padding: '10px 15px',
-          borderRadius: '30px',
-          fontWeight: 'bold',
-          fontSize: '0.8rem',
-          boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-          cursor: 'pointer',
-          textDecoration: 'none',
-          display: 'flex', alignItems: 'center', gap: '8px',
-          transition: 'all 0.2s'
-        }}
-      >
-        <span style={{ fontSize: '1.2rem' }}>👾</span> SOURCE (GIT)
-      </a>
 
-      {/* PITCH MODE BUTTON (Fixed Overlay) */}
-      <button
-        onClick={() => setShowPresentation(true)}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: 9000,
-          background: 'gold',
-          color: '#000',
-          border: 'none',
-          padding: '10px 20px',
-          borderRadius: '30px',
-          fontWeight: 'bold',
-          boxShadow: '0 0 20px rgba(255, 215, 0, 0.5)',
-          cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '10px'
-        }}
-      >
-        <span>📽️</span> PITCH DECK
-      </button>
-
-      {/* SPIKE TRIGGER BUTTON (Temporary) */}
-      <button
-        onClick={() => setShowTripPreferences(true)}
-        style={{
-          position: 'fixed',
-          bottom: '70px',
-          right: '20px',
-          zIndex: 9000,
-          background: '#00F0FF',
-          color: '#000',
-          border: 'none',
-          padding: '10px 20px',
-          borderRadius: '30px',
-          fontWeight: 'bold',
-          boxShadow: '0 0 20px rgba(0, 240, 255, 0.5)',
-          cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '10px'
-        }}
-      >
-        <span>✨</span> TEST BOOKING
-      </button>
 
       {/* TRIP PREFERENCES MODAL (SPIKE) */}
       {
