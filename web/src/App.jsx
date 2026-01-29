@@ -1667,9 +1667,29 @@ function App() {
 
             {planes.map(p => (
               <Marker key={p.id} position={[p.lat, p.lng]} icon={p.status === 'LANDED' ? parkedPlaneIcon : planeDivIcon(p.heading)}>
-                <Tooltip direction="right" offset={[10, 0]} opacity={0.8} permanent>
-                  <div style={{ fontSize: '9px', bg: 'transparent', color: '#00F0FF', textShadow: '0 0 2px black' }}>
-                    ✈ {p.id}
+                <Tooltip direction="top" offset={[0, -20]} opacity={1} className="glass-tooltip">
+                  <div style={{ padding: '8px 12px', minWidth: '140px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
+                      <span style={{ color: '#00F0FF', fontWeight: 'bold', fontSize: '13px' }}>✈ {p.id}</span>
+                      <span style={{ fontSize: '10px', color: '#888' }}>{p.status}</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', color: '#ccc' }}>
+                      <div>
+                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase' }}>Altitud</div>
+                        <div style={{ color: '#fff' }}>{p.alt ? p.alt.toLocaleString() : '---'} ft</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase' }}>Speed</div>
+                        <div style={{ color: '#39FF14' }}>{p.spd ? p.spd : '---'} kts</div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '6px', fontSize: '10px', color: '#aaa', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span>📍 {p.from}</span>
+                      <span style={{ color: '#555' }}>➔</span>
+                      <span style={{ color: '#fff' }}>MDE</span>
+                    </div>
                   </div>
                 </Tooltip>
               </Marker>
@@ -1691,74 +1711,54 @@ function App() {
           📡 RADAR JMC: <span style={{ color: '#39FF14' }}>ONLINE</span>
         </div>
 
-        {/* 4. BOTTOM CENTER COMMANDS (OPTIMIZE, AUDIT, SECURITY) */}
+        {/* 4. BOTTOM LEFT COMMANDS (OPTIMIZE, AUDIT, SECURITY) - SMALL & UNINTRUSIVE */}
         {!showOperationalDashboard && !showLanding && (
           <div style={{
-            position: 'absolute', bottom: '100px', left: '50%', transform: 'translateX(-50%)',
-            display: 'flex', gap: '15px', zIndex: 999
+            position: 'absolute', bottom: '20px', left: '20px', zIndex: 999,
+            display: 'flex', flexDirection: 'column', gap: '8px'
           }}>
             {[
-              { label: 'Optimize Routes', icon: '✨', color: '#00F0FF' },
-              { label: 'Financial Audit', icon: '✨', color: '#FFD700' },
-              { label: 'Security Scan', icon: '✨', color: '#39FF14' }
+              { label: 'Optimize', icon: '✨', color: '#00F0FF' },
+              { label: 'Audit', icon: '📊', color: '#FFD700' },
+              { label: 'Security', icon: '🛡️', color: '#39FF14' }
             ].map(btn => (
               <button key={btn.label} style={{
-                background: 'rgba(0,0,0,0.8)', border: `1px solid ${btn.color}`, color: btn.color,
-                padding: '10px 20px', borderRadius: '30px', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '0.8rem',
-                boxShadow: `0 0 10px ${btn.color}40`, backdropFilter: 'blur(4px)'
+                background: 'rgba(0,0,0,0.6)', border: `1px solid ${btn.color}`, color: btn.color,
+                padding: '5px 10px', borderRadius: '20px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.65rem',
+                boxShadow: `0 0 5px ${btn.color}20`, backdropFilter: 'blur(4px)',
+                width: 'fit-content'
               }}>
-                <span style={{ fontSize: '1.2rem', marginBottom: '2px' }}>{btn.icon}</span>
+                <span style={{ fontSize: '1rem' }}>{btn.icon}</span>
                 {btn.label}
               </button>
             ))}
           </div>
         )}
 
-        {/* 5. CHAT BAR (Ask Teso Operations AI...) */}
+        {/* 5. CHAT BAR (Ask Teso Operations AI...) - CENTERED ABOVE DOCK */}
         {!showOperationalDashboard && !showLanding && (
           <div style={{
-            position: 'absolute', bottom: '90px', right: '370px', zIndex: 999,
+            position: 'absolute', bottom: '110px', left: '50%', transform: 'translateX(-50%)', zIndex: 999,
             display: 'flex', alignItems: 'center', gap: '10px'
           }}>
             <div style={{
               background: 'rgba(0,0,0,0.8)', border: '1px solid #00F0FF', borderRadius: '50px',
-              padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '10px',
-              width: '400px', boxShadow: '0 0 15px rgba(0, 240, 255, 0.2)'
+              padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '10px',
+              width: '350px', boxShadow: '0 0 15px rgba(0, 240, 255, 0.2)'
             }}>
-              <span>🤖</span>
+              <span style={{ fontSize: '1.2rem' }}>🤖</span>
               <input
-                placeholder="abre el excel de programacion..."
-                style={{ background: 'transparent', border: 'none', color: '#fff', width: '100%', outline: 'none' }}
+                placeholder="Consultar Operaciones..."
+                style={{ background: 'transparent', border: 'none', color: '#fff', width: '100%', outline: 'none', fontSize: '0.8rem' }}
               />
-              <span>🎤</span>
-              <button style={{ background: '#00F0FF', border: 'none', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer' }}>➤</button>
+              <span style={{ fontSize: '1.2rem' }}>🎤</span>
+              <button style={{ background: '#00F0FF', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>➤</button>
             </div>
           </div>
         )}
 
-        {/* 6. TOP LEFT BUTTONS (VISION IA, CONECTAR MOVIL) */}
-        {!showOperationalDashboard && !showLanding && (
-          <div style={{
-            position: 'absolute', top: '100px', left: '20px', zIndex: 999,
-            display: 'flex', flexDirection: 'column', gap: '15px'
-          }}>
-            <button style={{
-              background: 'rgba(255, 0, 255, 0.1)', border: '1px solid #FF00FF', color: '#FF00FF',
-              padding: '10px 20px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold',
-              display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 0 15px rgba(255, 0, 255, 0.2)'
-            }}>
-              🧠 VISIÓN IA
-            </button>
-            <button onClick={() => openQR()} style={{
-              background: 'rgba(255, 255, 255, 0.1)', border: '1px solid #fff', color: '#fff',
-              padding: '10px 20px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold',
-              display: 'flex', alignItems: 'center', gap: '10px'
-            }}>
-              📱 CONECTAR MÓVIL
-            </button>
-          </div>
-        )}
+        {/* REMOVED DUPLICATE TOP LEFT BUTTONS (VISION IA) HERE - KEPT THE ONES AT LINE 1906 */}
 
 
         {/* --- LAYER 2: MAP HUB INTERFACE --- */}
@@ -3593,86 +3593,7 @@ function App() {
 
       {/* AGENTIC NAVIGATION BAR - MOVED UP */}
 
-      {/* 5. V6 CONTROL DOCK (HOME / FIRE / CORE) - CENTERED */}
-      {!showOperationalDashboard && !showLanding && (
-        <div style={{
-          position: 'absolute',
-          bottom: '30px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '30px',
-          zIndex: 9999,
-          padding: '12px 40px',
-          borderRadius: '24px',
-          background: 'rgba(10, 15, 30, 0.85)',
-          border: '1px solid rgba(0, 242, 255, 0.3)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0, 242, 255, 0.1)',
-          backdropFilter: 'blur(12px)'
-        }}>
-          {/* 1. HOME (Landing) */}
-          <button
-            onClick={() => setShowLanding(true)} // Retorno a Portada
-            title="Volver a Portada"
-            style={{
-              background: 'transparent', border: 'none', fontSize: '1.5rem', cursor: 'pointer',
-              filter: 'drop-shadow(0 0 5px rgba(0, 242, 255, 0.5))',
-              transition: 'transform 0.2s',
-              display: 'flex', flexDirection: 'column', alignItems: 'center'
-            }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            🏠
-          </button>
 
-          {/* 2. FIRE (War Room / Emergency) */}
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => {
-                const confirmWar = window.confirm("🚨 ¿ACTIVAR PROTOCOLO WAR ROOM?\n\nEsto desplegará todas las unidades disponibles y notificará al mando central.");
-                if (confirmWar) {
-                  addLog("🔥🔥🔥 WAR ROOM ACTIVADO POR COMANDO.");
-                  // Logic to force all busy units to available logic? Or highlight map?
-                  speak("Protocolo War Room Iniciado. Prioridad Máxima.");
-                }
-              }}
-              style={{
-                background: 'linear-gradient(135deg, #FF4D4D 0%, #C41E3A 100%)',
-                border: '2px solid #FF8C00',
-                borderRadius: '50%',
-                width: '60px', height: '60px',
-                fontSize: '2rem',
-                cursor: 'pointer',
-                boxShadow: '0 0 20px rgba(255, 69, 0, 0.6)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                animation: 'pulse 2s infinite'
-              }}
-            >
-              🔥
-            </button>
-            <div style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', borderRadius: '50%', padding: '2px 6px', fontSize: '0.6rem', border: '1px solid white' }}>SOS</div>
-          </div>
-
-          {/* 3. CORE (Layer 3 Dashboard) */}
-          <button
-            onClick={() => setShowOperationalDashboard(true)}
-            title="Abrir Core Operativo (V4)"
-            style={{
-              background: 'transparent', border: 'none', fontSize: '1.5rem', cursor: 'pointer',
-              filter: 'drop-shadow(0 0 5px rgba(0, 255, 0, 0.5))',
-              transition: 'transform 0.2s',
-              display: 'flex', flexDirection: 'column', alignItems: 'center'
-            }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            🔋
-            <span style={{ fontSize: '0.5rem', color: '#00F0FF', marginTop: '2px' }}>CORE V4</span>
-          </button>
-        </div>
-      )}
 
     </main >
   );
