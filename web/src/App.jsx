@@ -1700,28 +1700,40 @@ function App() {
           📡 RADAR JMC: <span style={{ color: '#39FF14' }}>ONLINE</span>
         </div>
 
-        {/* 4. BOTTOM LEFT COMMANDS (OPTIMIZE, AUDIT, SECURITY) - SMALL & UNINTRUSIVE */}
+        {/* UNIFIED LEFT COMMAND DOCK */}
         {!showOperationalDashboard && !showLanding && (
-          <div style={{
-            position: 'absolute', bottom: '20px', left: '20px', zIndex: 999,
-            display: 'flex', flexDirection: 'column', gap: '8px'
+          <div className="left-glass-dock" style={{
+            position: 'absolute', top: '50%', left: '20px', transform: 'translateY(-50%)',
+            display: 'flex', flexDirection: 'column', gap: '15px', zIndex: 1000,
+            background: 'rgba(5, 10, 20, 0.75)', backdropFilter: 'blur(12px)',
+            padding: '15px 10px', borderRadius: '16px', border: '1px solid rgba(0, 240, 255, 0.15)',
+            boxShadow: '0 0 30px rgba(0,0,0,0.6)'
           }}>
-            {[
-              { label: 'Optimize', icon: '✨', color: '#00F0FF' },
-              { label: 'Audit', icon: '📊', color: '#FFD700' },
-              { label: 'Security', icon: '🛡️', color: '#39FF14' }
-            ].map(btn => (
-              <button key={btn.label} style={{
-                background: 'rgba(0,0,0,0.6)', border: `1px solid ${btn.color}`, color: btn.color,
-                padding: '5px 10px', borderRadius: '20px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.65rem',
-                boxShadow: `0 0 5px ${btn.color}20`, backdropFilter: 'blur(4px)',
-                width: 'fit-content'
-              }}>
-                <span style={{ fontSize: '1rem' }}>{btn.icon}</span>
-                {btn.label}
-              </button>
-            ))}
+            {/* 1. HOME */}
+            <button onClick={() => setShowLanding(true)} title="Inicio" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', transition: 'transform 0.2s', filter: 'drop-shadow(0 0 5px rgba(0,240,255,0.3))' }}>🏠</button>
+
+            {/* 2. CORE V4 */}
+            <button onClick={() => setShowOperationalDashboard(true)} title="Core V4" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', transition: 'transform 0.2s' }}>🔋</button>
+
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '2px 5px' }} />
+
+            {/* 3. VISION IA */}
+            <button onClick={() => setIsHeatmap(!isHeatmap)} title="Visión IA" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: isHeatmap ? '#A020F0' : '#ccc', transition: 'color 0.2s' }}>🧠</button>
+
+            {/* 4. MOBILE */}
+            <button onClick={openQR} title="Conectar Móvil" style={{ background: 'transparent', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: '#fff' }}>📱</button>
+
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '2px 5px' }} />
+
+            {/* 5. TOOLS */}
+            <button title="Optimize" style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#00F0FF' }}>✨</button>
+            <button title="Audit" style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#FFD700' }}>📊</button>
+            <button title="Security" style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#39FF14' }}>🛡️</button>
+
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '2px 5px' }} />
+
+            {/* 6. FIRE */}
+            <button onClick={simularDiaCritico} title="Simulacro" style={{ background: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.4)', borderRadius: '8px', fontSize: '1.4rem', cursor: 'pointer', padding: '5px' }}>🔥</button>
           </div>
         )}
 
@@ -1811,16 +1823,7 @@ function App() {
 
 
 
-        <div className="map-ui-top-left" style={{ position: 'absolute', top: '80px', left: '20px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <button className={`btn-neon ${isHeatmap ? 'active' : ''}`} onClick={() => setIsHeatmap(!isHeatmap)} style={{ borderColor: '#A020F0', color: isHeatmap ? '#fff' : '#A020F0' }}>
-            🧠 VISIÓN IA
-          </button>
 
-
-          <button className="btn-neon" onClick={openQR} style={{ borderColor: '#fff', color: '#fff', fontSize: '0.8rem' }}>
-            📱 CONECTAR MÓVIL
-          </button>
-        </div>
 
         {/* AGENTIC NAVIGATION BAR - MOVED INSIDE MAP FOR BETTER CENTERING */}
         <Suspense fallback={null}>
@@ -1841,7 +1844,7 @@ function App() {
                 </div>
               </div>
               <button title="Volver al Inicio" onClick={() => setShowLanding(true)} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(5px)', border: '1px solid #FF5722', color: '#FF5722', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🏠</button>
-              <button title="Simulacro Día Crítico" onClick={simularDiaCritico} style={{ background: 'rgba(255,0,0,0.1)', backdropFilter: 'blur(5px)', border: '1px solid red', color: 'red', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', marginLeft: '5px' }}>🔥</button>
+
             </div>
 
             {/* SEARCH BAR */}
