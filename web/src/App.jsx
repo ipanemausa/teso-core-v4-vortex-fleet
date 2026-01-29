@@ -1816,6 +1816,7 @@ function App() {
               { id: 'AGENDA', icon: '📅' },
               { id: 'FINANZAS', icon: '💰' },
               { id: 'MERCADEO', icon: '📢' },
+              { id: 'PITCH DECK', icon: '🎤', action: () => setShowPresentation(true) }, // EMERGENCY RESTORE
               { id: 'CORE V4', icon: '🔋', action: () => { setShowOperationalDashboard(true); setDashboardViewMode('CORE'); addLog('🔋 CORE V4: SISTEMA CENTRAL ACTIVADO.'); } }
             ].map(tab => (
               <button
