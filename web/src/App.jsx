@@ -3548,17 +3548,7 @@ function App() {
             </button>
           ))}
 
-          {/* VOICE INPUT BAR */}
-          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', background: '#000', borderRadius: '20px', padding: '5px 10px', border: '1px solid #39FF14' }}>
-              <span style={{ fontSize: '1.2rem' }}>🤖</span>
-              <input
-                placeholder="Consultar Operaciones..."
-                style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '0.7rem', flex: 1, marginLeft: '5px' }}
-              />
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#39FF14' }}></div>
-            </div>
-          </div>
+
         </div>
       )}
 
