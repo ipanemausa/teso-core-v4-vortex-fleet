@@ -7,3 +7,24 @@
   max-width: none !important;
   text-align: left !important;
 }
+
+/* Custom Tooltip Styles for Leaflet */
+.leaflet-tooltip.glass-tooltip {
+  background: rgba(10, 15, 30, 0.85) !important;
+  /* Dark glass */
+  border: 1px solid rgba(0, 240, 255, 0.5) !important;
+  /* Cyan border */
+  backdrop-filter: blur(10px) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2) !important;
+  font-family: 'Inter', sans-serif !important;
+  padding: 0 !important;
+  /* Reset padding to let inner div handle it */
+  overflow: hidden;
+}
+
+/* Hide default leaflet tooltip arrow */
+.leaflet-tooltip.glass-tooltip:before {
+  display: none !important;
+}
