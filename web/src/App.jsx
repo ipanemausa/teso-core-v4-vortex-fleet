@@ -3506,8 +3506,8 @@ function App() {
         <div className="glass-panel" style={{
           position: 'fixed', left: 20, top: '50%', transform: 'translateY(-50%)',
           display: 'flex', flexDirection: 'column', gap: '8px',
-          padding: '12px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)',
-          background: 'rgba(5, 10, 20, 0.6)', backdropFilter: 'blur(10px)',
+          padding: '12px', borderRadius: '16px', border: 'none',
+          background: 'transparent', // RESTORED: No Black Box
           zIndex: 1100
         }}>
           {[
