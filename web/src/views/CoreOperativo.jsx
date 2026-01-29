@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { AiTaskForce } from "./AiTaskForce";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 const DEFAULT_CARS = 15;
 const DEFAULT_TRIPS_PER_DAY = 40;
 
-export function CoreOperativo() {
+export function CoreOperativo({ onClose, onHome }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -83,7 +84,11 @@ export function CoreOperativo() {
     if (!data) return null;
 
     if (showLiveEvents) {
-        return <AiTaskForce onClose={() => setShowLiveEvents(false)} />;
+        return (
+            <ErrorBoundary>
+                <AiTaskForce onClose={() => setShowLiveEvents(false)} />
+            </ErrorBoundary>
+        );
     }
 
     const fmtMoney = (n) => `$ ${n?.toLocaleString('es-CO') || '0'}`;
@@ -124,7 +129,8 @@ export function CoreOperativo() {
 
                     <button onClick={() => setShowLiveEvents(true)} style={{ background: "rgba(255, 69, 0, 0.15)", border: "1px solid #FF4500", color: "#FF4500", padding: "6px 12px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>+ WAR ROOM</button>
 
-                    <button style={{ background: "transparent", border: "1px solid #ff4444", color: "#ff4444", padding: "6px 12px", borderRadius: "14px", fontSize: "0.75rem", fontWeight: "bold", marginLeft: "10px", cursor: "pointer" }}>X SALIR</button>
+                    <button onClick={onHome} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid #fff", color: "#fff", padding: "6px 12px", borderRadius: "14px", fontSize: "0.75rem", fontWeight: "bold", marginLeft: "10px", cursor: "pointer" }}>🏠 INICIO</button>
+                    <button onClick={onClose} style={{ background: "transparent", border: "1px solid #ff4444", color: "#ff4444", padding: "6px 12px", borderRadius: "14px", fontSize: "0.75rem", fontWeight: "bold", marginLeft: "10px", cursor: "pointer" }}>✖ SALIR (MAPA)</button>
 
                     <div style={{ marginLeft: "15px", textAlign: "right", lineHeight: "1" }}>
                         <div style={{ fontSize: "1.2rem", fontWeight: "800", color: "#00f2ff" }}>{displayRows.length.toLocaleString()}</div>

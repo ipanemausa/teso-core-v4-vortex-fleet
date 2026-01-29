@@ -370,3 +370,21 @@ body {
         /* Hide default zoom controls on mobile */
     }
 }
+
+/* NEW HEATMAP ANIMATIONS */
+.heatmap-pulse path {
+    animation: pulse-opacity 3s infinite ease-in-out;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+.heatmap-pulse-fast path {
+    animation: pulse-opacity 1s infinite ease-in-out;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+.airport-label {
+    white-space: nowrap;
+    z-index: 1000 !important;
+}

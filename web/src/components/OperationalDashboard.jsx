@@ -645,7 +645,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
             {/* VIEW MODE: CORE OPERATIVO */}
             {viewMode === 'CORE' && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 200, overflowY: 'auto' }}>
-                    <CoreOperativo />
+                    <CoreOperativo onClose={onClose} onHome={onHome} />
                 </div>
             )}
 

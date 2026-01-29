@@ -333,6 +333,7 @@ function App() {
   const [showLanding, setShowLanding] = useState(true);
   const autoAssignRef = useRef(null);
   const [showPresentation, setShowPresentation] = useState(false); // NEW: Investor Pitch Mode
+  const [activeModule, setActiveModule] = useState(null); // NEW: Full Screen Modules (Audit, Security, etc.)
   const [showGastro, setShowGastro] = useState(false); // NEW: Muncher Demo Mode
   const [showOperationalDashboard, setShowOperationalDashboard] = useState(false); // NEW: Agentic Dashboard
   const [activeTab, setActiveTab] = useState('FLOTA');
@@ -1688,7 +1689,27 @@ function App() {
               <Polyline key={r.id} positions={r.path} color={r.color} weight={3} dashArray="5, 10" />
             ))}
 
-            <Circle center={[6.20, -75.57]} radius={1500} pathOptions={{ color: '#39FF14', fillColor: '#39FF14', fillOpacity: 0.05, dashArray: '4, 8' }} />
+            {/* AIRPORTS LAYER (NEON STYLE) */}
+            <Circle center={[6.2213, -75.5906]} radius={400} pathOptions={{ color: '#00F0FF', fillColor: '#00F0FF', fillOpacity: 0.05, dashArray: '2, 5', weight: 1 }} />
+            <Marker position={[6.2213, -75.5906]} icon={new L.DivIcon({ className: 'airport-label', html: '<div style="color:#00F0FF; font-weight:bold; font-size:10px; background:rgba(0,0,0,0.6); padding:2px 5px; border-radius:4px; border:1px solid rgba(0,240,255,0.3); white-space:nowrap;">✈ EOH: OLAYA HERRERA</div>', iconSize: [120, 20], iconAnchor: [60, -10] })} />
+
+            <Circle center={[6.1644, -75.4232]} radius={600} pathOptions={{ color: '#00F0FF', fillColor: '#00F0FF', fillOpacity: 0.05, dashArray: '2, 5', weight: 1 }} />
+            <Marker position={[6.1644, -75.4232]} icon={new L.DivIcon({ className: 'airport-label', html: '<div style="color:#00F0FF; font-weight:bold; font-size:10px; background:rgba(0,0,0,0.6); padding:2px 5px; border-radius:4px; border:1px solid rgba(0,240,255,0.3); white-space:nowrap;">✈ MDE: JOSÉ MARÍA CÓRDOVA</div>', iconSize: [140, 20], iconAnchor: [70, -10] })} />
+
+            {/* VISION IA HEATMAP (INTERACTIVE PULSING LAYERS) */}
+            {isHeatmap && (
+              <>
+                {/* Zona Poblado (High Traffic) */}
+                <Circle center={[6.205, -75.567]} radius={1500} pathOptions={{ color: '#A020F0', fillColor: '#A020F0', fillOpacity: 0.1, weight: 0, className: 'heatmap-pulse' }} />
+                <Circle center={[6.205, -75.567]} radius={800} pathOptions={{ color: '#A020F0', fillColor: '#A020F0', fillOpacity: 0.2, weight: 0 }} />
+
+                {/* Zona Centro (Danger/Alert) */}
+                <Circle center={[6.250, -75.570]} radius={900} pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.1, weight: 0, className: 'heatmap-pulse-fast' }} />
+
+                {/* Zona Envigado (Medium) */}
+                <Circle center={[6.165, -75.585]} radius={1000} pathOptions={{ color: 'orange', fillColor: 'orange', fillOpacity: 0.1, weight: 0 }} />
+              </>
+            )}
 
           </MapContainer>
         </ErrorBoundary>
@@ -1703,16 +1724,16 @@ function App() {
             display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 1000
           }}>
             {[
-              { name: 'RADAR JMC', icon: '📡', action: () => addLog('📡 RADAR JMC: ESTATUS ONLINE - SEÑAL FUERTE'), color: '#39FF14', active: true },
-              { name: 'VISIÓN IA', icon: '🧠', action: () => setIsHeatmap(!isHeatmap), active: isHeatmap, color: '#A020F0' },
+              { name: 'RADAR JMC', icon: '📡', action: () => setActiveModule('RADAR'), color: '#39FF14', active: activeModule === 'RADAR' },
+              { name: 'VISIÓN IA', icon: '🧠', action: () => { setIsHeatmap(true); setActiveModule('VISION'); }, active: isHeatmap || activeModule === 'VISION', color: '#A020F0' },
               { name: 'CONECTAR MÓVIL', icon: '📱', action: openQR },
               { name: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core', '_blank') },
               { name: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true) },
               { name: 'PITCH DECK', icon: '📢', action: () => setShowPresentation(true) },
-              { name: 'OPTIMIZE', icon: '✨', action: () => addLog('✨ OPTIMIZANDO FLOTA...') },
-              { name: 'AUDIT', icon: '📊', action: () => addLog('📊 INICIANDO AUDITORÍA...') },
-              { name: 'SIMULACRO', icon: '🔥', action: simularDiaCritico, color: 'red', border: 'red' },
-              { name: 'SECURITY', icon: '🛡️', action: () => addLog('🛡️ MONITOR DE SEGURIDAD ACTIVO'), color: '#39FF14' }
+              { name: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE') },
+              { name: 'AUDIT', icon: '📊', action: () => setActiveModule('AUDIT') },
+              { name: 'SIMULACRO', icon: '🔥', action: () => { simularDiaCritico(); setActiveModule('SIMULATION'); }, color: 'red', border: 'red' },
+              { name: 'SECURITY', icon: '🛡️', action: () => setActiveModule('SECURITY'), color: '#39FF14' }
             ].map((item, index) => (
               <button
                 key={index}
@@ -1992,17 +2013,28 @@ function App() {
 
             {activeTab === 'FLOTA' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button className={`btn-neon ${isLive ? 'active' : ''}`} onClick={() => setIsLive(!isLive)}>
-                  {isLive ? '⏸ PAUSAR' : '▶ INICIAR'}
+                <button className={`btn-neon ${isLive ? 'active' : ''}`} onClick={() => {
+                  const newState = !isLive;
+                  setIsLive(newState);
+                  if (newState) {
+                    simularDiaCritico();
+                    addLog('🚀 SIMULACIÓN ACTIVA: INICIANDO SECUENCIA...', { important: true });
+                  }
+                }}>
+                  {isLive ? '⏸ PAUSAR SIMULACIÓN' : '▶ INICIAR SIMULACIÓN'}
                 </button>
-                <button className="btn-neon" onClick={autoAssign} disabled={requests.length === 0}>
+                <button className="btn-neon" onClick={() => {
+                  setActiveModule('OPTIMIZE'); // VISUALIZATION
+                  setTimeout(autoAssign, 1000); // LOGIC
+                }} disabled={requests.length === 0}>
                   ⚡ DESPACHO INTELIGENTE
                 </button>
                 {/* CORPORATE SIMULATOR CONTROLS */}
                 <div style={{ display: 'flex', gap: '5px' }}>
                   <input
+                    list="company-list"
                     type="text"
-                    placeholder="🏢 Escriba Empresa (Ej: POSTOBON)"
+                    placeholder="🏢 Seleccionar Cliente..."
                     value={corpInput}
                     onChange={(e) => setCorpInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -2013,6 +2045,15 @@ function App() {
                       padding: '8px', borderRadius: '4px'
                     }}
                   />
+                  <datalist id="company-list">
+                    {clients.map((c, i) => <option key={i} value={c.companyName} />)}
+                    <option value="BANCOLOMBIA" />
+                    <option value="ARGOS" />
+                    <option value="SURA" />
+                    <option value="NUTRESA" />
+                    <option value="ISA" />
+                    <option value="EAFIT" />
+                  </datalist>
                   <button
                     id="btnDesplegar"
                     className="btn-neon btn-alert"
@@ -3471,9 +3512,156 @@ function App() {
 
 
 
+      {/* FULL SCREEN MODULE RENDERER */}
+      {activeModule && (
+        <FullScreenModule view={activeModule} onClose={() => setActiveModule(null)} systemData={{ requests, vehicles, logs, onSimulate: simularDiaCritico }} />
+      )}
+
     </main >
   );
 }
+
+// --- NEW: FULL SCREEN MODULE COMPONENT ---
+const FullScreenModule = ({ view, onClose, systemData }) => {
+  const titles = {
+    'RADAR': '📡 CONTROL DE TRÁFICO AÉREO (RADAR)',
+    'VISION': '🧠 VISIÓN ARTIFICIAL (ANÁLISIS DE CALOR)',
+    'OPTIMIZE': '✨ OPTIMIZACIÓN DE FLOTA (AI)',
+    'AUDIT': '📊 AUDITORÍA OPERATIVA EN TIEMPO REAL',
+    'SIMULATION': '🔥 SIMULACIÓN DE CRISIS (CONTROL)',
+    'SECURITY': '🛡️ CENTRO DE COMANDO DE SEGURIDAD'
+  };
+
+  const getModuleContent = () => {
+    switch (view) {
+      case 'AUDIT':
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="glass-panel" style={{ padding: '20px' }}>
+              <h3>REGISTRO DE OPERACIONES</h3>
+              {systemData.requests.map(r => (
+                <div key={r.id} style={{ borderBottom: '1px solid #333', padding: '10px 0', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{r.id}</span>
+                  <span style={{ color: r.status === 'assigned' ? '#39FF14' : 'orange' }}>{r.status}</span>
+                </div>
+              ))}
+            </div>
+            <div className="glass-panel" style={{ padding: '20px' }}>
+              <h3>MÉTRICAS DE RENDIMIENTO</h3>
+              <div style={{ fontSize: '2rem', color: '#00F0FF' }}>98.5% <span style={{ fontSize: '1rem', color: '#888' }}>EFICIENCIA</span></div>
+            </div>
+          </div>
+        );
+      case 'SECURITY':
+        return (
+          <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <div style={{ fontSize: '4rem' }}>🛡️</div>
+            <h2>SISTEMA DE MONITOREO ACTIVO</h2>
+            <p>Todas las unidades están reportando telemetría segura.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '30px' }}>
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} style={{ background: '#000', height: '100px', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>CAM FEED {i} (OFFLINE)</div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'VISION':
+        return (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ marginBottom: '30px', color: '#A020F0', fontSize: '1.2rem' }}>CAPAS TÉRMICAS VISUALIZADAS EN MAPA</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+              <div className="glass-panel" style={{ padding: '20px', border: '1px solid #A020F0' }}>
+                <div style={{ fontSize: '2rem' }}>🔥 POBLADO</div>
+                <div style={{ color: '#aaa' }}>ALTA DENSIDAD</div>
+              </div>
+              <div className="glass-panel" style={{ padding: '20px', border: '1px solid #A020F0' }}>
+                <div style={{ fontSize: '2rem' }}>❄️ RIONEGRO</div>
+                <div style={{ color: '#aaa' }}>TRÁFICO FLUIDO</div>
+              </div>
+              <div className="glass-panel" style={{ padding: '20px', border: '1px solid #A020F0' }}>
+                <div style={{ fontSize: '2rem' }}>⚠️ CENTRO</div>
+                <div style={{ color: 'orange' }}>CONGESTIÓN MEDIA</div>
+              </div>
+            </div>
+            <button className="btn-neon" onClick={onClose} style={{ marginTop: '40px', borderColor: '#A020F0', color: '#A020F0' }}>VOLVER AL MAPA</button>
+          </div>
+        );
+      case 'SIMULATION':
+        return (
+          <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{ border: '1px solid red', padding: '20px', background: 'rgba(255,0,0,0.1)', marginBottom: '30px' }}>
+              <h2 style={{ color: 'red', margin: 0 }}>⚠️ ZONA DE CONTROL DE CATÁSTROFES</h2>
+              <p style={{ color: '#aaa' }}>Este módulo permite simular escenarios de alta demanda y fallos operativos para entrenar al sistema.</p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <button className="btn-neon" onClick={() => { onClose(); systemData.onSimulate?.(); }} style={{ height: '150px', fontSize: '1.5rem', borderColor: 'red', color: 'red' }}>
+                🔥 SIMULAR DÍA CRÍTICO
+                <div style={{ fontSize: '0.8rem', marginTop: '10px' }}>(Lluvias + Alta Demanda)</div>
+              </button>
+              <button className="btn-neon" style={{ height: '150px', fontSize: '1.5rem', borderColor: 'orange', color: 'orange' }}>
+                🌧️ SIMULAR CLIMA SEVERO
+                <div style={{ fontSize: '0.8rem', marginTop: '10px' }}>(Retrasos en Vuelos)</div>
+              </button>
+            </div>
+          </div>
+        );
+      case 'RADAR':
+        return (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3>VUELOS EN SEGUIMIENTO ({systemData.vehicles?.filter(v => v.type === 'plane').length || 0})</h3>
+              <button className="btn-neon">ACTUALIZAR DATOS</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
+              <div className="glass-panel" style={{ padding: '15px', color: '#00F0FF' }}>
+                <strong>LA890</strong> - LIMA <br />
+                <span style={{ color: '#aaa' }}>Alt: 24,000ft | ETA: 15min</span>
+              </div>
+              <div className="glass-panel" style={{ padding: '15px', color: '#00F0FF' }}>
+                <strong>AV9322</strong> - BOGOTA <br />
+                <span style={{ color: '#aaa' }}>Alt: 18,500ft | ETA: 8min</span>
+              </div>
+              <div className="glass-panel" style={{ padding: '15px', color: '#00F0FF' }}>
+                <strong>AA1123</strong> - MIAMI <br />
+                <span style={{ color: '#aaa' }}>Alt: 32,000ft | ETA: 45min</span>
+              </div>
+            </div>
+          </div>
+        );
+      case 'OPTIMIZE':
+        return (
+          <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '20px' }}>✨</div>
+            <h2>OPTIMIZADOR DE FLOTA (AI)</h2>
+            <p>Analizando patrones de ruta y consumo de combustible...</p>
+            <div style={{ width: '100%', height: '10px', background: '#333', borderRadius: '5px', marginTop: '20px', overflow: 'hidden' }}>
+              <div style={{ width: '60%', height: '100%', background: '#00F0FF' }}></div>
+            </div>
+            <p style={{ color: '#00F0FF', marginTop: '10px' }}>EFICIENCIA ACTUAL: 87%</p>
+          </div>
+        );
+      default:
+        return <div style={{ padding: '50px', textAlign: 'center', color: '#888' }}>MÓDULO {view} EN CONSTRUCCIÓN...</div>;
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+      background: 'rgba(5, 10, 20, 0.95)', zIndex: 10000,
+      display: 'flex', flexDirection: 'column', backdropFilter: 'blur(20px)'
+    }}>
+      <div style={{ padding: '20px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0, color: '#00F0FF' }}>{titles[view] || view}</h2>
+        <button onClick={onClose} style={{ background: 'transparent', border: '1px solid red', color: 'red', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '1.2rem' }}>✖</button>
+      </div>
+      <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+        {getModuleContent()}
+      </div>
+    </div>
+  );
+};
 
 const SocialImpactPanel = () => {
   const [taxes, setTaxes] = useState(0);
