@@ -332,36 +332,40 @@ def optimize_routes_decision():
         "timestamp": datetime.now().isoformat()
     }
 
-@app.post("/api/decisions/financial-audit", response_model=DecisionResponse)
+# --- IMPORT AGENTS ---
+from agents.financial_agent import FinancialAgent
+
+# Initialize Agents
+fin_agent = FinancialAgent()
+
+@app.post("/api/decisions/financial-audit")
 def financial_audit_decision():
     """
-    Real-time Financial Health Check.
-    Analyzes current simulation cache for insolvency risks.
+    AGENTIC ENDPOINT: VORTEX_FINANCIAL_AUDITOR
+    Uses the FinancialAgent (Learning Heroes Framework) to analyze the live simulation state.
     """
-    json_data = GLOBAL_CACHE["json_data"]
-    balance = 0
-    if json_data and "banks" in json_data and len(json_data["banks"]) > 0:
-        balance = json_data["banks"][0].get("SALDO_ACTUAL", 0)
-        
-    health_score = 100.0
-    verdict = "HEALTHY"
+    print(f"🤖 AGENT ACTIVATION: {fin_agent.identity['rol']}...")
     
-    if balance < 0:
-        health_score = 10.0
-        verdict = "CRITICAL_INSOLVENCY"
-    elif balance < 5000000:
-        health_score = 45.0
-        verdict = "LOW_LIQUIDITY"
-        
+    # 1. Get Live Data (Context)
+    simulation_state = GLOBAL_CACHE.get("json_data", {})
+    
+    # 2. Agent Reasoning (The 5-Step Process)
+    audit_result = fin_agent.run_audit(simulation_state)
+    
+    # 3. Adaptation for Frontend (Legacy Support + New Insights)
+    # We map the Agent's sophisticated output slightly to ensure the frontend displays it correctly
+    # while preserving the rich metadata.
+    
     return {
-        "decision_id": f"AUD-{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}",
-        "score": health_score,
-        "verdict": verdict,
+        "decision_id": audit_result["meta"]["decision_id"],
+        "score": audit_result["executive_summary"]["score"],
+        "verdict": audit_result["executive_summary"]["headline"], # "Estado Financiero: OPTIMAL"
         "details": {
-            "current_balance": balance,
-            "action_required": "IMMEDIATE_FUNDING" if balance < 0 else "NONE"
+            "current_balance": audit_result["financial_context"]["current_cash_cop"],
+            "action_required": audit_result["strategic_advice"]["action_item"],
+            "agent_analysis": audit_result
         },
-        "timestamp": datetime.now().isoformat()
+        "timestamp": audit_result["meta"]["timestamp"]
     }
 
 @app.post("/api/decisions/security-scan", response_model=DecisionResponse)
