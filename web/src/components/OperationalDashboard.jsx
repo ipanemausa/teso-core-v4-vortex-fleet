@@ -1420,6 +1420,76 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                                     </button>
                                 </div>
 
+                                {/* AGENT COMMAND CENTER (PERPLEXITY STYLE) */}
+                                <div style={{
+                                    background: '#0f172a',
+                                    border: '1px solid #334155',
+                                    borderRadius: '8px',
+                                    padding: '15px',
+                                    marginTop: '20px',
+                                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                                }}>
+                                    <div style={{ color: '#39FF14', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        🤖 VORTEX AGENT COMMAND
+                                        <span style={{ fontSize: '0.6rem', background: '#334155', padding: '2px 6px', borderRadius: '4px', color: '#cbd5e1' }}>BETA: VOICE ENABLED</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Ej: 'Auditar finanzas', 'Revisar flota retrasada'..."
+                                        onKeyDown={async (e) => {
+                                            if (e.key === 'Enter') {
+                                                const cmd = e.target.value;
+                                                e.target.value = "Pensando...";
+                                                e.target.disabled = true;
+
+                                                try {
+                                                    const res = await fetch('https://teso-api-dev.fly.dev/api/agently/command', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ intent: cmd })
+                                                    });
+                                                    const data = await res.json();
+
+                                                    // Trigger Voice from Orchestrator Synthesis
+                                                    if (data.synthesis?.voice_script) {
+                                                        speakAgentMessage(data.synthesis.voice_script);
+                                                    }
+
+                                                    // Update UI if audit returned
+                                                    if (data.results?.finance) {
+                                                        // Update visualization (mock update via details prop pattern)
+                                                        // Ideally we merge this into simulationData, but for now voice is key.
+                                                    }
+
+                                                } catch (err) {
+                                                    console.error("Agent CMD Error:", err);
+                                                    speakAgentMessage("Error de conexión con el Orquestador.");
+                                                } finally {
+                                                    e.target.value = "";
+                                                    e.target.disabled = false;
+                                                    e.target.focus();
+                                                }
+                                            }
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            background: '#1e293b',
+                                            border: '1px solid #475569',
+                                            color: '#fff',
+                                            padding: '10px',
+                                            borderRadius: '6px',
+                                            outline: 'none',
+                                            fontSize: '0.9rem',
+                                            fontFamily: 'monospace'
+                                        }}
+                                        onMouseOver={e => e.target.style.borderColor = '#39FF14'}
+                                        onMouseOut={e => e.target.style.borderColor = '#475569'}
+                                    />
+                                    <div style={{ marginTop: '8px', fontSize: '0.7rem', color: '#64748b' }}>
+                                        Try: <i>"Auditoría global"</i>, <i>"Alerta de tráfico"</i>
+                                    </div>
+                                </div>
+
                                 {/* SHEET TABS (RESTORED) */}
                                 <div style={{ display: 'flex', gap: '5px', padding: '0 15px', background: '#1e293b', borderBottom: '1px solid #334155' }}>
                                     {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (

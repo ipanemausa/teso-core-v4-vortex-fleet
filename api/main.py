@@ -335,13 +335,45 @@ def optimize_routes_decision():
 # --- IMPORT AGENTS ---
 from agents.financial_agent import FinancialAgent
 from agents.logistics_agent import LogisticsAgent
+from agents.orchestrator import OrchestratorAgent
 
 # Initialize Agents
 fin_agent = FinancialAgent()
 log_agent = LogisticsAgent()
+orchestrator = OrchestratorAgent()
+
+@app.post("/api/agently/command")
+def unified_agent_command(command_payload: dict):
+    """
+    PERPLEXITY-STYLE ORCHESTRATOR ENDPOINT
+    Unified entry point for all agent interactions.
+    Payload: { "intent": "AUDIT_ALL" | "CHECK_CASH", "context": {} }
+    """
+    intent = command_payload.get("intent", "GLOBAL_AUDIT")
+    print(f"🧠 ORCHESTRATOR: Processing intent '{intent}'...")
+    
+    simulation_state = GLOBAL_CACHE.get("json_data", {})
+    
+    # Delegate to the Orchestrator Brain
+    response = orchestrator.route_request(intent, simulation_state)
+    
+    # Check for autonomous triggers while we are at it
+    triggers = orchestrator.check_triggers(simulation_state)
+    if triggers:
+        response["autonomous_triggers"] = triggers
+        
+    return response
 
 @app.post("/api/decisions/financial-audit")
 def financial_audit_decision():
+    """
+    LEGACY ENDPOINT (Kept for backward compatibility, internally uses Agent)
+    """
+    # ... (rest of function remains same, acting as wrapper)
+    simulation_state = GLOBAL_CACHE.get("json_data", {})
+    return fin_agent.run_audit(simulation_state) # Direct call for specific endpoint
+    
+# ... (Logistics endpoint logic preserved similarly)
     """
     AGENTIC ENDPOINT: VORTEX_FINANCIAL_AUDITOR
     Uses the FinancialAgent (Learning Heroes Framework) to analyze the live simulation state.
