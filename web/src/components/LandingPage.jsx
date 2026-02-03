@@ -96,51 +96,50 @@ export default function LandingPage({ onEnter }) {
                 }
             `}</style>
 
-            {/* --- BACKGROUND LAYERS --- */}
+            {/* --- CYBERPUNK DYNAMIC BACKGROUND (CODE ONLY - NO IMAGES) --- */}
 
-            {/* Dark Overlay */}
+            {/* 1. Deep Space Base */}
             <div style={{
                 position: 'absolute', inset: 0,
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)',
-                zIndex: 1
+                background: 'radial-gradient(circle at center top, #1a0b2e 0%, #000000 80%)',
+                zIndex: 0
             }} />
 
-            {/* Scanline Effect */}
+            {/* 2. Moving 3D Grid (The "Runway" Feel) */}
             <div style={{
                 position: 'absolute', inset: 0,
-                background: 'linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.05), transparent)',
-                zIndex: 2,
-                animation: 'scanline 8s linear infinite',
-                pointerEvents: 'none'
-            }} />
-
-            {/* City Lights Glitter Layer - Enhanced with Flicker and Height */}
-            <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}>
-                {[...Array(40)].map((_, i) => (
-                    <div key={i} style={{
-                        position: 'absolute',
-                        left: `${Math.random() * 100}%`,
-                        // Allow some lights to go higher (30%+) to simulate tall buildings
-                        top: `${30 + Math.random() * 70}%`,
-                        width: `${Math.random() * 4}px`,
-                        height: `${Math.random() * 4}px`,
-                        background: i % 4 === 0 ? '#ffffff' : i % 3 === 0 ? '#ff00ff' : i % 3 === 1 ? '#00f2ff' : '#ffd700',
-                        borderRadius: '50%',
-                        boxShadow: `0 0 ${Math.random() * 5 + 2}px ${i % 4 === 0 ? '#ffffff' : i % 3 === 0 ? '#ff00ff' : i % 3 === 1 ? '#00f2ff' : '#ffd700'}`,
-                        // Mix 'twinkle' and 'flicker' for variety
-                        animation: `${i % 2 === 0 ? 'twinkle' : 'flicker'} ${1 + Math.random() * 4}s infinite ${Math.random() * 5}s`
-                    }} />
-                ))}
+                perspective: '1000px',
+                overflow: 'hidden',
+                zIndex: 0
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: '0', left: '-50%', right: '-50%', bottom: '0',
+                    background: `
+                        linear-gradient(rgba(0, 242, 255, 0.3) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 242, 255, 0.3) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '100px 100px, 100px 100px',
+                    transform: 'rotateX(60deg)',
+                    transformOrigin: 'top center',
+                    animation: 'gridMove 10s linear infinite',
+                    boxShadow: '0 0 100px rgba(0, 242, 255, 0.2) inset'
+                }} />
             </div>
 
-            {/* Spinning Background Grid */}
+            {/* 3. Horizon Glow */}
             <div style={{
-                position: 'absolute',
-                top: '-50%', left: '-50%', width: '200%', height: '200%',
-                background: 'radial-gradient(circle, rgba(0,242,255,0.03) 0%, transparent 60%)',
-                animation: 'spin 120s linear infinite',
+                position: 'absolute', top: '0', left: '0', right: '0', height: '60%',
+                background: 'linear-gradient(to bottom, #000000 0%, transparent 100%)',
                 zIndex: 1
             }} />
+
+            <style>{`
+                @keyframes gridMove {
+                    0% { background-position: 0 0; }
+                    100% { background-position: 0 100px; }
+                }
+            `}</style>
 
             {/* --- LEFT NAVIGATION BAR (The "Barra que permite navegar") --- */}
             <div style={{
