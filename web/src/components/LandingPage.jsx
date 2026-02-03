@@ -2,7 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import UserRegistration from './onboarding/UserRegistration';
 import DriverRegistration from './onboarding/DriverRegistration';
 
-import landingBg from '../assets/landing_bg.png';
+// import landingBg from '../assets/landing_bg.png'; // REMOVED: Using CSS Gradient for stability
 
 export default function LandingPage({ onEnter }) {
     const [isEntering, setIsEntering] = useState(false);
@@ -46,7 +46,8 @@ export default function LandingPage({ onEnter }) {
         <div style={{
             width: '100vw',
             minHeight: '100vh', // Ensuring full height but allowing scroll
-            backgroundImage: `url(${landingBg})`,
+            // backgroundImage: `url(${landingBg})`, // REMOVED
+            background: 'radial-gradient(circle at center, #1a2a3a 0%, #000000 100%)', // CYBERPUNK CSS FALLBACK
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed', // Fix background during scroll
