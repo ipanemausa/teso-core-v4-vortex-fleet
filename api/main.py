@@ -334,9 +334,11 @@ def optimize_routes_decision():
 
 # --- IMPORT AGENTS ---
 from agents.financial_agent import FinancialAgent
+from agents.logistics_agent import LogisticsAgent
 
 # Initialize Agents
 fin_agent = FinancialAgent()
+log_agent = LogisticsAgent()
 
 @app.post("/api/decisions/financial-audit")
 def financial_audit_decision():
@@ -352,20 +354,34 @@ def financial_audit_decision():
     # 2. Agent Reasoning (The 5-Step Process)
     audit_result = fin_agent.run_audit(simulation_state)
     
-    # 3. Adaptation for Frontend (Legacy Support + New Insights)
-    # We map the Agent's sophisticated output slightly to ensure the frontend displays it correctly
-    # while preserving the rich metadata.
-    
+    # 3. Adaptation for Frontend
     return {
         "decision_id": audit_result["meta"]["decision_id"],
         "score": audit_result["executive_summary"]["score"],
-        "verdict": audit_result["executive_summary"]["headline"], # "Estado Financiero: OPTIMAL"
+        "verdict": audit_result["executive_summary"]["headline"], 
         "details": {
             "current_balance": audit_result["financial_context"]["current_cash_cop"],
             "action_required": audit_result["strategic_advice"]["action_item"],
             "agent_analysis": audit_result
         },
         "timestamp": audit_result["meta"]["timestamp"]
+    }
+
+@app.post("/api/decisions/logistics-dispatch")
+def logistics_dispatch_decision():
+    """
+    AGENTIC ENDPOINT: VORTEX_LOGISTICS_DISPATCHER
+    Uses the LogisticsAgent to optimize fleet operations.
+    """
+    print(f"🚚 AGENT ACTIVATION: {log_agent.identity['rol']}...")
+    
+    simulation_state = GLOBAL_CACHE.get("json_data", {})
+    dispatch_result = log_agent.run_dispatch_analysis(simulation_state)
+    
+    return {
+        "decision_id": dispatch_result["meta"]["decision_id"],
+        "status": "OK",
+        "analysis": dispatch_result
     }
 
 @app.post("/api/decisions/security-scan", response_model=DecisionResponse)
