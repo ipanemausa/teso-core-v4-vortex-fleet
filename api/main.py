@@ -45,8 +45,13 @@ GLOBAL_CACHE = {
 # PERSISTENCE LAYER
 PERSISTENCE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "persistence")
 DATA_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+import asyncio # Auto-Import for Background Loops
+
 os.makedirs(PERSISTENCE_DIR, exist_ok=True)
 os.makedirs(DATA_ROOT, exist_ok=True)
+
+# --- GLOBAL ALERTS (AUTONOMOUS MEMORY) ---
+GLOBAL_ALERTS = []
 
 SIM_JSON_PATH = os.path.join(PERSISTENCE_DIR, "latest_simulation.json")
 # STRICT MASTER PROTOCOL: Excel persistence is the VIVO dataset
@@ -163,15 +168,40 @@ def get_simulation_data():
         
     return GLOBAL_CACHE["json_data"]
 
-@app.on_event("startup")
-def load_cache_on_startup():
+# --- BACKGROUND MONITORING (AUTONOMY) ---
+async def monitoring_loop():
     """
-    AUTO-BOOTSTRAP PROTOCOL:
-    If no persistence is found, the Simulation Agent autonomously generates 
-    the first batch of V4 Data to ensure the system is never empty.
+    INDUSTRIAL MONITORING SYSTEM:
+    Runs continuously in the background to detect deviations in real-time (Lead Time = 60s).
+    """
+    print("⚙️ MONITOR: Inicializando ciclo de control autónomo...")
+    while True:
+        try:
+            await asyncio.sleep(60) # Intervalo de Control (1 min)
+            
+            if GLOBAL_CACHE["json_data"]:
+                # Silent check
+                triggers = orchestrator.check_triggers(GLOBAL_CACHE["json_data"])
+                
+                if triggers:
+                    for t in triggers:
+                        timestamp = datetime.now().isoformat()
+                        t['timestamp'] = timestamp
+                        GLOBAL_ALERTS.insert(0, t) # Newest first
+                        if len(GLOBAL_ALERTS) > 50: GLOBAL_ALERTS.pop()
+                            
+                    print(f"🚨 MONITOR: {len(triggers)} Alertas generadas.")
+        except Exception as e:
+            print(f"❌ MONITOR ERROR: {e}")
+            await asyncio.sleep(10)
+
+@app.on_event("startup")
+async def load_cache_on_startup():
+    """
+    AUTO-BOOTSTRAP PROTOCOL & AUTONOMOUS LOOP START
     """
     j_data, x_bytes = load_simulation_state()
-    
+
     if j_data and x_bytes:
         GLOBAL_CACHE["json_data"] = j_data
         GLOBAL_CACHE["excel_bytes"] = x_bytes
@@ -181,8 +211,11 @@ def load_cache_on_startup():
         print("⚠️ SYSTEM EMPTY: No previous context found on disk.")
         print("🤖 AGENT ACTIVATION: Generating autonomous dataset (360 Days)...")
         # RUN AUTONOMOUS GENERATION
-        run_simulation(days=360) 
+        run_simulation(days=360)
         print("🚀 VORTEX ENGINE: System Bootstrapped & Ready.")
+        
+    # START AUTONOMOUS LOOP
+    asyncio.create_task(monitoring_loop())
 
 @app.get("/api/simulation/export")
 def download_excel():
@@ -363,6 +396,13 @@ def unified_agent_command(command_payload: dict):
         response["autonomous_triggers"] = triggers
         
     return response
+
+@app.get("/api/agently/alerts")
+def get_autonomous_alerts():
+    """
+    Endpoint for Frontend to poll mostly recent autonomous alerts.
+    """
+    return GLOBAL_ALERTS[:5]
 
 @app.post("/api/decisions/financial-audit")
 def financial_audit_decision():

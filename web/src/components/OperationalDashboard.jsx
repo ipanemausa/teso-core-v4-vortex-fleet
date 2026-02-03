@@ -86,6 +86,43 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
         }
     }, [propSimulationData]);
 
+    // --- AUTONOMOUS MONITOR POLLING (INDUSTRIAL EFFICIENCY) ---
+    useEffect(() => {
+        const lastAlertRef = { current: null }; // volatile memory for last alert time
+
+        const pollAlerts = async () => {
+            try {
+                // Poll backend for background alerts
+                const res = await fetch('https://teso-api-dev.fly.dev/api/agently/alerts');
+                if (!res.ok) return;
+
+                const alerts = await res.json();
+                if (alerts.length > 0) {
+                    const latest = alerts[0]; // Newest first
+
+                    // Check if it's new
+                    if (latest.timestamp !== lastAlertRef.current) {
+                        lastAlertRef.current = latest.timestamp;
+                        console.log("🚨 NEW AUTONOMOUS ALERT:", latest);
+
+                        // Extract voice script from the alert payload
+                        // Structure depends on how trigger stored it. 
+                        // Trigger puts the full 'audit' object in data.
+                        if (latest.data && latest.data.analysis) {
+                            const script = `Alerta Autónoma. ${latest.data.analysis.message}`;
+                            speakAgentMessage(script);
+                        }
+                    }
+                }
+            } catch (e) {
+                // Silent fail on polling to not spam console
+            }
+        };
+
+        const interval = setInterval(pollAlerts, 30000); // Check every 30s
+        return () => clearInterval(interval);
+    }, []);
+
     // FIX: Sync Prop to State (React Pattern for Derived State)
     useEffect(() => {
         if (propSimulationData) {
