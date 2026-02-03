@@ -165,17 +165,24 @@ def get_simulation_data():
 
 @app.on_event("startup")
 def load_cache_on_startup():
-    """Try to load disk persistence into memory on startup"""
+    """
+    AUTO-BOOTSTRAP PROTOCOL:
+    If no persistence is found, the Simulation Agent autonomously generates 
+    the first batch of V4 Data to ensure the system is never empty.
+    """
     j_data, x_bytes = load_simulation_state()
+    
     if j_data and x_bytes:
         GLOBAL_CACHE["json_data"] = j_data
         GLOBAL_CACHE["excel_bytes"] = x_bytes
         GLOBAL_CACHE["last_updated"] = "RESTORED_FROM_DISK"
-        print("✅ SYSTEM RESTORED: Previous simulation loaded.")
+        print("✅ SYSTEM RESTORED: Previous context loaded from disk.")
     else:
-        print("ℹ️ SYSTEM CLEAN: No previous simulation found. 🔥 IGNITING VORTEX ENGINE...")
-        run_simulation(days=360) # Force initial generation
-        print("🚀 VORTEX ENGINE: Initial Simulation Complete.")
+        print("⚠️ SYSTEM EMPTY: No previous context found on disk.")
+        print("🤖 AGENT ACTIVATION: Generating autonomous dataset (360 Days)...")
+        # RUN AUTONOMOUS GENERATION
+        run_simulation(days=360) 
+        print("🚀 VORTEX ENGINE: System Bootstrapped & Ready.")
 
 @app.get("/api/simulation/export")
 def download_excel():
