@@ -1,10 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import UserRegistration from './onboarding/UserRegistration';
+import DriverRegistration from './onboarding/DriverRegistration';
 
 import landingBg from '../assets/landing_bg.png';
 
 export default function LandingPage({ onEnter }) {
     const [isEntering, setIsEntering] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [registrationMode, setRegistrationMode] = useState(null); // 'user' | 'driver' | null
+
+    const handleRegistrationComplete = (data) => {
+        setRegistrationMode(null);
+        // Auto-login after registration
+        // Pass user data up to App.jsx via onEnter if supported, or just enter for now
+        // For demo purposes, we treat it as valid entry
+        const roleParam = data.role === 'driver' ? 'driver' : 'client';
+
+        // Update URL to reflect role without reload (simulated navigation)
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('role', roleParam);
+        window.history.pushState({}, '', newUrl);
+
+        handleEnter();
+    };
 
     // Automatic entry effect (The "Wow" factor)
     useEffect(() => {
@@ -366,11 +384,12 @@ export default function LandingPage({ onEnter }) {
                 transition: 'all 1s ease-out 0.6s'
             }}>
 
+                {/* MAIN LOGIN (ADMIN/EXISTING) */}
                 <button
                     onClick={handleEnter}
                     disabled={isEntering}
                     style={{
-                        background: isEntering ? 'transparent' : 'rgba(0, 0, 0, 0.3)', // Darker backing
+                        background: isEntering ? 'transparent' : 'rgba(0, 0, 0, 0.5)',
                         border: '1px solid #00f2ff',
                         color: isEntering ? 'transparent' : '#00f2ff',
                         padding: '18px 60px',
@@ -396,7 +415,7 @@ export default function LandingPage({ onEnter }) {
                     }}
                     onMouseLeave={(e) => {
                         if (!isEntering) {
-                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.3)';
+                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.5)';
                             e.currentTarget.style.color = '#00f2ff';
                             e.currentTarget.style.boxShadow = 'none';
                         }
@@ -414,10 +433,54 @@ export default function LandingPage({ onEnter }) {
                     )}
                 </button>
 
+                {/* REGISTRATION OPTIONS */}
+                {!isEntering && (
+                    <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                        <button
+                            onClick={() => setRegistrationMode('user')}
+                            style={{
+                                background: 'transparent', border: '1px solid #ffd700', color: '#ffd700',
+                                padding: '10px 20px', cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '1px',
+                                fontSize: '0.8rem', transition: 'all 0.3s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.boxShadow = '0 0 10px #ffd700'}
+                            onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
+                        >
+                            Soy Pasajero
+                        </button>
+                        <button
+                            onClick={() => setRegistrationMode('driver')}
+                            style={{
+                                background: 'transparent', border: '1px solid #39FF14', color: '#39FF14',
+                                padding: '10px 20px', cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '1px',
+                                fontSize: '0.8rem', transition: 'all 0.3s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.boxShadow = '0 0 10px #39FF14'}
+                            onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
+                        >
+                            Soy Conductor
+                        </button>
+                    </div>
+                )}
+
                 <div style={{ fontSize: '0.7rem', color: '#555', letterSpacing: '1px' }}>
                     SECURE CONNECTION v4.1.5 | MEDELLÍN
                 </div>
             </div>
+
+            {/* --- MODALS --- */}
+            {registrationMode === 'user' && (
+                <UserRegistration
+                    onComplete={handleRegistrationComplete}
+                    onCancel={() => setRegistrationMode(null)}
+                />
+            )}
+            {registrationMode === 'driver' && (
+                <DriverRegistration
+                    onComplete={handleRegistrationComplete}
+                    onCancel={() => setRegistrationMode(null)}
+                />
+            )}
 
             {/* --- KEYFRAMES --- */}
             <style>{`

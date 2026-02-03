@@ -18,6 +18,8 @@ const Presentation = lazy(() => import('./components/Presentation'));
 // const GastroDashboard = lazy(() => import('./components/GastroDashboard'));
 const OperationalDashboard = lazy(() => import('./components/OperationalDashboard'));
 // const LogisticsDashboard = lazy(() => import('./components/LogisticsDashboard'));
+const ClientDashboard = lazy(() => import('./components/ClientDashboard'));
+const DriverDashboard = lazy(() => import('./components/DriverDashboard'));
 // import { CoreOperativo } from './views/CoreOperativo'; // Removed to prevent conflict, handled in child
 
 
@@ -686,7 +688,47 @@ function App() {
   if (showLanding) {
     return (
       <Suspense fallback={<div style={{ height: '100vh', width: '100vw', background: '#000', color: '#39FF14', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace' }}><h1>TESO OS v3.0 (VORTEX)</h1><p>INITIALIZING NEURAL CORE...</p></div>}>
-        <LandingPage onEnter={() => { setShowOperationalDashboard(false); setShowLanding(false); }} />
+        <LandingPage onEnter={(role) => {
+          if (role) setUserRole(role);
+          setShowOperationalDashboard(false);
+          setShowLanding(false);
+        }} />
+      </Suspense>
+    );
+  }
+
+  // --- SECURITY: ROLE BASED ROUTING ---
+  // If we passed the Landing Page, strict routing applies.
+  if (!showLanding) {
+    if (userRole === 'driver') {
+      return (
+        <Suspense fallback={<div style={{ color: '#39FF14' }}>Cargando Panel de Conductor...</div>}>
+          <DriverDashboard />
+        </Suspense>
+      );
+    }
+
+    if (userRole === 'client') {
+      return (
+        <Suspense fallback={<div style={{ color: 'gold' }}>Cargando Servicio VIP...</div>}>
+          <ClientDashboard />
+        </Suspense>
+      );
+    }
+
+    // Default Fallback: ADMIN / CONTROLLER (OperationalDashboard)
+    return (
+      <Suspense fallback={<div style={{ color: '#00f2ff' }}>Cargando Centro de Operaciones...</div>}>
+        <OperationalDashboard
+          planes={planes}
+          vehicles={vehicles}
+          requests={requests}
+          isHeatmap={isHeatmap}
+          activeTab={activeTab}
+          isScanning={isScanning}
+          activeRequestId={activeRequestId}
+          setRequests={setRequests} // Pass setter for interactions
+        />
       </Suspense>
     );
   }
