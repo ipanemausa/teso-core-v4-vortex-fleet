@@ -109,6 +109,7 @@ class FinancialAgent:
                 "current_cash_cop": metrics["current_balance"],
                 "status": "Solvente" if not metrics["insolvency_risk"] else "Insolvente"
             },
+            "voice_script": f"Atención Gerencia. Auditoría finalizada. El estado financiero es {analysis['verdict']}. {analysis['recommendation']} Mi nivel de confianza es del {int(analysis['score'])} por ciento.",
             "strategic_advice": {
                 "action_item": analysis["recommendation"],
                 "urgency": "ALTA" if analysis["score"] < 50 else "BAJA"

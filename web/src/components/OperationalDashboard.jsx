@@ -43,6 +43,48 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
     const [simulationData, setSimulationData] = useState(propSimulationData || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [voiceEnabled, setVoiceEnabled] = useState(true); // Default ON for demo
+
+    // --- VOICE SYNTHESIS BETA (BROWSER NATIVE) ---
+    const speakAgentMessage = (text) => {
+        if (!voiceEnabled || !window.speechSynthesis) return;
+
+        // Stop current speech
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-CO'; // Colombian Spanish ideally
+        utterance.rate = 1.1; // Slightly faster/executive pace
+        utterance.pitch = 1.0;
+
+        // Try to find a good Spanish voice
+        const voices = window.speechSynthesis.getVoices();
+        const esVoice = voices.find(v => v.lang.includes('es'));
+        if (esVoice) utterance.voice = esVoice;
+
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // --- AUTO-SPEAK AGENT ALERTS ---
+    useEffect(() => {
+        if (!propSimulationData) return;
+
+        let script = null;
+
+        // 1. Check for Financial Agent Script
+        if (propSimulationData.details?.agent_analysis?.voice_script) {
+            script = propSimulationData.details.agent_analysis.voice_script;
+        }
+        // 2. Check for Logistics Agent Script
+        else if (propSimulationData.analysis?.voice_script) {
+            script = propSimulationData.analysis.voice_script;
+        }
+
+        if (script) {
+            console.log("🗣️ AGENT SPEAKING:", script);
+            speakAgentMessage(script);
+        }
+    }, [propSimulationData]);
 
     // FIX: Sync Prop to State (React Pattern for Derived State)
     useEffect(() => {

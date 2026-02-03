@@ -102,6 +102,7 @@ class LogisticsAgent:
                 "saturation": f"{metrics['saturation_percentage']}%",
                 "active_fleet": f"{metrics['active_units']}/45"
             },
+            "voice_script": f"Reporte de Flota. Estado: {analysis['verdict']}. Saturación al {int(metrics['saturation_percentage'])} por ciento. {metrics['delayed_services']} unidades reportan retraso. {analysis['recommendation']}",
             "alerts": {
                 "delayed_services": metrics["delayed_units"],
                 "level": analysis["priority"]
