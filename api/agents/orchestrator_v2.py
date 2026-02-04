@@ -4,20 +4,22 @@ from services.voice_system import VoiceSystem
 
 # Importar los Expertos del Dominio (Sub-Agentes)
 # En una arquitectura real, estos serían microservicios o clases separadas
-from agents.financial_agent import FinancialAgent
-from agents.logistics_agent import LogisticsAgent
-from agents.design_agent import DesignDirectorAgent
+from agents.agency_protocol import VORTEX_BUS
 
 class StrategicOrchestrator:
     """
     ROL: CEO / DIRECTOR GENERAL (Orquestador de Orquestadores)
     MISIÓN: Alinear Planificación, Organización, Dirección y Control.
-    MODELO: Henry Fayol's Administrative Theory + AI Agency
+    MODELO: Henry Fayol's Administrative Theory + AI Agency + Event Driven
     """
     
     def __init__(self):
         self.role = "Vortex Strategic Orchestrator (VSO)"
         self.voice_system = VoiceSystem()
+        
+        # AGENTIC CONNECTIVITY (The Nervous System)
+        self.bus = VORTEX_BUS
+        self._subscribe_to_critical_events()
         
         # SUBORDINADOS (La C-Suite Agéntica)
         self.cfo_agent = FinancialAgent() # Control Financiero (CFO)
@@ -25,6 +27,24 @@ class StrategicOrchestrator:
         self.cdo_agent = DesignDirectorAgent() # Organización y Diseño (CDO)
         
         self.memory = [] # Memoria Corporativa
+
+    def _subscribe_to_critical_events(self):
+        """El CEO siempre está escuchando la radiofrecuencia de la empresa"""
+        self.bus.subscribe("CRITICAL_INSOLVENCY", self._handle_financial_crisis)
+        self.bus.subscribe("UX_BLOCKER", self._handle_design_veto)
+
+    def _handle_financial_crisis(self, event):
+        """TRIGGER: Reacción automática ante quiebra inminente"""
+        print(f"🚨 CEO INTERVENTION: Detectada crisis financiera ({event['timestamp']})")
+        # Acción Autónoma: Cambiar Estrategia Global instantáneamente
+        self.memory.append({"role": "system", "content": "MODE_SWITCH: SURVIVAL"})
+        # Difundir nueva orden a toda la organización
+        self.bus.publish("STRATEGY_UPDATE", {"mode": "SURVIVAL", "directives": "FREEZE_HIRING, MAX_REVENUE"}, self.role)
+
+    def _handle_design_veto(self, event):
+        """TRIGGER: Reacción ante bloqueo de diseño"""
+        print(f"🎨 CEO INTERVENTION: Deteniendo lanzamiento por calidad.")
+        self.bus.publish("DEPLOYMENT_HALT", {"reason": event['payload']['reason']}, self.role)
 
     async def execute_strategic_cycle(self, simulation_data):
         """
