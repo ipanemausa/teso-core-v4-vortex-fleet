@@ -1729,19 +1729,29 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
 
                                                                                 {matchedCorp && (
                                                                                     <div style={{ marginTop: '10px' }}>
-                                                                                        <button
-                                                                                            onClick={(e) => {
-                                                                                                e.stopPropagation();
-                                                                                                setPreviewPdf(matchedCorp.pdf);
-                                                                                            }}
+                                                                                        <a
+                                                                                            href={matchedCorp.pdf}
+                                                                                            target="_blank"
+                                                                                            rel="noopener noreferrer"
+                                                                                            download={`FACTURA_DIAN_${c.name.replace(/\s+/g, '_')}.pdf`}
+                                                                                            onClick={(e) => e.stopPropagation()}
                                                                                             className="btn-neon"
                                                                                             style={{
-                                                                                                borderColor: 'gold', color: 'gold', background: 'rgba(255, 215, 0, 0.05)',
-                                                                                                padding: '8px 20px', fontSize: '0.8rem', width: '100%',
-                                                                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                                                                                textDecoration: 'none',
+                                                                                                border: '1px solid gold',
+                                                                                                color: 'gold',
+                                                                                                background: 'rgba(255, 215, 0, 0.05)',
+                                                                                                padding: '8px 20px',
+                                                                                                fontSize: '0.8rem',
+                                                                                                width: '100%',
+                                                                                                display: 'flex',
+                                                                                                alignItems: 'center',
+                                                                                                justifyContent: 'center',
+                                                                                                gap: '8px',
+                                                                                                borderRadius: '4px'
                                                                                             }}>
-                                                                                            <span>📄</span> VER FACTURA DIAN COMPLETA
-                                                                                        </button>
+                                                                                            <span>📄</span> DESCARGAR FACTURA DIAN COMPLETA (SECURE)
+                                                                                        </a>
                                                                                     </div>
                                                                                 )}
                                                                             </div>
