@@ -169,7 +169,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                 throw new Error(`Server Error (${res.status}): ${errText}`);
             }
 
-            const data = await res.json();
+            const data = await await res.json();
             console.log("AUDIT RESULT:", data);
 
             // Speak the result
