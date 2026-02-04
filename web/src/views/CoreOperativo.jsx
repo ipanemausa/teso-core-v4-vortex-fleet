@@ -129,9 +129,6 @@ export function CoreOperativo({ onClose, onHome }) {
 
                     <button onClick={() => setShowLiveEvents(true)} style={{ background: "rgba(255, 69, 0, 0.15)", border: "1px solid #FF4500", color: "#FF4500", padding: "6px 12px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>+ WAR ROOM</button>
 
-                    <button onClick={onHome} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid #fff", color: "#fff", padding: "6px 12px", borderRadius: "14px", fontSize: "0.75rem", fontWeight: "bold", marginLeft: "10px", cursor: "pointer" }}>🏠 INICIO</button>
-                    <button onClick={onClose} style={{ background: "transparent", border: "1px solid #ff4444", color: "#ff4444", padding: "6px 12px", borderRadius: "14px", fontSize: "0.75rem", fontWeight: "bold", marginLeft: "10px", cursor: "pointer" }}>✖ SALIR (MAPA)</button>
-
                     <div style={{ marginLeft: "15px", textAlign: "right", lineHeight: "1" }}>
                         <div style={{ fontSize: "1.2rem", fontWeight: "800", color: "#00f2ff" }}>{displayRows.length.toLocaleString()}</div>
                         <div style={{ fontSize: "0.6rem", color: "#666" }}>SVC</div>
@@ -247,14 +244,32 @@ export function CoreOperativo({ onClose, onHome }) {
                             </tbody>
                         </table>
                     </div>
-                    {/* BOTTOM TABS */}
+                    {/* BOTTOM TABS -- ACTIVE FILTERS */}
                     <div style={{ padding: "0 15px", background: "#1F2937", borderTop: "1px solid #333", display: "flex", gap: "1px" }}>
-                        <div style={{ background: "#111827", color: "#00f2ff", padding: "10px 15px", borderTop: "2px solid #00f2ff", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>PROGRAMACION</div>
-                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>CXC</div>
-                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>CXP</div>
-                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>BANCOS</div>
-                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>EGRESOS</div>
-                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>+</div>
+                        {[
+                            { id: 'PROGRAMACION', label: 'PROGRAMACION', color: '#00f2ff' },
+                            { id: 'CXC', label: 'CXC CLIENTES', color: '#F97316' },
+                            { id: 'CXP', label: 'CXP NÓMINA', color: '#3B82F6' },
+                            { id: 'BANCOS', label: 'BANCOS', color: '#FFD700' },
+                            { id: 'EGRESOS', label: 'EGRESOS', color: '#ff4444' }
+                        ].map(tab => (
+                            <div
+                                key={tab.id}
+                                onClick={() => setActiveFilter(tab.id)} // For now, use existing filter state or add new one
+                                style={{
+                                    background: activeFilter === tab.id ? "#111827" : "#222",
+                                    color: activeFilter === tab.id ? tab.color : "#666",
+                                    padding: "10px 15px",
+                                    borderTop: activeFilter === tab.id ? `2px solid ${tab.color}` : "2px solid transparent",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "bold",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s"
+                                }}
+                            >
+                                {tab.label}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
