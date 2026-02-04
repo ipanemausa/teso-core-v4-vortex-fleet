@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { divIcon } from 'leaflet';
-import ErrorBoundary from "../components/ErrorBoundary";
 
 // --- CUSTOM FLEET ICONS ---
 const carIcon = divIcon({
@@ -11,68 +10,88 @@ const carIcon = divIcon({
     iconSize: [12, 12]
 });
 
+const jobIcon = divIcon({
+    html: `<div style="background-color: #06b6d4; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 15px cyan; border: 2px solid white; animation: pulse 1s infinite;"></div>`,
+    className: 'job-marker',
+    iconSize: [14, 14]
+});
+
 // Medellín Coordinates
 const CENTER_LAT = 6.2442;
 const CENTER_LNG = -75.5812;
 
-export function CoreOperativo({ onClose, onHome }) {
+export function CoreOperativo({ onClose, onHome, command }) {
     const [fleet, setFleet] = useState([]);
+    const [jobs, setJobs] = useState([]); // Active Passenger Requests
 
-    // 1. INITIALIZE FLEET (Simulated positions around Medellín)
+    // 1. INITIALIZE FLEET
     useEffect(() => {
         const initialFleet = Array.from({ length: 15 }).map((_, i) => ({
             id: `V-0${i + 10}`,
-            lat: CENTER_LAT + (Math.random() - 0.5) * 0.05,
-            lng: CENTER_LNG + (Math.random() - 0.5) * 0.05,
-            status: Math.random() > 0.2 ? 'ACTIVE' : 'IDLE',
-            speed: Math.floor(Math.random() * 60)
+            lat: CENTER_LAT + (Math.random() - 0.5) * 0.06,
+            lng: CENTER_LNG + (Math.random() - 0.5) * 0.06,
+            status: Math.random() > 0.6 ? 'ACTIVE' : 'IDLE',
+            speed: 0,
+            target: null
         }));
         setFleet(initialFleet);
+    }, []);
 
-        // 2. LIVE ANIMATION LOOP
+    // 2. LISTEN FOR COMMANDS (The Brain Logic)
+    useEffect(() => {
+        if (command === 'DISPATCH_WAVE') {
+            console.log("⚡ WAVE TRIGGERED: Spawning Jobs...");
+
+            // Spawn 5 New Jobs (Cyan Dots)
+            const newJobs = Array.from({ length: 5 }).map((_, i) => ({
+                id: `REQ-${Math.floor(Math.random() * 9000) + 1000}`,
+                lat: CENTER_LAT + (Math.random() - 0.5) * 0.03, // Closer to center
+                lng: CENTER_LNG + (Math.random() - 0.5) * 0.03,
+                status: 'SEARCHING'
+            }));
+            setJobs(prev => [...prev, ...newJobs]);
+
+            // Assign Idle Cars (Simple Dispatch Logic)
+            setFleet(prevFleet => {
+                return prevFleet.map(car => {
+                    if (car.status === 'IDLE' && Math.random() > 0.4) {
+                        return { ...car, status: 'DISPATCHED', speed: 45 };
+                    }
+                    return car;
+                });
+            });
+        }
+    }, [command]);
+
+    // 3. LIVE ANIMATION LOOP (Physics)
+    useEffect(() => {
         const interval = setInterval(() => {
-            setFleet(prev => prev.map(car => ({
-                ...car,
-                lat: car.lat + (Math.random() - 0.5) * 0.001, // Jitter movement
-                lng: car.lng + (Math.random() - 0.5) * 0.001,
-                speed: car.status === 'ACTIVE' ? Math.max(10, Math.floor(Math.random() * 80)) : 0
-            })));
-        }, 2000);
+            setFleet(prev => prev.map(car => {
+                const isMoving = car.status === 'ACTIVE' || car.status === 'DISPATCHED';
+                if (!isMoving) return car;
 
+                return {
+                    ...car,
+                    lat: car.lat + (Math.random() - 0.5) * 0.0015,
+                    lng: car.lng + (Math.random() - 0.5) * 0.0015,
+                    speed: Math.max(20, Math.floor(Math.random() * 70))
+                };
+            }));
+        }, 1000); // 1 FPS update for smoothness
         return () => clearInterval(interval);
     }, []);
 
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', background: '#000' }}>
 
-            {/* L2 ADMIN HUD (HEADS UP DISPLAY) */}
+            {/* L2 ADMIN HUD (Mini stats overlay, keeping it simple as we have the big right panel now) */}
             <div style={{
                 position: 'absolute', top: 20, left: 20, zIndex: 1000,
-                background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(10px)',
-                padding: '15px', borderRadius: '8px', border: '1px solid #334155',
-                width: '300px', color: '#fff'
+                background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(5px)',
+                padding: '10px 15px', borderRadius: '8px', border: '1px solid #334155',
+                color: '#fff', fontSize: '0.8rem'
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <h3 style={{ margin: 0, fontSize: '1rem', color: '#38bdf8' }}>CAPA 2: VORTEX LIVE</h3>
-                    <div style={{ fontSize: '0.7rem', color: '#39FF14' }}>● SYSTEM ONLINE</div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div style={{ background: '#1e293b', padding: '10px', borderRadius: '4px' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>ACTIVE FLEET</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{fleet.filter(c => c.status === 'ACTIVE').length} / {fleet.length}</div>
-                    </div>
-                    <div style={{ background: '#1e293b', padding: '10px', borderRadius: '4px' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>AVG VELOCITY</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>34 km/h</div>
-                    </div>
-                </div>
-
-                <div style={{ marginTop: '15px' }}>
-                    <button style={{ width: '100%', padding: '8px', background: '#3b82f6', border: 'none', color: '#fff', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>
-                        DEPLOY REINFORCEMENTS
-                    </button>
-                </div>
+                <span style={{ color: '#39FF14' }}>●</span> SYSTEM ONLINE | FLOTA: {fleet.length} | ORDENES: {jobs.length}
             </div>
 
             {/* THE MAP ITSELF */}
@@ -100,6 +119,20 @@ export function CoreOperativo({ onClose, onHome }) {
                         </Popup>
                     </Marker>
                 ))}
+
+                {/* JOB MARKERS (PASSENGERS) */}
+                {jobs.map(job => (
+                    <Marker key={job.id} position={[job.lat, job.lng]} icon={jobIcon}>
+                        <Popup>
+                            <div style={{ color: '#000' }}>
+                                <strong>NEW REQUEST</strong><br />
+                                {job.id}<br />
+                                Status: {job.status}
+                            </div>
+                        </Popup>
+                    </Marker>
+                ))}
+
             </MapContainer>
         </div>
     );

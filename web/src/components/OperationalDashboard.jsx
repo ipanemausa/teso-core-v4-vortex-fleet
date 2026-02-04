@@ -39,13 +39,15 @@ const formatCurrency = (amount) => {
     }).format(amount);
 };
 
-const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS', onRowClick, simulationData: propSimulationData, onClose, onHome, onRegenerate, onSimulateStress, onRunMacro }) => {
+const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS', onRowClick, simulationData: propSimulationData, onClose, onHome, onRegenerate, onSimulateStress, onRunMacro }) => {
 
     // --- STATE ---
     const [simulationData, setSimulationData] = useState(propSimulationData || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [voiceEnabled, setVoiceEnabled] = useState(true); // Default ON for demo
+    const [opsCommand, setOpsCommand] = useState(null); // Command channel for CoreOperativo
+
 
     // --- VOICE SYNTHESIS (Unified System) ---
     const speakAgentMessage = (text, emotion = 'professional') => {
@@ -1198,7 +1200,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
 
                         {/* B. THE MAP (FULLSCREEN BACKGROUND) */}
                         <div style={{ flex: 1, position: 'relative' }}>
-                            <CoreOperativo />
+                            <CoreOperativo command={opsCommand} />
                         </div>
 
                         {/* C. RIGHT SIDE "TESO OPS" PANEL (THE COMMAND CENTER) */}
@@ -1234,7 +1236,14 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                                 <button onClick={handleAuditClick} style={{ padding: '12px', background: 'transparent', border: '1px solid #06b6d4', color: '#06b6d4', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s' }}>
                                     <span>▶</span> INICIAR SIMULACIÓN
                                 </button>
-                                <button style={{ padding: '12px', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <button 
+                                    onClick={() => {
+                                        speakAgentMessage("Iniciando Protocolo de Despacho Inteligente V4. Asignando unidades...");
+                                        setOpsCommand('DISPATCH_WAVE');
+                                        setTimeout(() => setOpsCommand(null), 1000); 
+                                    }}
+                                    style={{ padding: '12px', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px' }}
+                                >
                                     <span>⚡</span> DESPACHO INTELIGENTE
                                 </button>
                             </div>
