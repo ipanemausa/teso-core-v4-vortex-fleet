@@ -139,6 +139,32 @@ export function CoreOperativo({ onClose, onHome }) {
                 </div>
             </div>
 
+            {/* UNIT ECONOMICS VERIFICATION ROW (ADDED V4.2) */}
+            <div style={{ padding: "0 20px", marginTop: "15px", display: "flex", flexWrap: 'wrap', gap: "10px", alignItems: "center" }}>
+                <span style={{ fontSize: '0.7rem', color: '#666', border: '1px solid #333', padding: '5px 8px', borderRadius: '4px' }}>VERIFICACIÓN DE MODELO ({data.unit_economics ? 'V4.2 AFILIADOS' : 'STANDARD'})</span>
+
+                {data.unit_economics && (
+                    <>
+                        <div style={{ display: 'flex', gap: '5px', fontSize: '0.75rem', background: '#111', padding: '5px 10px', borderRadius: '4px', border: '1px solid #222' }}>
+                            <span style={{ color: '#888' }}>TARIFA:</span>
+                            <span style={{ color: '#fff', fontWeight: 'bold' }}>{fmtMoney(data.unit_economics.fare)}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px', fontSize: '0.75rem', background: '#111', padding: '5px 10px', borderRadius: '4px', border: '1px solid #222' }}>
+                            <span style={{ color: '#888' }}>COMISIÓN APP ({data.unit_economics.commission_percent}%):</span>
+                            <span style={{ color: '#00f2ff', fontWeight: 'bold' }}>{fmtMoney(data.unit_economics.platform_revenue)}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px', fontSize: '0.75rem', background: '#111', padding: '5px 10px', borderRadius: '4px', border: '1px solid #222' }}>
+                            <span style={{ color: '#888' }}>PEAJE (COSTO):</span>
+                            <span style={{ color: '#F97316', fontWeight: 'bold' }}>-{fmtMoney(data.unit_economics.toll_deduction)}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px', fontSize: '0.75rem', background: '#111', padding: '5px 10px', borderRadius: '4px', border: '1px solid #222' }}>
+                            <span style={{ color: '#888' }}>NETO CONDUCTOR:</span>
+                            <span style={{ color: '#39FF14', fontWeight: 'bold' }}>{fmtMoney(data.unit_economics.driver_net)}</span>
+                        </div>
+                    </>
+                )}
+            </div>
+
             <div style={{ padding: "20px" }}>
                 {/* KPI CARDS ROW */}
                 <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.2fr 1.2fr 1.2fr 0.8fr", gap: "15px", marginBottom: "20px" }}>
