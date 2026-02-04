@@ -366,7 +366,17 @@ function App() {
   const [clients, setClients] = useState([]);
   const [futureBookings, setFutureBookings] = useState([]);
 
-  const [simulationContext, setSimulationContext] = useState(null); // FIX: Init to NULL to force Dashboard Loading State
+  // FIX: Pre-populate simulationContext with structure to avoid "Screen in 0"
+  const [simulationContext, setSimulationContext] = useState({
+    kpis: {
+      total_income: 0,
+      trips_24h: 0,
+      active_drivers: 0,
+      efficiency_index: 0
+    },
+    cash_flow: [],
+    banks: []
+  });
 
   // --- ROLE DETECTION (NEW) ---
   const [userRole, setUserRole] = useState('admin'); // 'admin', 'client', 'driver'

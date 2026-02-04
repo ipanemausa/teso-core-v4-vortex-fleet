@@ -64,7 +64,8 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
 
     // --- AUTO-SPEAK AGENT ALERTS ---
     useEffect(() => {
-        if (!propSimulationData) return;
+        // Prevent speaking if data is just the initialization skeleton
+        if (!propSimulationData || !propSimulationData.details) return;
 
         let script = null;
 
