@@ -131,11 +131,44 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
 
 
 
+    // --- CEO AGENT INTEGRATION ---
+    const [ceoReport, setCeoReport] = useState(null);
+    const [isCeoThinking, setIsCeoThinking] = useState(false);
+
+    const triggerStrategicCycle = async () => {
+        setIsCeoThinking(true);
+        try {
+            const resp = await fetch('/api/strategic-cycle', { method: 'POST' });
+            if (resp.ok) {
+                const data = await resp.json();
+                setCeoReport(data);
+                // Speak the CEO's directive
+                if (data.voice_broadcast) {
+                    speakAgentMessage(data.voice_broadcast.text);
+                }
+            }
+        } catch (e) {
+            console.error("CEO Brain Offline:", e);
+        } finally {
+            setIsCeoThinking(false);
+        }
+    };
+
+    // Auto-trigger CEO on first load (Simulated Proactivity)
+    useEffect(() => {
+        if (simulationData && !ceoReport) {
+            // Wait 2s then trigger
+            const t = setTimeout(triggerStrategicCycle, 2000);
+            return () => clearTimeout(t);
+        }
+    }, [simulationData]);
+
     // --- FETCH DATA FROM BACKEND (V4 ENGINE) ---
     useEffect(() => {
         if (simulationData) return; // If passed as prop, use it
 
         const loadBackendData = async () => {
+            // ... existing data fetch logic ...
             console.log("📡 CONNECTING TO TESO OPS V4...");
             setLoading(true);
             try {
@@ -590,6 +623,81 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
 
     // PDF Preview State
     const [previewPdf, setPreviewPdf] = useState(null);
+    // --- CEO VISUAL PANEL ---
+    const CeoPanel = () => {
+        if (!ceoReport && !isCeoThinking) return null;
+
+        return (
+            <div style={{
+                margin: '20px',
+                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+                border: '1px solid #6366f1',
+                borderRadius: '8px',
+                padding: '20px',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div style={{
+                            fontSize: '2rem',
+                            background: '#fff',
+                            borderRadius: '50%',
+                            width: '50px', height: '50px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>👔</div>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 'bold' }}>VORTEX STRATEGIC ORCHESTRATOR</div>
+                            <div style={{ fontSize: '1.2rem', color: '#fff', fontWeight: '900' }}>
+                                {isCeoThinking ? 'ANALIZANDO ESTRATEGIA GLOBAL...' : 'DIRECTIVA EJECUTIVA VIGENTE'}
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button
+                            onClick={triggerStrategicCycle}
+                            disabled={isCeoThinking}
+                            style={{
+                                background: isCeoThinking ? '#4338ca' : '#4f46e5',
+                                color: '#fff',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '6px',
+                                fontWeight: 'bold',
+                                cursor: isCeoThinking ? 'wait' : 'pointer'
+                            }}>
+                            {isCeoThinking ? '⏳ CALCULANDO...' : '🔄 RE-EVALUAR ESTRATEGIA'}
+                        </button>
+                    </div>
+                </div>
+
+                {ceoReport && !isCeoThinking && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '6px' }}>
+                            <div style={{ color: '#818cf8', fontSize: '0.75rem', marginBottom: '5px' }}>DECISIÓN DEL CEO</div>
+                            <div style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '10px' }}>
+                                {ceoReport.strategic_alignment.directive.replace(/_/g, ' ')}
+                            </div>
+                            <div style={{ color: '#c7d2fe', fontSize: '0.9rem', fontStyle: 'italic' }}>
+                                "{ceoReport.strategic_alignment.reasoning}"
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '4px', borderLeft: '3px solid #34d399' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>CFO (FINANZAS)</div>
+                                <div style={{ fontWeight: 'bold', color: '#fff' }}>Score: {ceoReport.department_reports?.finance?.executive_summary?.score || 0}/100</div>
+                            </div>
+                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '4px', borderLeft: '3px solid #fbbf24' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>COO (LOGÍSTICA)</div>
+                                <div style={{ fontWeight: 'bold', color: '#fff' }}>Status: {ceoReport.department_reports?.operations?.dispatch_summary?.status || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // --- MACRO STRUCTURE: AI WORKFORCE ORCHESTRATOR ---
     const [workforce, setWorkforce] = useState({
         activeOrderId: null,
@@ -1359,6 +1467,10 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                                     <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Corte: 20 DÍAS</div>
                                 </div>
 
+                                {/* CEO STRATEGIC COMMAND PANEL */}
+                                <CeoPanel />
+
+                                {/* UNIT ECONOMICS VERIFICATION ROW (ADDED V4.2) */}
                                 {/* CONFLICT SUMMARY CARD (NEW) */}
                                 {simulationData && simulationData.conflicts && (
                                     <div style={{ width: '180px', flexShrink: 0, background: 'linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #ef4444', padding: '8px', borderRadius: '15px' }}>
