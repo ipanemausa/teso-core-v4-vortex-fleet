@@ -1184,706 +1184,704 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
                             )}
                         </div>
                     </div>
-                    </div>
-            )
-                }
+                )}
 
 
-            {/* CONTENT AREA */}
-            {
-                viewMode === 'LIVE_OPS' ? (
-                    /* --- LAYER 2: OPS MAP MODE (RECREATED FROM FLY.IO LEGACY) --- */
-                    <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex' }}>
+                {/* CONTENT AREA */}
+                {
+                    viewMode === 'LIVE_OPS' ? (
+                        /* --- LAYER 2: OPS MAP MODE (RECREATED FROM FLY.IO LEGACY) --- */
+                        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex' }}>
 
-                        {/* A. FLOATING NAVBAR (TOP CENTER) */}
-                        <NeonNavbar activeTab={'FLOTA'} onTabChange={(id) => console.log(id)} />
+                            {/* A. FLOATING NAVBAR (TOP CENTER) */}
+                            <NeonNavbar activeTab={'FLOTA'} onTabChange={(id) => console.log(id)} />
 
-                        {/* B. THE MAP (FULLSCREEN BACKGROUND) */}
-                        <div style={{ flex: 1, position: 'relative' }}>
-                            <CoreOperativo command={opsCommand} />
-                        </div>
-
-                        {/* C. RIGHT SIDE "TESO OPS" PANEL (THE COMMAND CENTER) */}
-                        <div style={{
-                            width: '380px',
-                            background: '#09090b', // Deep black/slate
-                            borderLeft: '1px solid #334155',
-                            display: 'flex', flexDirection: 'column',
-                            padding: '20px',
-                            zIndex: 50,
-                            boxShadow: '-10px 0 30px rgba(0,0,0,0.8)'
-                        }}>
-                            {/* Title Section */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <div>
-                                    <h2 style={{ margin: 0, color: '#ef4444', fontFamily: 'monospace', letterSpacing: '2px', fontSize: '1.5rem' }}>TESO OPS</h2>
-                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '5px' }}>UNIDADES: 15 | OPS ACTIVAS: 60</div>
-                                </div>
-                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c', boxShadow: '0 0 10px #ea580c' }}>🏠</div>
+                            {/* B. THE MAP (FULLSCREEN BACKGROUND) */}
+                            <div style={{ flex: 1, position: 'relative' }}>
+                                <CoreOperativo command={opsCommand} />
                             </div>
 
-                            {/* Search Bar */}
-                            <input
-                                type="text"
-                                placeholder="🔍 Buscar Orden, Unidad, Cliente [ENTER]"
-                                style={{ background: '#020617', border: '1px solid #1e293b', padding: '12px', color: '#fff', borderRadius: '4px', marginBottom: '20px', fontFamily: 'monospace', outline: 'none' }}
-                                onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
-                                onBlur={(e) => e.target.style.borderColor = '#1e293b'}
-                            />
-
-                            {/* Actions */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '30px' }}>
-                                <button onClick={handleAuditClick} style={{ padding: '12px', background: 'transparent', border: '1px solid #06b6d4', color: '#06b6d4', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s' }}>
-                                    <span>▶</span> INICIAR SIMULACIÓN
-                                </button>
-                                <button 
-                                    onClick={() => {
-                                        speakAgentMessage("Iniciando Protocolo de Despacho Inteligente V4. Asignando unidades...");
-                                        setOpsCommand('DISPATCH_WAVE');
-                                        setTimeout(() => setOpsCommand(null), 1000); 
-                                    }}
-                                    style={{ padding: '12px', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px' }}
-                                >
-                                    <span>⚡</span> DESPACHO INTELIGENTE
-                                </button>
-                            </div>
-
-                            {/* Agent Selection Chips */}
-                            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                                <div style={{ padding: '5px 10px', background: '#1e293b', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', borderLeft: '3px solid #a855f7' }}>Seleccionar Cli</div>
-                                <div style={{ padding: '5px 10px', background: '#dc2626', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>🚀 DESPLEGAR</div>
-                            </div>
-
-                            {/* Console Log (System Events) */}
-                            <div style={{ flex: 1, background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.75rem', marginBottom: '20px' }}>
-                                <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #1e293b', paddingBottom: '5px', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span>CONSOLE.LOG :: SYSTEM EVENTS</span>
-                                    <span style={{ color: '#39FF14' }}>●</span>
+                            {/* C. RIGHT SIDE "TESO OPS" PANEL (THE COMMAND CENTER) */}
+                            <div style={{
+                                width: '380px',
+                                background: '#09090b', // Deep black/slate
+                                borderLeft: '1px solid #334155',
+                                display: 'flex', flexDirection: 'column',
+                                padding: '20px',
+                                zIndex: 50,
+                                boxShadow: '-10px 0 30px rgba(0,0,0,0.8)'
+                            }}>
+                                {/* Title Section */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                    <div>
+                                        <h2 style={{ margin: 0, color: '#ef4444', fontFamily: 'monospace', letterSpacing: '2px', fontSize: '1.5rem' }}>TESO OPS</h2>
+                                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '5px' }}>UNIDADES: 15 | OPS ACTIVAS: 60</div>
+                                    </div>
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c', boxShadow: '0 0 10px #ea580c' }}>🏠</div>
                                 </div>
 
-                                <div style={{ color: '#94a3b8', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] ☁️ NUBE SINCRONIZADA: 86346 Ops.</div>
-                                <div style={{ color: '#fff', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] 🚀 CONNECTING: Sincronizando con "Cerebro" (Python Backend)...</div>
-                                <div style={{ color: '#ec4899', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] 🖍️ SYSTEM STARTUP: API Target = 'RELATIVE'</div>
+                                {/* Search Bar */}
+                                <input
+                                    type="text"
+                                    placeholder="🔍 Buscar Orden, Unidad, Cliente [ENTER]"
+                                    style={{ background: '#020617', border: '1px solid #1e293b', padding: '12px', color: '#fff', borderRadius: '4px', marginBottom: '20px', fontFamily: 'monospace', outline: 'none' }}
+                                    onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
+                                    onBlur={(e) => e.target.style.borderColor = '#1e293b'}
+                                />
 
-                                {/* Proactive Messages */}
-                                {agentMessages.slice(-5).map((msg, i) => (
-                                    <div key={i} style={{ color: '#39FF14', marginTop: '5px' }}>
-                                        ► {msg}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Unit Status List (Mini) */}
-                            <div style={{ height: '200px', overflowY: 'auto' }}>
-                                <div style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>UNIDADES EN LÍNEA (15)</div>
-                                {['TSO-120', 'TSO-160', 'TSO-189'].map(u => (
-                                    <div key={u} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 5px', borderBottom: '1px solid #1e293b', alignItems: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <span style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'monospace' }}>{u}</span>
-                                            <span style={{ color: '#64748b', fontSize: '0.65rem' }}>Cond: COND-{Math.floor(Math.random() * 999)}</span>
-                                        </div>
-                                        <span style={{ color: '#39FF14', fontSize: '0.6rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                            <div style={{ width: 6, height: 6, background: '#39FF14', borderRadius: '50%' }}></div>
-                                            DISPONIBLE
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    // --- VIRTUAL EXCEL VIEW (Embedded Real-time Sheet) ---
-                    // MODIFIED: Increased Bottom Margin significantly to clear Floating Chat Bar
-                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, marginBottom: '90px', gap: '10px', overflow: 'hidden' }}>
-
-                        {/* 1. VISUAL FINANCIAL CARDS (THE RESTORED FEATURE) */}
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(5,150,105,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #10b981', padding: '10px', borderRadius: '15px' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#6ee7b7', fontWeight: 'bold', textTransform: 'uppercase' }}>Ingresos Brutos (Revenue)</div>
-                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.totalRevenue)}</div>
-                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Proyección cierre de mes: ↑ 12%</div>
-                            </div>
-
-                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(234,179,8,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #eab308', padding: '10px', borderRadius: '15px' }}>
-                                <ExplainableTooltip
-                                    title="Margen Operativo (EBITDA)"
-                                    explanation="Beneficio real tras restar costos directos (Gasolina, Comisión). No incluye impuestos ni amortizaciones. Fuente: Análisis de Flujo de Caja en Tiempo Real."
-                                >
-                                    <div style={{ fontSize: '0.75rem', color: '#fde047', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}>Margen Operativo ℹ</div>
-                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.margin)}</div>
-                                        <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '0.9rem' }}>({analytics.marginPercent}%)</span>
-                                    </div>
-                                    <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Post-Comisiones y Gasolina</div>
-                                </ExplainableTooltip>
-                            </div>
-
-                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(249,115,22,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #f97316', padding: '10px', borderRadius: '15px' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#fdba74', fontWeight: 'bold', textTransform: 'uppercase' }}>CxC (Cartera Clientes)</div>
-                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.cxcPending)}</div>
-                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Pendiente de Facturación</div>
-                            </div>
-
-                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #3b82f6', padding: '10px', borderRadius: '15px' }}>
-                                <div style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 'bold', textTransform: 'uppercase' }}>CxP (Nómina Drivers)</div>
-                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.cxpPending)}</div>
-                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Corte: 20 DÍAS</div>
-                            </div>
-
-                            {/* CEO STRATEGIC COMMAND PANEL */}
-                            <CeoPanel />
-
-                            {/* UNIT ECONOMICS VERIFICATION ROW (ADDED V4.2) */}
-                            {/* CONFLICT SUMMARY CARD (NEW) */}
-                            {simulationData && simulationData.conflicts && (
-                                <div style={{ width: '180px', flexShrink: 0, background: 'linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #ef4444', padding: '8px', borderRadius: '15px' }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#fca5a5', fontWeight: 'bold', textTransform: 'uppercase' }}>Conflictos Ops</div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '5px' }}>
-                                        <div style={{ fontSize: '0.75rem', color: '#fff' }}>🚫 Cancelados: <strong style={{ color: '#fca5a5' }}>{simulationData.conflicts.cancellations}</strong></div>
-                                        <div style={{ fontSize: '0.75rem', color: '#fff' }}>⏳ Retrasos: <strong style={{ color: '#fcd34d' }}>{simulationData.conflicts.delays}</strong></div>
-                                        <div style={{ fontSize: '0.75rem', color: '#fff' }}>🔄 Cambios: <strong style={{ color: '#86efac' }}>{simulationData.conflicts.driverChanges}</strong></div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 2. THE SPREADSHEET */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#0f172a', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
-
-                            {/* TOOLBAR */}
-                            <div style={{ background: '#1e293b', padding: '8px 15px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                                    <div style={{ color: '#f1f5f9', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span style={{ fontSize: '1.2rem' }}>📊</span> LIBRO: TESO_MASTER_DATASET_VIVO.xlsx
-                                    </div>
-                                    <div style={{ background: '#059669', padding: '2px 8px', borderRadius: '20px', color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', border: '1px solid #34d399' }}>● AUTOGUARDADO: ON</div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    {/* CLOUD COMPUTE EXPORT (PYTHON) */}
-                                    <button
-                                        onClick={async () => {
-                                            setIsExporting(true);
-                                            try {
-                                                // FIX: Use relative path for production (Space)
-                                                const apiUrl = import.meta.env.VITE_API_URL || '';
-                                                const response = await fetch(`${apiUrl}/api/simulate-export?days=360`);
-                                                if (!response.ok) throw new Error('Cloud Engine Offline');
-
-                                                const blob = await response.blob();
-                                                const url = window.URL.createObjectURL(blob);
-                                                const a = document.createElement('a');
-                                                a.href = url;
-                                                a.download = "TESO_CLOUD_SIM_360D.xlsx";
-                                                document.body.appendChild(a);
-                                                a.click();
-                                                a.remove();
-                                            } catch (e) {
-                                                alert("⚠️ ERROR: Cloud Engine Offline. Asegúrate de correr 'uvicorn main:app' en teso_core/api");
-                                                console.error(e);
-                                            } finally {
-                                                setIsExporting(false);
-                                            }
-                                        }}
-                                        style={{
-                                            background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)',
-                                            color: 'white',
-                                            border: '1px solid #8b5cf6',
-                                            padding: '6px 15px',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            fontWeight: 'bold',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            fontSize: '0.8rem',
-                                            boxShadow: '0 0 15px rgba(168, 85, 247, 0.4)'
-                                        }}
-                                        title="Generar en Servidor (No consume memoria local)"
-                                    >
-                                        <span>☁️</span> CLOUD EXPORT (360D)
+                                {/* Actions */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '30px' }}>
+                                    <button onClick={handleAuditClick} style={{ padding: '12px', background: 'transparent', border: '1px solid #06b6d4', color: '#06b6d4', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s' }}>
+                                        <span>▶</span> INICIAR SIMULACIÓN
                                     </button>
-
                                     <button
                                         onClick={() => {
-                                            setIsExporting(true);
-                                            // Use setTimeout to allow UI to render "GENERANDO..." before blocking main thread
-                                            setTimeout(() => {
-                                                const getDescCutoff = () => {
-                                                    const d = new Date();
-                                                    d.setHours(0, 0, 0, 0);
-                                                    if (timeFilter === 'Today') { d.setDate(d.getDate() - 1); return d; }
-                                                    if (timeFilter === '30D') { d.setDate(d.getDate() - 30); return d; }
-                                                    if (timeFilter === '90D') { d.setDate(d.getDate() - 90); return d; }
-                                                    if (timeFilter === '180D') { d.setDate(d.getDate() - 180); return d; }
-                                                    return new Date('2020-01-01');
-                                                };
-                                                const cutoff = getDescCutoff();
-
-                                                const raw = [...(requests || []), ...(simulationData?.services || [])];
-                                                const filteredDownload = timeFilter === 'ALL' ? raw : raw.filter(s => parseItemDate(s.date) >= cutoff);
-
-                                                generateMasterExcel(filteredDownload, vehicles, simulationData?.clients || [], simulationData, analytics, scenario);
-                                                setIsExporting(false);
-                                            }, 100);
+                                            speakAgentMessage("Iniciando Protocolo de Despacho Inteligente V4. Asignando unidades...");
+                                            setOpsCommand('DISPATCH_WAVE');
+                                            setTimeout(() => setOpsCommand(null), 1000);
                                         }}
-                                        style={{
-                                            background: isExporting ? '#555' : 'linear-gradient(90deg, #059669 0%, #10b981 100%)',
-                                            color: 'white',
-                                            border: isExporting ? '1px solid #333' : '1px solid #34d399',
-                                            padding: '6px 15px',
-                                            borderRadius: '6px',
-                                            cursor: isExporting ? 'wait' : 'pointer',
-                                            fontWeight: 'bold',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
-                                            fontSize: '0.8rem',
-                                            transition: 'all 0.2s',
-                                            animation: isExporting ? 'none' : 'pulse 2s infinite'
-                                        }}
-                                        disabled={isExporting}
-                                        onMouseOver={(e) => !isExporting && (e.currentTarget.style.transform = 'translateY(-1px)')}
-                                        onMouseOut={(e) => !isExporting && (e.currentTarget.style.transform = 'translateY(0)')}
+                                        style={{ padding: '12px', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px' }}
                                     >
-                                        <span>{isExporting ? '⏳' : '📥'}</span> {isExporting ? `GENERANDO (${filteredCount})...` : `DESCARGAR REPORTE (${timeFilter})`}
+                                        <span>⚡</span> DESPACHO INTELIGENTE
                                     </button>
                                 </div>
 
-                                {/* AGENT COMMAND CENTER (PERPLEXITY STYLE) */}
-                                <div style={{
-                                    background: '#0f172a',
-                                    border: '1px solid #334155',
-                                    borderRadius: '8px',
-                                    padding: '15px',
-                                    marginTop: '20px',
-                                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
-                                }}>
-                                    <div style={{ color: '#39FF14', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        🤖 VORTEX AGENT COMMAND
-                                        <span style={{ fontSize: '0.6rem', background: '#334155', padding: '2px 6px', borderRadius: '4px', color: '#cbd5e1' }}>BETA: VOICE ENABLED</span>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Ej: 'Auditar finanzas', 'Revisar flota retrasada'..."
-                                        onKeyDown={async (e) => {
-                                            if (e.key === 'Enter') {
-                                                const cmd = e.target.value;
-                                                e.target.value = "Pensando...";
-                                                e.target.disabled = true;
-
-                                                try {
-                                                    const res = await fetch('https://teso-api-dev.fly.dev/api/agently/command', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({ intent: cmd })
-                                                    });
-                                                    const data = await res.json();
-
-                                                    // Trigger Voice from Orchestrator Synthesis
-                                                    if (data.synthesis?.voice_script) {
-                                                        speakAgentMessage(data.synthesis.voice_script);
-                                                    }
-
-                                                    // Update UI if audit returned
-                                                    if (data.results?.finance) {
-                                                        // Update visualization (mock update via details prop pattern)
-                                                        // Ideally we merge this into simulationData, but for now voice is key.
-                                                    }
-
-                                                } catch (err) {
-                                                    console.error("Agent CMD Error:", err);
-                                                    speakAgentMessage("Error de conexión con el Orquestador.");
-                                                } finally {
-                                                    e.target.value = "";
-                                                    e.target.disabled = false;
-                                                    e.target.focus();
-                                                }
-                                            }
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            background: '#1e293b',
-                                            border: '1px solid #475569',
-                                            color: '#fff',
-                                            padding: '10px',
-                                            borderRadius: '6px',
-                                            outline: 'none',
-                                            fontSize: '0.9rem',
-                                            fontFamily: 'monospace'
-                                        }}
-                                        onMouseOver={e => e.target.style.borderColor = '#39FF14'}
-                                        onMouseOut={e => e.target.style.borderColor = '#475569'}
-                                    />
-                                    <div style={{ marginTop: '8px', fontSize: '0.7rem', color: '#64748b' }}>
-                                        Try: <i>"Auditoría global"</i>, <i>"Alerta de tráfico"</i>
-                                    </div>
+                                {/* Agent Selection Chips */}
+                                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                                    <div style={{ padding: '5px 10px', background: '#1e293b', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', borderLeft: '3px solid #a855f7' }}>Seleccionar Cli</div>
+                                    <div style={{ padding: '5px 10px', background: '#dc2626', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>🚀 DESPLEGAR</div>
                                 </div>
 
-                                {/* SHEET TABS (ADMIN DATA LAYER 2) */}
-                                <div style={{ display: 'flex', gap: '2px', padding: '0 10px', background: '#020617', borderBottom: '1px solid #334155', paddingTop: '10px' }}>
-                                    {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (
-                                        <button
-                                            key={sheet}
-                                            onClick={() => setActiveSheet(sheet)}
-                                            style={{
-                                                background: activeSheet === sheet ? '#1e293b' : '#0f172a',
-                                                color: activeSheet === sheet ? '#38bdf8' : '#64748b',
-                                                borderTop: activeSheet === sheet ? '3px solid #38bdf8' : '3px solid transparent',
-                                                borderLeft: '1px solid #334155',
-                                                borderRight: '1px solid #334155',
-                                                borderBottom: 'none',
-                                                padding: '8px 20px',
-                                                cursor: 'pointer',
-                                                fontWeight: 'bold',
-                                                fontSize: '0.75rem',
-                                                transition: 'all 0.2s',
-                                                borderRadius: '6px 6px 0 0',
-                                                opacity: activeSheet === sheet ? 1 : 0.8,
-                                                letterSpacing: '0.5px'
-                                            }}
-                                            onMouseOver={(e) => activeSheet !== sheet && (e.currentTarget.style.background = '#1e293b')}
-                                            onMouseOut={(e) => activeSheet !== sheet && (e.currentTarget.style.background = '#0f172a')}
-                                        >
-                                            {sheet}
-                                        </button>
+                                {/* Console Log (System Events) */}
+                                <div style={{ flex: 1, background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.75rem', marginBottom: '20px' }}>
+                                    <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #1e293b', paddingBottom: '5px', display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>CONSOLE.LOG :: SYSTEM EVENTS</span>
+                                        <span style={{ color: '#39FF14' }}>●</span>
+                                    </div>
+
+                                    <div style={{ color: '#94a3b8', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] ☁️ NUBE SINCRONIZADA: 86346 Ops.</div>
+                                    <div style={{ color: '#fff', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] 🚀 CONNECTING: Sincronizando con "Cerebro" (Python Backend)...</div>
+                                    <div style={{ color: '#ec4899', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] 🖍️ SYSTEM STARTUP: API Target = 'RELATIVE'</div>
+
+                                    {/* Proactive Messages */}
+                                    {agentMessages.slice(-5).map((msg, i) => (
+                                        <div key={i} style={{ color: '#39FF14', marginTop: '5px' }}>
+                                            ► {msg}
+                                        </div>
                                     ))}
                                 </div>
 
-                                {/* SPREADSHEET GRID (ADMIN CONTROL) */}
-                                <div style={{ flex: 1, overflow: 'auto', background: '#1e293b', color: '#cbd5e1', fontFamily: "'Segoe UI', Roboto, Helvetica, sans-serif" }}>
-                                    <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.85rem' }}>
-                                        <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
-                                            <tr>
-                                                {/* DYNAMIC HEADERS */}
-                                                {activeSheet === 'PROGRAMACION' && ['ID', 'FECHA', 'HORA', 'CLIENTE (Pax)', 'RUTA DESTINO', 'ESTADO', 'CONDUCTOR', 'VEHÍCULO', 'TARIFA', 'PIN SEGURIDAD'].map(h => (
-                                                    <th key={h} style={{ background: '#0f172a', borderRight: '1px solid #334155', borderBottom: '2px solid #38bdf8', padding: '12px 15px', textAlign: 'left', color: '#fff', fontWeight: 'bold', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
-                                                ))}
-                                                {activeSheet === 'CXC' && ['CLIENTE CORPORATIVO', 'SALDO PENDIENTE', 'ESTADO', 'DÍAS MORA', 'FACTURA / SOPORTE', 'ACCIÓN'].map(h => (
-                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
-                                                ))}
-                                                {activeSheet === 'CXP' && ['CONDUCTOR', 'VEHÍCULO', 'SALDO A FAVOR', 'BANCO', 'CUENTA', 'REF'].map(h => (
-                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
-                                                ))}
-                                                {activeSheet === 'BANCOS' && ['FECHA', 'TIPO', 'DESCRIPCION / REF', 'VALOR', 'SALDO'].map(h => (
-                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
-                                                ))}
-                                                {activeSheet === 'EGRESOS' && ['FECHA', 'RUBRO', 'VEHICULO', 'VALOR', 'REF'].map(h => (
-                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
-                                                ))}
-                                                {activeSheet === 'INGRESOS' && ['FECHA', 'ORIGEN', 'CONCEPTO', 'VALOR', 'ESTADO'].map(h => (
-                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
-                                                ))}
-                                                {activeSheet === 'CAJA' && ['FECHA', 'RESPONSABLE', 'CONCEPTO', 'ENTRADA', 'SALIDA', 'SALDO'].map(h => (
-                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {/* DYNAMIC BODY */}
-                                            {activeSheet === 'PROGRAMACION' && ([...(requests || []), ...(simulationData?.services || [])])
-                                                .filter(item => {
-                                                    // UI FILTER LOGIC REPLICATION
-                                                    if (!simulationData?.services) return true; // Show all if just requests
-                                                    if (timeFilter === 'ALL') return true;
+                                {/* Unit Status List (Mini) */}
+                                <div style={{ height: '200px', overflowY: 'auto' }}>
+                                    <div style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>UNIDADES EN LÍNEA (15)</div>
+                                    {['TSO-120', 'TSO-160', 'TSO-189'].map(u => (
+                                        <div key={u} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 5px', borderBottom: '1px solid #1e293b', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'monospace' }}>{u}</span>
+                                                <span style={{ color: '#64748b', fontSize: '0.65rem' }}>Cond: COND-{Math.floor(Math.random() * 999)}</span>
+                                            </div>
+                                            <span style={{ color: '#39FF14', fontSize: '0.6rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                <div style={{ width: 6, height: 6, background: '#39FF14', borderRadius: '50%' }}></div>
+                                                DISPONIBLE
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        // --- VIRTUAL EXCEL VIEW (Embedded Real-time Sheet) ---
+                        // MODIFIED: Increased Bottom Margin significantly to clear Floating Chat Bar
+                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, marginBottom: '90px', gap: '10px', overflow: 'hidden' }}>
 
-                                                    const getCutoff = () => {
+                            {/* 1. VISUAL FINANCIAL CARDS (THE RESTORED FEATURE) */}
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(5,150,105,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #10b981', padding: '10px', borderRadius: '15px' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#6ee7b7', fontWeight: 'bold', textTransform: 'uppercase' }}>Ingresos Brutos (Revenue)</div>
+                                    <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.totalRevenue)}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Proyección cierre de mes: ↑ 12%</div>
+                                </div>
+
+                                <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(234,179,8,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #eab308', padding: '10px', borderRadius: '15px' }}>
+                                    <ExplainableTooltip
+                                        title="Margen Operativo (EBITDA)"
+                                        explanation="Beneficio real tras restar costos directos (Gasolina, Comisión). No incluye impuestos ni amortizaciones. Fuente: Análisis de Flujo de Caja en Tiempo Real."
+                                    >
+                                        <div style={{ fontSize: '0.75rem', color: '#fde047', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}>Margen Operativo ℹ</div>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.margin)}</div>
+                                            <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '0.9rem' }}>({analytics.marginPercent}%)</span>
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Post-Comisiones y Gasolina</div>
+                                    </ExplainableTooltip>
+                                </div>
+
+                                <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(249,115,22,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #f97316', padding: '10px', borderRadius: '15px' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#fdba74', fontWeight: 'bold', textTransform: 'uppercase' }}>CxC (Cartera Clientes)</div>
+                                    <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.cxcPending)}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Pendiente de Facturación</div>
+                                </div>
+
+                                <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #3b82f6', padding: '10px', borderRadius: '15px' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 'bold', textTransform: 'uppercase' }}>CxP (Nómina Drivers)</div>
+                                    <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.cxpPending)}</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Corte: 20 DÍAS</div>
+                                </div>
+
+                                {/* CEO STRATEGIC COMMAND PANEL */}
+                                <CeoPanel />
+
+                                {/* UNIT ECONOMICS VERIFICATION ROW (ADDED V4.2) */}
+                                {/* CONFLICT SUMMARY CARD (NEW) */}
+                                {simulationData && simulationData.conflicts && (
+                                    <div style={{ width: '180px', flexShrink: 0, background: 'linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #ef4444', padding: '8px', borderRadius: '15px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: '#fca5a5', fontWeight: 'bold', textTransform: 'uppercase' }}>Conflictos Ops</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '5px' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#fff' }}>🚫 Cancelados: <strong style={{ color: '#fca5a5' }}>{simulationData.conflicts.cancellations}</strong></div>
+                                            <div style={{ fontSize: '0.75rem', color: '#fff' }}>⏳ Retrasos: <strong style={{ color: '#fcd34d' }}>{simulationData.conflicts.delays}</strong></div>
+                                            <div style={{ fontSize: '0.75rem', color: '#fff' }}>🔄 Cambios: <strong style={{ color: '#86efac' }}>{simulationData.conflicts.driverChanges}</strong></div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 2. THE SPREADSHEET */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#0f172a', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
+
+                                {/* TOOLBAR */}
+                                <div style={{ background: '#1e293b', padding: '8px 15px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                        <div style={{ color: '#f1f5f9', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ fontSize: '1.2rem' }}>📊</span> LIBRO: TESO_MASTER_DATASET_VIVO.xlsx
+                                        </div>
+                                        <div style={{ background: '#059669', padding: '2px 8px', borderRadius: '20px', color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', border: '1px solid #34d399' }}>● AUTOGUARDADO: ON</div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        {/* CLOUD COMPUTE EXPORT (PYTHON) */}
+                                        <button
+                                            onClick={async () => {
+                                                setIsExporting(true);
+                                                try {
+                                                    // FIX: Use relative path for production (Space)
+                                                    const apiUrl = import.meta.env.VITE_API_URL || '';
+                                                    const response = await fetch(`${apiUrl}/api/simulate-export?days=360`);
+                                                    if (!response.ok) throw new Error('Cloud Engine Offline');
+
+                                                    const blob = await response.blob();
+                                                    const url = window.URL.createObjectURL(blob);
+                                                    const a = document.createElement('a');
+                                                    a.href = url;
+                                                    a.download = "TESO_CLOUD_SIM_360D.xlsx";
+                                                    document.body.appendChild(a);
+                                                    a.click();
+                                                    a.remove();
+                                                } catch (e) {
+                                                    alert("⚠️ ERROR: Cloud Engine Offline. Asegúrate de correr 'uvicorn main:app' en teso_core/api");
+                                                    console.error(e);
+                                                } finally {
+                                                    setIsExporting(false);
+                                                }
+                                            }}
+                                            style={{
+                                                background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)',
+                                                color: 'white',
+                                                border: '1px solid #8b5cf6',
+                                                padding: '6px 15px',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                fontWeight: 'bold',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                fontSize: '0.8rem',
+                                                boxShadow: '0 0 15px rgba(168, 85, 247, 0.4)'
+                                            }}
+                                            title="Generar en Servidor (No consume memoria local)"
+                                        >
+                                            <span>☁️</span> CLOUD EXPORT (360D)
+                                        </button>
+
+                                        <button
+                                            onClick={() => {
+                                                setIsExporting(true);
+                                                // Use setTimeout to allow UI to render "GENERANDO..." before blocking main thread
+                                                setTimeout(() => {
+                                                    const getDescCutoff = () => {
                                                         const d = new Date();
                                                         d.setHours(0, 0, 0, 0);
                                                         if (timeFilter === 'Today') { d.setDate(d.getDate() - 1); return d; }
-                                                        if (timeFilter === '7D') { d.setDate(d.getDate() - 7); return d; }
                                                         if (timeFilter === '30D') { d.setDate(d.getDate() - 30); return d; }
                                                         if (timeFilter === '90D') { d.setDate(d.getDate() - 90); return d; }
                                                         if (timeFilter === '180D') { d.setDate(d.getDate() - 180); return d; }
                                                         return new Date('2020-01-01');
                                                     };
-                                                    const cutoff = getCutoff();
+                                                    const cutoff = getDescCutoff();
 
-                                                    // USE HELPER FOR ROBUST PARSING
-                                                    return parseItemDate(item.date) >= cutoff;
-                                                })
-                                                .slice(0, 500) // SAFETY CAP FOR UI RENDERING (Don't render 50k rows)
-                                                .map((r, i) => (
-                                                    <tr
-                                                        key={i}
-                                                        onClick={() => onRowClick && onRowClick(r)}
-                                                        style={{
-                                                            background: i % 2 === 0 ? '#0f172a' : '#1e293b',
-                                                            transition: 'background 0.1s',
-                                                            cursor: 'pointer'
-                                                        }}
-                                                        onMouseOver={(e) => e.currentTarget.style.background = '#334155'}
-                                                        onMouseOut={(e) => e.currentTarget.style.background = i % 2 === 0 ? '#0f172a' : '#1e293b'}
-                                                        title="👆 Click para localizar vehículo en mapa"
-                                                    >
-                                                        {/* ID COLUMN WITH VISUAL AUDIT FEEDBACK */}
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#64748b', fontSize: '0.8rem' }}>
-                                                            {isAuditMode ? (
-                                                                <span style={{ fontFamily: 'monospace', color: 'var(--neon-green)' }}>
-                                                                    0x{Math.floor(Math.random() * 10000).toString(16)}...
-                                                                </span>
-                                                            ) : r.id}
-                                                        </td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.date}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fbbf24' }}>{r.flightTime || 'NOW'}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: '#fff' }}>{r.paxName}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.dest || r.route || 'Local'}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
-                                                            <span style={{
-                                                                background: r.status.includes('cancel') || r.status === 'CANCELLED' ? 'rgba(239, 68, 68, 0.2)' :
-                                                                    r.status === 'paid' ? 'rgba(5, 150, 105, 0.3)' : 'rgba(16, 185, 129, 0.2)',
-                                                                color: r.status.includes('cancel') || r.status === 'CANCELLED' ? '#fca5a5' :
-                                                                    r.status === 'paid' ? '#34d399' : '#6ee7b7',
-                                                                padding: '2px 8px', borderRadius: '4px',
-                                                                border: `1px solid ${r.status.includes('cancel') || r.status === 'CANCELLED' ? '#ef4444' : r.status === 'paid' ? '#059669' : '#10b981'}`,
-                                                                textShadow: r.status === 'paid' ? '0 0 5px #34d399' : 'none'
-                                                            }}>
-                                                                {r.status === 'paid' ? '✔ PAGADO' : r.status.toUpperCase().replace('_', ' ')}
-                                                            </span>
-                                                        </td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.driverName || r.assignedDriver || '-'}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{r.vehiclePlate || r.assignedVehicle || '-'}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
-                                                            {r.financials ? formatCurrency(r.financials.totalValue) : (r.fare || '-')}
-                                                        </td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{r.pin || (r.id ? r.id.toString().substring(0, 4) : '????')}</td>
-                                                    </tr>
-                                                ))}
-                                            {activeSheet === 'CXC' && analytics.topClients.length === 0 && (
-                                                <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin datos de cartera disponibles. Ejecute una simulación.</td></tr>
-                                            )}
-                                            {activeSheet === 'CXC' && analytics.topClients.map((c, i) => {
-                                                // Try to match with a corporate billing account for the PDF
-                                                const matchedCorp = corporateAccounts.find(acc => acc.name.includes(c.name) || c.name.includes(acc.name));
-                                                const isExpanded = expandedClient === i;
+                                                    const raw = [...(requests || []), ...(simulationData?.services || [])];
+                                                    const filteredDownload = timeFilter === 'ALL' ? raw : raw.filter(s => parseItemDate(s.date) >= cutoff);
 
-                                                return (
-                                                    <React.Fragment key={i}>
+                                                    generateMasterExcel(filteredDownload, vehicles, simulationData?.clients || [], simulationData, analytics, scenario);
+                                                    setIsExporting(false);
+                                                }, 100);
+                                            }}
+                                            style={{
+                                                background: isExporting ? '#555' : 'linear-gradient(90deg, #059669 0%, #10b981 100%)',
+                                                color: 'white',
+                                                border: isExporting ? '1px solid #333' : '1px solid #34d399',
+                                                padding: '6px 15px',
+                                                borderRadius: '6px',
+                                                cursor: isExporting ? 'wait' : 'pointer',
+                                                fontWeight: 'bold',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
+                                                boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+                                                fontSize: '0.8rem',
+                                                transition: 'all 0.2s',
+                                                animation: isExporting ? 'none' : 'pulse 2s infinite'
+                                            }}
+                                            disabled={isExporting}
+                                            onMouseOver={(e) => !isExporting && (e.currentTarget.style.transform = 'translateY(-1px)')}
+                                            onMouseOut={(e) => !isExporting && (e.currentTarget.style.transform = 'translateY(0)')}
+                                        >
+                                            <span>{isExporting ? '⏳' : '📥'}</span> {isExporting ? `GENERANDO (${filteredCount})...` : `DESCARGAR REPORTE (${timeFilter})`}
+                                        </button>
+                                    </div>
+
+                                    {/* AGENT COMMAND CENTER (PERPLEXITY STYLE) */}
+                                    <div style={{
+                                        background: '#0f172a',
+                                        border: '1px solid #334155',
+                                        borderRadius: '8px',
+                                        padding: '15px',
+                                        marginTop: '20px',
+                                        boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                                    }}>
+                                        <div style={{ color: '#39FF14', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            🤖 VORTEX AGENT COMMAND
+                                            <span style={{ fontSize: '0.6rem', background: '#334155', padding: '2px 6px', borderRadius: '4px', color: '#cbd5e1' }}>BETA: VOICE ENABLED</span>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Ej: 'Auditar finanzas', 'Revisar flota retrasada'..."
+                                            onKeyDown={async (e) => {
+                                                if (e.key === 'Enter') {
+                                                    const cmd = e.target.value;
+                                                    e.target.value = "Pensando...";
+                                                    e.target.disabled = true;
+
+                                                    try {
+                                                        const res = await fetch('https://teso-api-dev.fly.dev/api/agently/command', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ intent: cmd })
+                                                        });
+                                                        const data = await res.json();
+
+                                                        // Trigger Voice from Orchestrator Synthesis
+                                                        if (data.synthesis?.voice_script) {
+                                                            speakAgentMessage(data.synthesis.voice_script);
+                                                        }
+
+                                                        // Update UI if audit returned
+                                                        if (data.results?.finance) {
+                                                            // Update visualization (mock update via details prop pattern)
+                                                            // Ideally we merge this into simulationData, but for now voice is key.
+                                                        }
+
+                                                    } catch (err) {
+                                                        console.error("Agent CMD Error:", err);
+                                                        speakAgentMessage("Error de conexión con el Orquestador.");
+                                                    } finally {
+                                                        e.target.value = "";
+                                                        e.target.disabled = false;
+                                                        e.target.focus();
+                                                    }
+                                                }
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                background: '#1e293b',
+                                                border: '1px solid #475569',
+                                                color: '#fff',
+                                                padding: '10px',
+                                                borderRadius: '6px',
+                                                outline: 'none',
+                                                fontSize: '0.9rem',
+                                                fontFamily: 'monospace'
+                                            }}
+                                            onMouseOver={e => e.target.style.borderColor = '#39FF14'}
+                                            onMouseOut={e => e.target.style.borderColor = '#475569'}
+                                        />
+                                        <div style={{ marginTop: '8px', fontSize: '0.7rem', color: '#64748b' }}>
+                                            Try: <i>"Auditoría global"</i>, <i>"Alerta de tráfico"</i>
+                                        </div>
+                                    </div>
+
+                                    {/* SHEET TABS (ADMIN DATA LAYER 2) */}
+                                    <div style={{ display: 'flex', gap: '2px', padding: '0 10px', background: '#020617', borderBottom: '1px solid #334155', paddingTop: '10px' }}>
+                                        {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (
+                                            <button
+                                                key={sheet}
+                                                onClick={() => setActiveSheet(sheet)}
+                                                style={{
+                                                    background: activeSheet === sheet ? '#1e293b' : '#0f172a',
+                                                    color: activeSheet === sheet ? '#38bdf8' : '#64748b',
+                                                    borderTop: activeSheet === sheet ? '3px solid #38bdf8' : '3px solid transparent',
+                                                    borderLeft: '1px solid #334155',
+                                                    borderRight: '1px solid #334155',
+                                                    borderBottom: 'none',
+                                                    padding: '8px 20px',
+                                                    cursor: 'pointer',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '0.75rem',
+                                                    transition: 'all 0.2s',
+                                                    borderRadius: '6px 6px 0 0',
+                                                    opacity: activeSheet === sheet ? 1 : 0.8,
+                                                    letterSpacing: '0.5px'
+                                                }}
+                                                onMouseOver={(e) => activeSheet !== sheet && (e.currentTarget.style.background = '#1e293b')}
+                                                onMouseOut={(e) => activeSheet !== sheet && (e.currentTarget.style.background = '#0f172a')}
+                                            >
+                                                {sheet}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* SPREADSHEET GRID (ADMIN CONTROL) */}
+                                    <div style={{ flex: 1, overflow: 'auto', background: '#1e293b', color: '#cbd5e1', fontFamily: "'Segoe UI', Roboto, Helvetica, sans-serif" }}>
+                                        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.85rem' }}>
+                                            <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+                                                <tr>
+                                                    {/* DYNAMIC HEADERS */}
+                                                    {activeSheet === 'PROGRAMACION' && ['ID', 'FECHA', 'HORA', 'CLIENTE (Pax)', 'RUTA DESTINO', 'ESTADO', 'CONDUCTOR', 'VEHÍCULO', 'TARIFA', 'PIN SEGURIDAD'].map(h => (
+                                                        <th key={h} style={{ background: '#0f172a', borderRight: '1px solid #334155', borderBottom: '2px solid #38bdf8', padding: '12px 15px', textAlign: 'left', color: '#fff', fontWeight: 'bold', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                                                    ))}
+                                                    {activeSheet === 'CXC' && ['CLIENTE CORPORATIVO', 'SALDO PENDIENTE', 'ESTADO', 'DÍAS MORA', 'FACTURA / SOPORTE', 'ACCIÓN'].map(h => (
+                                                        <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                    ))}
+                                                    {activeSheet === 'CXP' && ['CONDUCTOR', 'VEHÍCULO', 'SALDO A FAVOR', 'BANCO', 'CUENTA', 'REF'].map(h => (
+                                                        <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                    ))}
+                                                    {activeSheet === 'BANCOS' && ['FECHA', 'TIPO', 'DESCRIPCION / REF', 'VALOR', 'SALDO'].map(h => (
+                                                        <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                    ))}
+                                                    {activeSheet === 'EGRESOS' && ['FECHA', 'RUBRO', 'VEHICULO', 'VALOR', 'REF'].map(h => (
+                                                        <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                    ))}
+                                                    {activeSheet === 'INGRESOS' && ['FECHA', 'ORIGEN', 'CONCEPTO', 'VALOR', 'ESTADO'].map(h => (
+                                                        <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                    ))}
+                                                    {activeSheet === 'CAJA' && ['FECHA', 'RESPONSABLE', 'CONCEPTO', 'ENTRADA', 'SALIDA', 'SALDO'].map(h => (
+                                                        <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {/* DYNAMIC BODY */}
+                                                {activeSheet === 'PROGRAMACION' && ([...(requests || []), ...(simulationData?.services || [])])
+                                                    .filter(item => {
+                                                        // UI FILTER LOGIC REPLICATION
+                                                        if (!simulationData?.services) return true; // Show all if just requests
+                                                        if (timeFilter === 'ALL') return true;
+
+                                                        const getCutoff = () => {
+                                                            const d = new Date();
+                                                            d.setHours(0, 0, 0, 0);
+                                                            if (timeFilter === 'Today') { d.setDate(d.getDate() - 1); return d; }
+                                                            if (timeFilter === '7D') { d.setDate(d.getDate() - 7); return d; }
+                                                            if (timeFilter === '30D') { d.setDate(d.getDate() - 30); return d; }
+                                                            if (timeFilter === '90D') { d.setDate(d.getDate() - 90); return d; }
+                                                            if (timeFilter === '180D') { d.setDate(d.getDate() - 180); return d; }
+                                                            return new Date('2020-01-01');
+                                                        };
+                                                        const cutoff = getCutoff();
+
+                                                        // USE HELPER FOR ROBUST PARSING
+                                                        return parseItemDate(item.date) >= cutoff;
+                                                    })
+                                                    .slice(0, 500) // SAFETY CAP FOR UI RENDERING (Don't render 50k rows)
+                                                    .map((r, i) => (
                                                         <tr
-                                                            onClick={() => setExpandedClient(isExpanded ? null : i)}
+                                                            key={i}
+                                                            onClick={() => onRowClick && onRowClick(r)}
                                                             style={{
-                                                                background: isExpanded ? '#334155' : (i % 2 === 0 ? '#0f172a' : '#1e293b'),
-                                                                cursor: 'pointer',
-                                                                borderLeft: isExpanded ? '4px solid #39FF14' : '4px solid transparent'
-                                                            }}>
-                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{isExpanded ? '▼' : '▶'}</span>
-                                                                {c.name}
+                                                                background: i % 2 === 0 ? '#0f172a' : '#1e293b',
+                                                                transition: 'background 0.1s',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                            onMouseOver={(e) => e.currentTarget.style.background = '#334155'}
+                                                            onMouseOut={(e) => e.currentTarget.style.background = i % 2 === 0 ? '#0f172a' : '#1e293b'}
+                                                            title="👆 Click para localizar vehículo en mapa"
+                                                        >
+                                                            {/* ID COLUMN WITH VISUAL AUDIT FEEDBACK */}
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#64748b', fontSize: '0.8rem' }}>
+                                                                {isAuditMode ? (
+                                                                    <span style={{ fontFamily: 'monospace', color: 'var(--neon-green)' }}>
+                                                                        0x{Math.floor(Math.random() * 10000).toString(16)}...
+                                                                    </span>
+                                                                ) : r.id}
                                                             </td>
-                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fbbf24' }}>{formatCurrency(c.volume)}</td>
-                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>POR COBRAR</td>
-                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: c.balance > 0 ? '#f87171' : '#34d399', fontWeight: 'bold' }}>
-                                                                {formatCurrency(c.balance)}
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.date}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fbbf24' }}>{r.flightTime || 'NOW'}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: '#fff' }}>{r.paxName}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.dest || r.route || 'Local'}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
+                                                                <span style={{
+                                                                    background: r.status.includes('cancel') || r.status === 'CANCELLED' ? 'rgba(239, 68, 68, 0.2)' :
+                                                                        r.status === 'paid' ? 'rgba(5, 150, 105, 0.3)' : 'rgba(16, 185, 129, 0.2)',
+                                                                    color: r.status.includes('cancel') || r.status === 'CANCELLED' ? '#fca5a5' :
+                                                                        r.status === 'paid' ? '#34d399' : '#6ee7b7',
+                                                                    padding: '2px 8px', borderRadius: '4px',
+                                                                    border: `1px solid ${r.status.includes('cancel') || r.status === 'CANCELLED' ? '#ef4444' : r.status === 'paid' ? '#059669' : '#10b981'}`,
+                                                                    textShadow: r.status === 'paid' ? '0 0 5px #34d399' : 'none'
+                                                                }}>
+                                                                    {r.status === 'paid' ? '✔ PAGADO' : r.status.toUpperCase().replace('_', ' ')}
+                                                                </span>
                                                             </td>
-                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#94a3b8', fontSize: '0.7rem' }}>
-                                                                {matchedCorp ? 'FACTURA DISPONIBLE' : 'SIN SOPORTE'}
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.driverName || r.assignedDriver || '-'}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{r.vehiclePlate || r.assignedVehicle || '-'}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
+                                                                {r.financials ? formatCurrency(r.financials.totalValue) : (r.fare || '-')}
                                                             </td>
-                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', textDecoration: 'underline', color: '#38bdf8', cursor: 'pointer' }}>Gestionar</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{r.pin || (r.id ? r.id.toString().substring(0, 4) : '????')}</td>
                                                         </tr>
-                                                        {isExpanded && (
-                                                            <tr style={{ background: '#1e293b' }}>
-                                                                <td colSpan="6" style={{ padding: '0', border: '1px solid #334155' }}>
-                                                                    <div style={{
-                                                                        padding: '20px',
-                                                                        display: 'grid',
-                                                                        gridTemplateColumns: '1fr 1fr',
-                                                                        gap: '20px',
-                                                                        background: 'rgba(0,0,0,0.2)',
-                                                                        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)'
-                                                                    }}>
-                                                                        {/* LEFT: INFO */}
-                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                                                            <div style={{ display: 'flex', gap: '40px' }}>
-                                                                                <div>
-                                                                                    <div style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '4px' }}>NIT / IDENTIFICACIÓN</div>
-                                                                                    <div style={{ color: '#fff', fontFamily: 'monospace' }}>900.{Math.floor(Math.random() * 1000)}.000-{i}</div>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <div style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '4px' }}>ESTADO DE CARTERA</div>
-                                                                                    <div style={{ color: c.balance > 0 ? '#fbbf24' : '#39FF14' }}>
-                                                                                        {c.balance > 0 ? `● PENDIENTE (${formatCurrency(c.balance)})` : '● AL DÍA'}
+                                                    ))}
+                                                {activeSheet === 'CXC' && analytics.topClients.length === 0 && (
+                                                    <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin datos de cartera disponibles. Ejecute una simulación.</td></tr>
+                                                )}
+                                                {activeSheet === 'CXC' && analytics.topClients.map((c, i) => {
+                                                    // Try to match with a corporate billing account for the PDF
+                                                    const matchedCorp = corporateAccounts.find(acc => acc.name.includes(c.name) || c.name.includes(acc.name));
+                                                    const isExpanded = expandedClient === i;
+
+                                                    return (
+                                                        <React.Fragment key={i}>
+                                                            <tr
+                                                                onClick={() => setExpandedClient(isExpanded ? null : i)}
+                                                                style={{
+                                                                    background: isExpanded ? '#334155' : (i % 2 === 0 ? '#0f172a' : '#1e293b'),
+                                                                    cursor: 'pointer',
+                                                                    borderLeft: isExpanded ? '4px solid #39FF14' : '4px solid transparent'
+                                                                }}>
+                                                                <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                    <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{isExpanded ? '▼' : '▶'}</span>
+                                                                    {c.name}
+                                                                </td>
+                                                                <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fbbf24' }}>{formatCurrency(c.volume)}</td>
+                                                                <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>POR COBRAR</td>
+                                                                <td style={{ border: '1px solid #334155', padding: '8px 12px', color: c.balance > 0 ? '#f87171' : '#34d399', fontWeight: 'bold' }}>
+                                                                    {formatCurrency(c.balance)}
+                                                                </td>
+                                                                <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#94a3b8', fontSize: '0.7rem' }}>
+                                                                    {matchedCorp ? 'FACTURA DISPONIBLE' : 'SIN SOPORTE'}
+                                                                </td>
+                                                                <td style={{ border: '1px solid #334155', padding: '8px 12px', textDecoration: 'underline', color: '#38bdf8', cursor: 'pointer' }}>Gestionar</td>
+                                                            </tr>
+                                                            {isExpanded && (
+                                                                <tr style={{ background: '#1e293b' }}>
+                                                                    <td colSpan="6" style={{ padding: '0', border: '1px solid #334155' }}>
+                                                                        <div style={{
+                                                                            padding: '20px',
+                                                                            display: 'grid',
+                                                                            gridTemplateColumns: '1fr 1fr',
+                                                                            gap: '20px',
+                                                                            background: 'rgba(0,0,0,0.2)',
+                                                                            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)'
+                                                                        }}>
+                                                                            {/* LEFT: INFO */}
+                                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                                                <div style={{ display: 'flex', gap: '40px' }}>
+                                                                                    <div>
+                                                                                        <div style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '4px' }}>NIT / IDENTIFICACIÓN</div>
+                                                                                        <div style={{ color: '#fff', fontFamily: 'monospace' }}>900.{Math.floor(Math.random() * 1000)}.000-{i}</div>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <div style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '4px' }}>ESTADO DE CARTERA</div>
+                                                                                        <div style={{ color: c.balance > 0 ? '#fbbf24' : '#39FF14' }}>
+                                                                                            {c.balance > 0 ? `● PENDIENTE (${formatCurrency(c.balance)})` : '● AL DÍA'}
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
+
+                                                                                {matchedCorp && (
+                                                                                    <div style={{ marginTop: '10px' }}>
+                                                                                        <a
+                                                                                            href={matchedCorp.pdf}
+                                                                                            target="_blank"
+                                                                                            rel="noopener noreferrer"
+                                                                                            download={`FACTURA_DIAN_${c.name.replace(/\s+/g, '_')}.pdf`}
+                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                            className="btn-neon"
+                                                                                            style={{
+                                                                                                textDecoration: 'none',
+                                                                                                border: '1px solid gold',
+                                                                                                color: 'gold',
+                                                                                                background: 'rgba(255, 215, 0, 0.05)',
+                                                                                                padding: '8px 20px',
+                                                                                                fontSize: '0.8rem',
+                                                                                                width: '100%',
+                                                                                                display: 'flex',
+                                                                                                alignItems: 'center',
+                                                                                                justifyContent: 'center',
+                                                                                                gap: '8px',
+                                                                                                borderRadius: '4px'
+                                                                                            }}>
+                                                                                            <span>📄</span> DESCARGAR FACTURA DIAN COMPLETA (SECURE)
+                                                                                        </a>
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
 
-                                                                            {matchedCorp && (
-                                                                                <div style={{ marginTop: '10px' }}>
-                                                                                    <a
-                                                                                        href={matchedCorp.pdf}
-                                                                                        target="_blank"
-                                                                                        rel="noopener noreferrer"
-                                                                                        download={`FACTURA_DIAN_${c.name.replace(/\s+/g, '_')}.pdf`}
-                                                                                        onClick={(e) => e.stopPropagation()}
-                                                                                        className="btn-neon"
-                                                                                        style={{
-                                                                                            textDecoration: 'none',
-                                                                                            border: '1px solid gold',
-                                                                                            color: 'gold',
-                                                                                            background: 'rgba(255, 215, 0, 0.05)',
-                                                                                            padding: '8px 20px',
-                                                                                            fontSize: '0.8rem',
-                                                                                            width: '100%',
-                                                                                            display: 'flex',
-                                                                                            alignItems: 'center',
-                                                                                            justifyContent: 'center',
-                                                                                            gap: '8px',
-                                                                                            borderRadius: '4px'
-                                                                                        }}>
-                                                                                        <span>📄</span> DESCARGAR FACTURA DIAN COMPLETA (SECURE)
-                                                                                    </a>
+                                                                            {/* RIGHT: MOVEMENTS TABLE */}
+                                                                            <div style={{ background: '#0f172a', padding: '10px', borderRadius: '4px' }}>
+                                                                                <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px', borderBottom: '1px solid #334155', paddingBottom: '4px' }}>
+                                                                                    ÚLTIMOS MOVIMIENTOS Y ABONOS
                                                                                 </div>
-                                                                            )}
-                                                                        </div>
-
-                                                                        {/* RIGHT: MOVEMENTS TABLE */}
-                                                                        <div style={{ background: '#0f172a', padding: '10px', borderRadius: '4px' }}>
-                                                                            <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px', borderBottom: '1px solid #334155', paddingBottom: '4px' }}>
-                                                                                ÚLTIMOS MOVIMIENTOS Y ABONOS
+                                                                                <table style={{ width: '100%', fontSize: '0.75rem', color: '#cbd5e1' }}>
+                                                                                    <tbody>
+                                                                                        {(simulationData?.bankTransactions?.filter(t => t.clientName === c.name) || []).slice(-4).map((tx, k) => (
+                                                                                            <tr key={k}>
+                                                                                                <td style={{ padding: '4px' }}>{tx.date}</td>
+                                                                                                <td style={{ padding: '4px', color: '#34d399' }}>ABONO CTA</td>
+                                                                                                <td style={{ padding: '4px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(tx.amount)}</td>
+                                                                                            </tr>
+                                                                                        ))}
+                                                                                        {(!simulationData?.bankTransactions?.some(t => t.clientName === c.name)) && (
+                                                                                            <tr><td colSpan="3" style={{ padding: '10px', textAlign: 'center', color: '#64748b' }}>Sin abonos recientes</td></tr>
+                                                                                        )}
+                                                                                    </tbody>
+                                                                                </table>
                                                                             </div>
-                                                                            <table style={{ width: '100%', fontSize: '0.75rem', color: '#cbd5e1' }}>
-                                                                                <tbody>
-                                                                                    {(simulationData?.bankTransactions?.filter(t => t.clientName === c.name) || []).slice(-4).map((tx, k) => (
-                                                                                        <tr key={k}>
-                                                                                            <td style={{ padding: '4px' }}>{tx.date}</td>
-                                                                                            <td style={{ padding: '4px', color: '#34d399' }}>ABONO CTA</td>
-                                                                                            <td style={{ padding: '4px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(tx.amount)}</td>
-                                                                                        </tr>
-                                                                                    ))}
-                                                                                    {(!simulationData?.bankTransactions?.some(t => t.clientName === c.name)) && (
-                                                                                        <tr><td colSpan="3" style={{ padding: '10px', textAlign: 'center', color: '#64748b' }}>Sin abonos recientes</td></tr>
-                                                                                    )}
-                                                                                </tbody>
-                                                                            </table>
                                                                         </div>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </React.Fragment>
-                                                );
-                                            })}
-                                            {activeSheet === 'CXP' && (!simulationData?.payables && vehicles.length === 0) && (
-                                                <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin cuentas por pagar.</td></tr>
-                                            )}
-                                            {activeSheet === 'CXP' && (simulationData?.payables || vehicles.slice(0, 15)).slice(0, 100).map((item, i) => {
-                                                // Handler for both simulated data and fallback vehicle list
-                                                const isSim = !!simulationData?.payables;
-                                                return (
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                                {activeSheet === 'CXP' && (!simulationData?.payables && vehicles.length === 0) && (
+                                                    <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin cuentas por pagar.</td></tr>
+                                                )}
+                                                {activeSheet === 'CXP' && (simulationData?.payables || vehicles.slice(0, 15)).slice(0, 100).map((item, i) => {
+                                                    // Handler for both simulated data and fallback vehicle list
+                                                    const isSim = !!simulationData?.payables;
+                                                    return (
+                                                        <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold' }}>{isSim ? item.driver : item.driver}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{isSim ? item.vehicle : item.id}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399' }}>{formatCurrency(isSim ? item.amount : 450000)}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{isSim ? item.bank : 'BANCOLOMBIA'}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{isSim ? item.account : '****2341'}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.7rem', color: '#aaa' }}>{isSim ? item.ref : '-'}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                                {activeSheet === 'BANCOS' && (!simulationData?.bankTransactions || simulationData.bankTransactions.length === 0) && (
+                                                    <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin transacciones registradas.</td></tr>
+                                                )}
+                                                {activeSheet === 'BANCOS' && (simulationData?.bankTransactions || []).slice(0, 100).map((t, i) => (
                                                     <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold' }}>{isSim ? item.driver : item.driver}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{isSim ? item.vehicle : item.id}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399' }}>{formatCurrency(isSim ? item.amount : 450000)}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{isSim ? item.bank : 'BANCOLOMBIA'}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{isSim ? item.account : '****2341'}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.7rem', color: '#aaa' }}>{isSim ? item.ref : '-'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{t.date}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
+                                                            <span style={{
+                                                                background: t.type === 'INCOME' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                                                color: t.type === 'INCOME' ? '#34d399' : '#fca5a5',
+                                                                padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
+                                                            }}>{t.type}</span>
+                                                        </td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>
+                                                            {t.description} <span style={{ color: '#64748b', fontSize: '0.7rem' }}>({t.ref})</span>
+                                                        </td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: t.type === 'INCOME' ? '#34d399' : '#ef4444' }}>
+                                                            {t.type === 'INCOME' ? '+' : '-'}{formatCurrency(t.amount)}
+                                                        </td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace', color: '#fbbf24' }}>
+                                                            {formatCurrency(t.balance)}
+                                                        </td>
                                                     </tr>
-                                                );
-                                            })}
-                                            {activeSheet === 'BANCOS' && (!simulationData?.bankTransactions || simulationData.bankTransactions.length === 0) && (
-                                                <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin transacciones registradas.</td></tr>
-                                            )}
-                                            {activeSheet === 'BANCOS' && (simulationData?.bankTransactions || []).slice(0, 100).map((t, i) => (
-                                                <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{t.date}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
-                                                        <span style={{
-                                                            background: t.type === 'INCOME' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                                                            color: t.type === 'INCOME' ? '#34d399' : '#fca5a5',
-                                                            padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
-                                                        }}>{t.type}</span>
-                                                    </td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>
-                                                        {t.description} <span style={{ color: '#64748b', fontSize: '0.7rem' }}>({t.ref})</span>
-                                                    </td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: t.type === 'INCOME' ? '#34d399' : '#ef4444' }}>
-                                                        {t.type === 'INCOME' ? '+' : '-'}{formatCurrency(t.amount)}
-                                                    </td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace', color: '#fbbf24' }}>
-                                                        {formatCurrency(t.balance)}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                            {activeSheet === 'EGRESOS' && (!simulationData?.expenses || simulationData.expenses.length === 0) && (
-                                                <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin egresos registrados.</td></tr>
-                                            )}
-                                            {activeSheet === 'EGRESOS' && (simulationData?.expenses || []).slice(0, 100).map((e, i) => (
-                                                <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{e.date}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: 'bold', color: '#94a3b8' }}>{e.category}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{e.vehicle}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>{formatCurrency(e.amount)}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.7rem', color: '#64748b' }}>{e.ref}</td>
-                                                </tr>
-                                            ))}
-
-                                            {activeSheet === 'INGRESOS' && (simulationData?.bankTransactions?.filter(t => t.type === 'INCOME') || []).slice(0, 100).map((t, i) => (
-                                                <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{t.date}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>{t.clientName || 'TESO PLATFORM'}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.8rem' }}>{t.description}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399', fontWeight: 'bold' }}>{formatCurrency(t.amount)}</td>
-                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}><span style={{ background: '#059669', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>APLICADO</span></td>
-                                                </tr>
-                                            ))}
-
-                                            {activeSheet === 'CAJA' && (
-                                                // Mock CAJA (Petty Cash mock)
-                                                [...Array(10)].map((_, i) => ({
-                                                    date: new Date().toISOString().split('T')[0],
-                                                    resp: 'OPERACIONES',
-                                                    conc: 'CAJA MENOR - REFRIGERIOS',
-                                                    in: 0,
-                                                    out: 50000,
-                                                    bal: 2000000 - (i * 50000)
-                                                })).map((c, i) => (
+                                                ))}
+                                                {activeSheet === 'EGRESOS' && (!simulationData?.expenses || simulationData.expenses.length === 0) && (
+                                                    <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin egresos registrados.</td></tr>
+                                                )}
+                                                {activeSheet === 'EGRESOS' && (simulationData?.expenses || []).slice(0, 100).map((e, i) => (
                                                     <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.date}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.resp}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.conc}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399' }}>{c.in}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#ef4444' }}>{c.out}</td>
-                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace', color: 'gold' }}>{formatCurrency(c.bal)}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{e.date}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: 'bold', color: '#94a3b8' }}>{e.category}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{e.vehicle}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>{formatCurrency(e.amount)}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.7rem', color: '#64748b' }}>{e.ref}</td>
                                                     </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                ))}
 
-                                <div style={{ background: '#1e293b', padding: '0px', display: 'flex', borderTop: '1px solid #334155', overflowX: 'auto' }}>
-                                    {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (
-                                        <button
-                                            key={sheet}
-                                            onClick={() => setActiveSheet(sheet)}
-                                            style={{
-                                                padding: '10px 25px',
-                                                border: 'none',
-                                                borderRight: '1px solid #334155',
-                                                background: activeSheet === sheet ? '#0f172a' : '#1e293b',
-                                                color: activeSheet === sheet ? '#34d399' : '#94a3b8',
-                                                fontWeight: activeSheet === sheet ? 'bold' : 'normal',
-                                                cursor: 'pointer',
-                                                borderTop: activeSheet === sheet ? '3px solid #34d399' : '3px solid transparent',
-                                                transition: 'background 0.2s',
-                                                fontSize: '0.85rem'
-                                            }}
-                                        >
-                                            {sheet}
-                                        </button>
-                                    ))}
-                                    <button style={{ padding: '8px 20px', border: 'none', background: 'transparent', color: '#64748b', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.2rem' }}>+</button>
+                                                {activeSheet === 'INGRESOS' && (simulationData?.bankTransactions?.filter(t => t.type === 'INCOME') || []).slice(0, 100).map((t, i) => (
+                                                    <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{t.date}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>{t.clientName || 'TESO PLATFORM'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.8rem' }}>{t.description}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399', fontWeight: 'bold' }}>{formatCurrency(t.amount)}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}><span style={{ background: '#059669', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>APLICADO</span></td>
+                                                    </tr>
+                                                ))}
+
+                                                {activeSheet === 'CAJA' && (
+                                                    // Mock CAJA (Petty Cash mock)
+                                                    [...Array(10)].map((_, i) => ({
+                                                        date: new Date().toISOString().split('T')[0],
+                                                        resp: 'OPERACIONES',
+                                                        conc: 'CAJA MENOR - REFRIGERIOS',
+                                                        in: 0,
+                                                        out: 50000,
+                                                        bal: 2000000 - (i * 50000)
+                                                    })).map((c, i) => (
+                                                        <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.date}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.resp}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.conc}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399' }}>{c.in}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#ef4444' }}>{c.out}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace', color: 'gold' }}>{formatCurrency(c.bal)}</td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div style={{ background: '#1e293b', padding: '0px', display: 'flex', borderTop: '1px solid #334155', overflowX: 'auto' }}>
+                                        {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (
+                                            <button
+                                                key={sheet}
+                                                onClick={() => setActiveSheet(sheet)}
+                                                style={{
+                                                    padding: '10px 25px',
+                                                    border: 'none',
+                                                    borderRight: '1px solid #334155',
+                                                    background: activeSheet === sheet ? '#0f172a' : '#1e293b',
+                                                    color: activeSheet === sheet ? '#34d399' : '#94a3b8',
+                                                    fontWeight: activeSheet === sheet ? 'bold' : 'normal',
+                                                    cursor: 'pointer',
+                                                    borderTop: activeSheet === sheet ? '3px solid #34d399' : '3px solid transparent',
+                                                    transition: 'background 0.2s',
+                                                    fontSize: '0.85rem'
+                                                }}
+                                            >
+                                                {sheet}
+                                            </button>
+                                        ))}
+                                        <button style={{ padding: '8px 20px', border: 'none', background: 'transparent', color: '#64748b', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.2rem' }}>+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )
-            }
+                    )
+                }
 
 
 
-        </div>
-        </div >
-    )
+            </div>
+            )
+};
 };
 
-export default OperationalDashboard;
+            export default OperationalDashboard;
