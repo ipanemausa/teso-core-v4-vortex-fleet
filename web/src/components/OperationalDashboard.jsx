@@ -1882,6 +1882,6 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
             </div>
             )
 };
-};
+
 
             export default OperationalDashboard;
