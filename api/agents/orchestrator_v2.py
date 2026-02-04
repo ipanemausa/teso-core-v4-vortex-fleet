@@ -6,8 +6,7 @@ from services.voice_system import VoiceSystem
 # En una arquitectura real, estos serían microservicios o clases separadas
 from agents.financial_agent import FinancialAgent
 from agents.logistics_agent import LogisticsAgent
-# from agents.design_ai import DesignDirectorAgent (Future)
-# from agents.hr_control_agent import HRControlAgent (Future)
+from agents.design_agent import DesignDirectorAgent
 
 class StrategicOrchestrator:
     """
@@ -21,9 +20,9 @@ class StrategicOrchestrator:
         self.voice_system = VoiceSystem()
         
         # SUBORDINADOS (La C-Suite Agéntica)
-        self.cfo_agent = FinancialAgent() # Control Financiero
-        self.coo_agent = LogisticsAgent() # Dirección Operativa
-        # self.cdo_agent = DesignDirectorAgent() # Organización y Diseño
+        self.cfo_agent = FinancialAgent() # Control Financiero (CFO)
+        self.coo_agent = LogisticsAgent() # Dirección Operativa (COO)
+        self.cdo_agent = DesignDirectorAgent() # Organización y Diseño (CDO)
         
         self.memory = [] # Memoria Corporativa
 
@@ -35,40 +34,43 @@ class StrategicOrchestrator:
         global_state = self._perceive_global_state(simulation_data)
         
         # 2. CONSULTA A EXPERTOS (Delegación)
-        # El CEO no micromanagea, pide reportes a sus directores.
         
         # A) Finanzas (Control)
-        financial_report = self.cfo_agent._format_output({}, {"verdict": "ANALYZING", "recommendation": "Pending", "score": 0}) 
-        if hasattr(self.cfo_agent, 'analyze_metrics'): # Si existiera el método avanzado
-             financial_report = self.cfo_agent.analyze_metrics(simulation_data)
+        financial_report = self.cfo_agent.run_audit(simulation_data)
 
         # B) Logística (Dirección)
         ops_report = self.coo_agent.run_dispatch_analysis(simulation_data)
         
+        # C) Diseño (Organización/UX)
+        design_report = self.cdo_agent.run_ux_audit({"interactive_nodes": 50, "event_handlers": 50}) # Mock Simulation State
+        
         # 3. SÍNTESIS ESTRATÉGICA (La Decisión del CEO)
-        final_verdict = self._synthesize_strategy(financial_report, ops_report)
+        final_verdict = self._synthesize_strategy(financial_report, ops_report, design_report)
         
         # 4. ORQUESTACIÓN DE ACCIÓN (Ejecución)
         return self._format_executive_summary(final_verdict)
 
-    def _perceive_global_state(self, data):
-        return {
-            "timestamp": datetime.now(),
-            "market_mood": "VOLATILE", # Simulado
-            "resource_availability": "HIGH"
-        }
-
-    def _synthesize_strategy(self, fin, ops):
+    def _synthesize_strategy(self, fin, ops, design):
         """
-        Cruza Finanzas vs Operaciones para tomar decisiones de alto nivel.
-        Ej: Si Operaciones dice "Expandir" pero Finanzas dice "Sin Caja", el CEO frena.
+        Cruza Finanzas vs Operaciones vs Diseño
         """
         fin_score = fin.get('executive_summary', {}).get('score', 50)
         ops_status = ops.get('dispatch_summary', {}).get('status', 'NORMAL')
+        ux_score = design.get('design_audit', {}).get('score', 100)
         
         decision = "MAINTAIN_COURSE"
         rationale = "Operación estable. Sin conflictos mayores."
         
+        # UX VETO POWER (Si el diseño falla, detenemos lanzamientos)
+        if ux_score < 80:
+             return {
+                 "ceo_decision": "HALT_DEPLOYMENT",
+                 "rationale": f"Bloqueo de Calidad. El CDO reporta problemas de UX ({ux_score}/100). Prioridad: Arreglar Interfaz.",
+                 "financial_input": fin,
+                 "ops_input": ops,
+                 "design_input": design
+             }
+
         # CONFLICT RESOLUTION LOGIC
         if ops_status == "CRITICAL_OVERLOAD" and fin_score > 80:
             decision = "AGGRESSIVE_EXPANSION"
@@ -81,7 +83,8 @@ class StrategicOrchestrator:
             "ceo_decision": decision,
             "rationale": rationale,
             "financial_input": fin,
-            "ops_input": ops
+            "ops_input": ops,
+            "design_input": design
         }
 
     def _format_executive_summary(self, strategy):
