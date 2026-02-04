@@ -28,7 +28,7 @@ export function CoreOperativo({ onClose, onHome }) {
             if (activeFilter === '90D') daysToSimulate = 90;
             if (activeFilter === 'ALL') daysToSimulate = 360;
 
-            const apiUrl = 'https://teso-api-dev.fly.dev';
+            const apiUrl = '';
             const resp = await fetch(
                 `${apiUrl}/api/simulate/core-v4`,
                 {

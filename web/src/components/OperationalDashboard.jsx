@@ -19,6 +19,7 @@ import ExplainableTooltip from './ExplainableTooltip';
 import TesoButton from './ui/TesoButton';
 import StatusBadge from './ui/StatusBadge';
 import { CoreOperativo } from '../views/CoreOperativo';
+import { voiceSystem, VOICE_TAGS } from '../services/VoiceSystem';
 
 // HELPER: Date Parser
 const parseItemDate = (dateStr) => {
@@ -45,24 +46,20 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
     const [error, setError] = useState(null);
     const [voiceEnabled, setVoiceEnabled] = useState(true); // Default ON for demo
 
-    // --- VOICE SYNTHESIS BETA (BROWSER NATIVE) ---
-    const speakAgentMessage = (text) => {
-        if (!voiceEnabled || !window.speechSynthesis) return;
+    // --- VOICE SYNTHESIS (Unified System) ---
+    const speakAgentMessage = (text, emotion = 'professional') => {
+        if (!voiceEnabled) return;
 
-        // Stop current speech
-        window.speechSynthesis.cancel();
+        // SMART FORMATTING: If text already has tags (from Backend Agent), respect them.
+        // Otherwise, apply the requested UI emotion.
+        const hasExistingTags = /^\s*\[.*\]/.test(text);
+        const styledText = hasExistingTags ? text : voiceSystem.formatText(text, emotion);
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-CO'; // Colombian Spanish ideally
-        utterance.rate = 1.1; // Slightly faster/executive pace
-        utterance.pitch = 1.0;
+        // Detect urgency for Native Fallback (Simple heuristic)
+        const isUrgent = text.includes('[urgent]') || text.includes('[angry]') || emotion === 'urgent';
+        const urgency = isUrgent ? 'CRITICAL' : 'INFO';
 
-        // Try to find a good Spanish voice
-        const voices = window.speechSynthesis.getVoices();
-        const esVoice = voices.find(v => v.lang.includes('es'));
-        if (esVoice) utterance.voice = esVoice;
-
-        window.speechSynthesis.speak(utterance);
+        voiceSystem.speak(styledText, urgency);
     };
 
     // --- AUTO-SPEAK AGENT ALERTS ---
@@ -141,7 +138,7 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
             console.log("📡 CONNECTING TO TESO OPS V4...");
             setLoading(true);
             try {
-                const apiUrl = 'https://teso-api-dev.fly.dev'; // Force Production URL
+                const apiUrl = ''; // Relative path for unified deployment (Hugging Face / Docker)
 
                 // 1. GET V4 STATS
                 const res = await fetch(`${apiUrl}/api/simulate/core-v4`, {

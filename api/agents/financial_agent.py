@@ -69,20 +69,24 @@ class FinancialAgent:
             verdict = "CRITICAL_INSOLVENCY"
             recommendation = "🛑 ALERTA ROJA: Inyección de capital inmediata requerida. Detener pagos a proveedores no esenciales."
             score = 10.0
+            voice_tags = "[urgent] [angry] [loudly]"
         elif balance < 5000000:
             verdict = "LOW_LIQUIDITY"
             recommendation = "⚠️ PRECAUCIÓN: Caja baja. Priorizar nómina y combustible. Retrasar CXP administrativa."
             score = 45.0
+            voice_tags = "[nervous] [breathes]"
         elif balance < 20000000:
             verdict = "STABLE"
             recommendation = "✅ OPERACIÓN NORMAL: Mantener recaudo. Sugerencia: Invertir excedentes en mantenimiento preventivo."
             score = 80.0
+            voice_tags = "[calm] [deliberate]"
         else:
              verdict = "OPTIMAL"
              recommendation = "🚀 CAJA FUERTE: Oportunidad de expansión de flota o pago anticipado de deuda."
              score = 95.0
+             voice_tags = "[happy] [excited] [laughs]"
              
-        return {"verdict": verdict, "recommendation": recommendation, "score": score}
+        return {"verdict": verdict, "recommendation": recommendation, "score": score, "voice_tags": voice_tags}
 
     def _format_output(self, metrics, analysis):
         """
@@ -94,6 +98,8 @@ class FinancialAgent:
         
         decision_id = f"AUD-{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}"
         
+        script = f"{analysis['voice_tags']} Atención Gerencia. Auditoría finalizada. El estado financiero es {analysis['verdict']}. {analysis['recommendation']} Mi nivel de confianza es del {int(analysis['score'])} por ciento."
+
         return {
             "meta": {
                 "agent": self.identity["rol"],
@@ -109,7 +115,7 @@ class FinancialAgent:
                 "current_cash_cop": metrics["current_balance"],
                 "status": "Solvente" if not metrics["insolvency_risk"] else "Insolvente"
             },
-            "voice_script": f"Atención Gerencia. Auditoría finalizada. El estado financiero es {analysis['verdict']}. {analysis['recommendation']} Mi nivel de confianza es del {int(analysis['score'])} por ciento.",
+            "voice_script": script,
             "strategic_advice": {
                 "action_item": analysis["recommendation"],
                 "urgency": "ALTA" if analysis["score"] < 50 else "BAJA"
