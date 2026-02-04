@@ -1060,12 +1060,8 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
                     </div>
                 </div>
 
-                {/* --- WAR ROOM (SCENARIO BUILDER) PANEL --- */}
-                {/* WAR ROOM TEMPORARILY DISABLED FOR SYNTAX REPAIR 
-                {showWarRoom && (
-                   <div /> 
-                )}
-                */}{/* CONTENT AREA */}
+                {/* WAR ROOM DISABLED */}
+                {showWarRoom && null}{/* CONTENT AREA */}
                 {
                     viewMode === 'LIVE_OPS' ? (
                         /* --- LAYER 2: OPS MAP MODE (RECREATED FROM FLY.IO LEGACY) --- */
