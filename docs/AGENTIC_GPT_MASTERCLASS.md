@@ -1,4 +1,4 @@
-# AGENTIC AI BLUEPRINT: FROM PROMPT TO AUTONOMY
+![alt text](image.png)# AGENTIC AI BLUEPRINT: FROM PROMPT TO AUTONOMY
 > **Artifacto de Estudio - Preparación Clase GPT Agents**
 > *Objetivo: Entender y diseñar arquitecturas agénticas avanzadas usando modelos GPT.*
 

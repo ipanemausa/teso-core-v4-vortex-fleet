@@ -1,117 +1,164 @@
-
 from datetime import datetime
 import hashlib
 import random
+from services.voice_system import VoiceSystem
+
+# --- MIGRACION A AGENTE HIBRIDO (NIVEL 1.5) ---
+# Este agente mantiene la estructura legacy para compatibilidad
+# pero incorpora la logica de "Thinking" del nuevo framework.
 
 class LogisticsAgent:
     """
-    AGENTE: VORTEX_LOGISTICS_DISPATCHER (LogiBot-01)
-    FRAMEWORK: Learning Heroes 5-Block Protocol
+    AGENTE: VORTEX_LOGISTICS_DISPATCHER (LogiBot-02 Enhanced)
+    FRAMEWORK: ReAct (Reasoning + Acting) Simulation
     """
     
     def __init__(self):
-        # 1. ROL Y OBJETIVO
+        # 1. PERSONA
         self.identity = {
-            "rol": "Jefe de Despacho y Logística de Transporte",
-            "objetivo": "Optimizar la asignación de flota, minimizar tiempos muertos y garantizar cumplimiento de rutas.",
-            "problema_que_resuelve": "Evita cuellos de botella operativos y retrasos en servicios críticos (Aeropuerto)."
+            "rol": "Jefe de Despacho y Logística de Transporte (AI)",
+            "objetivo": "Optimizar flota y detectar cuellos de botella.",
+            "mode": "AUTONOMOUS_MONITOR"
         }
-        
-        # 2. CONTEXTO
-        self.context = {
-            "usuario": "Coordinador de Operaciones Teso",
-            "entorno": "Medellín y Rionegro (JMC). Flota de Vans y Automóviles.",
-            "base": "Datos en tiempo real de ubicación y estado de servicios."
-        }
+        self.voice_system = VoiceSystem() # Conexión a sistema de voz
 
     def run_dispatch_analysis(self, simulation_data):
         """
-        3. PASOS DE EJECUCIÓN (Thinking Process)
+        Bucle de Pensamiento Simulado (ReAct Loop)
         """
-        # PASO 1: RECOPILAR (Gather Data)
+        # --- PERCEPTION ---
+        scene = self._perceive_environment(simulation_data)
+        
+        # --- THINKING (The Brain) ---
+        # Simula el razonamiento que haría un LLM con Chain of Thought
+        thoughts, decision = self._reason_about_scene(scene)
+        
+        # --- ACTION ---
+        action_result = self._execute_decision(decision, scene)
+        
+        # --- OUTPUT ---
+        return self._format_final_response(scene, thoughts, action_result)
+
+    def _perceive_environment(self, simulation_data):
+        """Gather raw operational data"""
         if not simulation_data or "services" not in simulation_data:
-             return self._format_error("No hay datos de servicios activos para analizar.")
+             return None
              
         services = simulation_data.get("services", [])
-        
-        # PASO 2: ANALIZAR (Evaluate Metrics)
-        metrics = self._analyze_fleet_status(services)
-        
-        # PASO 3: DESARROLLAR (Build Narrative)
-        analysis = self._develop_plan(metrics)
-        
-        # PASO 4: ESTRUCTURAR (Organize Output) & 5. ENTREGAR
-        return self._format_output(metrics, analysis)
-
-    def _analyze_fleet_status(self, services):
-        """Metodología de Análisis de Flota"""
         total = len(services)
-        active = len([s for s in services if s.get("ESTADO") == "EN_PROGRESO" or s.get("status") == "IN_PROGRESS"])
-        delayed = len([s for s in services if s.get("ESTADO") == "RETRASADO" or s.get("status") == "DELAYED"])
-        available = 45 - active # Asumiendo flota total de 45 (hardcoded por ahora)
+        active = len([s for s in services if s.get("status") in ["IN_PROGRESS", "EN_PROGRESO"]])
+        delayed = len([s for s in services if s.get("status") in ["DELAYED", "RETRASADO"]])
         
-        # Simulación de saturación
-        saturation = (active / 45) * 100
+        # Simulación de clima y tráfico (Variables exógenas)
+        weather = "LLUVIA_INTENSA" if random.random() > 0.8 else "SOLEADO"
+        traffic = "CONGESTION" if active > 30 else "FLUIDO"
         
         return {
-            "total_ops": total,
-            "active_units": active,
-            "delayed_units": delayed,
-            "available_units": available if available > 0 else 0,
-            "saturation_percentage": round(saturation, 1)
+            "services_raw": services,
+            "metrics": {
+                "total": total,
+                "active": active,
+                "delayed": delayed,
+                "saturation": (active / 45) * 100
+            },
+            "environment": {
+                "weather": weather,
+                "traffic": traffic
+            }
         }
 
-    def _develop_plan(self, metrics):
-        """Construcción de la Estrategia Logística"""
-        sat = metrics["saturation_percentage"]
-        delayed = metrics["delayed_units"]
+    def _reason_about_scene(self, scene):
+        """
+        Simula el 'System 2' thinking.
+        Devuelve: (ThinkingChain, FinalDecision)
+        """
+        if not scene: 
+            return [], "NO_DATA"
+            
+        metrics = scene["metrics"]
+        env = scene["environment"]
+        thoughts = []
         
-        if sat > 90:
-            verdict = "CRITICAL_OVERLOAD"
-            recommendation = "🛑 ALERTA DE CAPACIDAD: Activar flota tercerizada inmediatamente. Detener reservas nuevas."
-            priority = "URGENTE"
-        elif delayed > 3:
-            verdict = "DELAY_WARNING"
-            recommendation = "⚠️ RETRASOS DETECTADOS: Reasignar servicios de baja prioridad para cubrir rutas críticas."
-            priority = "ALTA"
-        elif sat > 70:
-             verdict = "HIGH_DEMAND"
-             recommendation = "⚡ DEMANDA ALTA: Pre-posicionar unidades en zona Aeropuerto y El Poblado."
-             priority = "MEDIA"
+        # Thought 1: Check Saturation
+        thoughts.append(f"Saturation is {metrics['saturation']:.1f}%. Threshold is 80%.")
+        
+        # Thought 2: Check Environment Impact
+        if env["weather"] == "LLUVIA_INTENSA":
+            thoughts.append("Weather is bad. Reducing effective fleet capacity by 20%.")
+            adjusted_capacity = 45 * 0.8
+            effective_saturation = (metrics['active'] / adjusted_capacity) * 100
+            thoughts.append(f"Effective saturation (adjusted for rain) is {effective_saturation:.1f}%.")
+            metrics["saturation"] = effective_saturation # Update mental model
         else:
-             verdict = "OPTIMAL_FLOW"
-             recommendation = "✅ OPERACIÓN FLUIDA: Sugerencia: Programar mantenimientos preventivos para unidades libres."
-             priority = "BAJA"
-             
-        return {"verdict": verdict, "recommendation": recommendation, "priority": priority}
+            thoughts.append("Weather is good. Capacity is nominal.")
 
-    def _format_output(self, metrics, analysis):
+        # FINAL DECISION LOGIC
+        if metrics["saturation"] > 90:
+            return thoughts, "CRITICAL_OVERLOAD"
+        elif metrics["delayed"] > 2:
+            thoughts.append(f"Detected {metrics['delayed']} delayed units. Needs intervention.")
+            return thoughts, "RESOLVE_DELAYS"
+        else:
+            return thoughts, "OPTIMIZE_IDLE"
+
+    def _execute_decision(self, decision, scene):
         """
-        4. FORMATO DE SALIDA
+        Ejecuta la 'Tool' correspondiente a la decisión.
         """
+        if decision == "CRITICAL_OVERLOAD":
+            return {
+                "action": "BROADCAST_ALERT",
+                "params": {"msg": "¡Atención Flota! Saturación crítica. Cierre de reservas nuevas.", "priority": "URGENT"}
+            }
+        elif decision == "RESOLVE_DELAYS":
+            # Simulation of re-routing
+            return {
+                "action": "REROUTE_UNITS",
+                "params": {"count": scene["metrics"]["delayed"], "strategy": "FASTEST_ROUTE"}
+            }
+        elif decision == "OPTIMIZE_IDLE":
+             return {
+                 "action": "STANDBY_MODE",
+                 "params": {"msg": "Operación nominal. Mantener posiciones estratégicas."}
+             }
+        return {"action": "WAIT", "params": {}}
+
+    def _format_final_response(self, scene, thoughts, action_result):
+        if not scene:
+             return {"status": "error", "message": "No data"}
+
         decision_id = f"LOG-{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}"
+        
+        # Generate Dynamic Voice Script based on 'Thinking'
+        # Esto le da la personalidad 'inteligente'
+        
+        # Voice Tags Mapping
+        emotion = "neutral"
+        if action_result["action"] == "BROADCAST_ALERT": emotion = "urgent"
+        if scene["environment"]["weather"] == "LLUVIA_INTENSA": emotion = "serious"
+        
+        voice_script = f"[{emotion}] Análisis completo. "
+        voice_script += f"Condiciones: {scene['environment']['weather']}. "
+        voice_script += f"Decisión: {action_result['action']}. "
+        
+        if emotion == "urgent":
+             voice_script += " [loud] Requiere atención inmediata."
         
         return {
             "meta": {
                 "agent": self.identity["rol"],
                 "timestamp": datetime.now().isoformat(),
-                "decision_id": decision_id
+                "decision_id": decision_id,
+                "ai_thoughts": thoughts # EXPOSE THINKING TO UI
             },
             "dispatch_summary": {
-                "status": analysis["verdict"],
-                "saturation": f"{metrics['saturation_percentage']}%",
-                "active_fleet": f"{metrics['active_units']}/45"
+                "status": action_result["action"],
+                "saturation": f"{scene['metrics']['saturation']:.1f}%",
+                "weather_impact": scene['environment']['weather'] == "LLUVIA_INTENSA"
             },
-            "voice_script": f"Reporte de Flota. Estado: {analysis['verdict']}. Saturación al {int(metrics['saturation_percentage'])} por ciento. {metrics['delayed_services']} unidades reportan retraso. {analysis['recommendation']}",
-            "alerts": {
-                "delayed_services": metrics["delayed_units"],
-                "level": analysis["priority"]
-            },
+            "voice_script": voice_script,
             "tactical_order": {
-                "instruction": analysis["recommendation"],
-                "execute_by": "Inmediato" if analysis["priority"] == "URGENTE" else "Próxima Hora"
+                "instruction": str(action_result["params"]),
+                "execute_by": "AI_AUTO_DISPATCHER"
             }
         }
-        
-    def _format_error(self, msg):
-        return {"status": "error", "message": msg, "agent": self.identity["rol"]}

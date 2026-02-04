@@ -368,12 +368,29 @@ def optimize_routes_decision():
 # --- IMPORT AGENTS ---
 from agents.financial_agent import FinancialAgent
 from agents.logistics_agent import LogisticsAgent
-from agents.orchestrator import OrchestratorAgent
+# from agents.orchestrator import OrchestratorAgent (DEPRECATED V1)
+from agents.orchestrator_v2 import StrategicOrchestrator
 
 # Initialize Agents
 fin_agent = FinancialAgent()
 log_agent = LogisticsAgent()
-orchestrator = OrchestratorAgent()
+orchestrator = StrategicOrchestrator() # V2 CEO AGENT
+
+@app.post("/api/strategic-cycle")
+async def run_strategic_cycle():
+    """
+    EXECUTIVE ENDPOINT: CEO BRAIN ACTIVATION
+    Triggers the full Fayol Administrative Cycle (Plan, Organize, Direct, Control).
+    """
+    print(f"👔 CEO AGENT ACTIVATION: {orchestrator.role}...")
+    
+    simulation_state = GLOBAL_CACHE.get("json_data", {})
+    if not simulation_state:
+        return {"status": "WAITING_FOR_DATA", "message": "System initializing..."}
+        
+    executive_summary = await orchestrator.execute_strategic_cycle(simulation_state)
+    
+    return executive_summary
 
 @app.post("/api/agently/command")
 def unified_agent_command(command_payload: dict):
