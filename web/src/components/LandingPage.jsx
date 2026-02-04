@@ -63,6 +63,24 @@ export default function LandingPage({ onEnter }) {
             overflowX: 'hidden'
         }}>
 
+            {/* --- VERSION INDICATOR (FIXED TOP RIGHT) --- */}
+            <div style={{
+                position: 'fixed',
+                top: '10px',
+                right: '10px',
+                zIndex: 9999,
+                background: 'rgba(0,0,0,0.7)',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                border: '1px solid #39FF14',
+                color: '#39FF14',
+                fontSize: '0.8rem',
+                fontWeight: 'bold',
+                fontFamily: 'monospace'
+            }}>
+                v4.2 LIVE
+            </div>
+
             {/* --- GLOBAL STYLES --- */}
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap');
