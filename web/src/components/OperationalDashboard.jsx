@@ -154,6 +154,39 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
         }
     };
 
+    // --- BUTTON HANDLERS (BACKEND CONNECTED) ---
+    const handleAuditClick = async () => {
+        speakAgentMessage("Iniciando Auditoría Profunda con Agente Financiero...");
+        try {
+            // Robust endpoint call
+            const res = await fetch('/api/decisions/financial-audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Server Error (${res.status}): ${errText}`);
+            }
+
+            const data = await res.json();
+            console.log("AUDIT RESULT:", data);
+
+            // Speak the result
+            const score = data.score || 0;
+            const verdict = data.verdict || "Desconocido";
+            speakAgentMessage(`Auditoría Finalizada. Score: ${score}. Veredicto: ${verdict}`);
+
+            // Optional: Show visual feedback
+            alert(`✅ AUDITORÍA COMPLETADA\n\nScore: ${score}/100\nVeredicto: ${verdict}\n\n(Vea el log para más detalles)`);
+
+        } catch (e) {
+            console.error("Audit Failed", e);
+            speakAgentMessage("Error crítico conectando con el Agente Financiero.");
+            alert(`❌ ERROR DE CONEXIÓN:\n${e.message}\n\nVerifique que el Backend Python esté corriendo.`);
+        }
+    };
+
     // Auto-trigger CEO on first load (Simulated Proactivity)
     useEffect(() => {
         if (simulationData && !ceoReport) {
