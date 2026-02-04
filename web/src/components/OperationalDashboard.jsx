@@ -19,6 +19,7 @@ import ExplainableTooltip from './ExplainableTooltip';
 import TesoButton from './ui/TesoButton';
 import StatusBadge from './ui/StatusBadge';
 import { CoreOperativo } from '../views/CoreOperativo';
+import { NeonNavbar } from './NeonNavbar';
 import { voiceSystem, VOICE_TAGS } from '../services/VoiceSystem';
 
 // HELPER: Date Parser
@@ -1189,199 +1190,97 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
             {/* CONTENT AREA */}
             {
                 viewMode === 'LIVE_OPS' ? (
-                    // --- LIVE OPS VIEW (Previous Layout) ---
-                    <div style={{ display: 'flex', gap: '30px', flex: 1, overflow: 'hidden' }}>
+                    /* --- LAYER 2: OPS MAP MODE (RECREATED FROM FLY.IO LEGACY) --- */
+                    <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex' }}>
 
-                        {/* COL 1: AGENT HIVE */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-                            <div style={{ background: 'var(--color-bg-panel)', border: 'var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-lg)', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ marginTop: 0, color: 'var(--color-primary)', fontSize: 'var(--text-lg)', borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: '10px' }}>
-                                    🧠 AI TASK FORCE <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>( MACRO ORCHESTRATION )</span>
-                                </h3>
+                        {/* A. FLOATING NAVBAR (TOP CENTER) */}
+                        <NeonNavbar activeTab={'FLOTA'} onTabChange={(id) => console.log(id)} />
 
-                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginTop: 'var(--spacing-md)', position: 'relative' }}>
-                                    {/* PIPELINE VISUALIZER */}
-                                    {workforce.nodes.map((node, i) => {
-                                        const isActive = node.status === 'WORKING' || node.status === 'PROCESSING';
-                                        const isDone = node.status === 'DONE';
-
-                                        return (
-                                            <div key={node.id} style={{ display: 'flex', gap: 'var(--spacing-md)', position: 'relative' }}>
-                                                {/* CONNECTOR LINE */}
-                                                {i < workforce.nodes.length - 1 && (
-                                                    <div style={{
-                                                        position: 'absolute', left: '24px', top: '40px', width: '2px', height: '30px',
-                                                        background: isDone ? 'var(--color-kpi-positive)' : 'var(--color-border-subtle)',
-                                                        boxShadow: isDone ? '0 0 10px var(--color-kpi-positive)' : 'none',
-                                                        transition: 'all 0.3s'
-                                                    }}></div>
-                                                )}
-
-                                                {/* ICON NODE */}
-                                                <div style={{
-                                                    width: '50px', height: '50px', borderRadius: '50%',
-                                                    background: isActive ? 'var(--color-kpi-positive)' : isDone ? '#059669' : '#111',
-                                                    border: isActive ? '2px solid #fff' : '1px solid var(--color-border-subtle)',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    fontSize: '1.5rem',
-                                                    boxShadow: isActive ? '0 0 20px var(--color-kpi-positive)' : 'none',
-                                                    zIndex: 2,
-                                                    transform: isActive ? 'scale(1.1)' : 'scale(1)',
-                                                    transition: 'all 0.3s'
-                                                }}>
-                                                    {node.icon}
-                                                </div>
-
-                                                {/* INFO CARD */}
-                                                <div style={{
-                                                    flex: 1,
-                                                    background: isActive ? 'rgba(0, 242, 255, 0.1)' : 'rgba(255,255,255,0.03)',
-                                                    border: isActive ? '1px solid var(--color-primary)' : '1px solid var(--color-border-subtle)',
-                                                    borderRadius: 'var(--radius-md)', padding: '10px 15px',
-                                                    display: 'flex', flexDirection: 'column', justifyContent: 'center'
-                                                }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        <strong style={{ color: isActive ? '#fff' : 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{node.label}</strong>
-                                                        <span style={{ fontSize: '0.7rem', color: isActive ? 'var(--color-primary)' : '#555' }}>
-                                                            {isAuditMode ? 'SHA-256: VALID' : node.status}
-                                                        </span>
-                                                    </div>
-                                                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                                                        {isAuditMode ? `ID: ${(node.id || '').toString().substring(0, 4)}-${Math.floor(Math.random() * 999)} | Lat: ${Math.floor(Math.random() * 20)}ms` : node.role}
-                                                    </div>
-
-                                                    {/* LIVE LOG IN NODE */}
-                                                    {isActive && (
-                                                        <div style={{ marginTop: '5px', fontSize: '0.75rem', color: 'var(--color-kpi-positive)', fontFamily: isAuditMode ? 'var(--font-mono)' : 'inherit' }}>
-                                                            &gt; {isAuditMode ? `TX_HASH: 0x${Math.random().toString(16).substr(2, 8)}...` : node.logs[0]}
-                                                        </div>
-                                                    )}
-
-                                                    {/* LOAD BAR */}
-                                                    {isActive && (
-                                                        <div style={{ width: '100%', height: '3px', background: '#333', marginTop: '8px', borderRadius: '2px' }}>
-                                                            <div style={{ width: `${node.load}%`, height: '100%', background: 'var(--color-kpi-positive)', transition: 'width 0.2s' }}></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                        {/* B. THE MAP (FULLSCREEN BACKGROUND) */}
+                        <div style={{ flex: 1, position: 'relative' }}>
+                            <CoreOperativo />
                         </div>
 
-                        {/* COL 2: METRICS & CONSOLE */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-                            {/* KPI CARDS */}
-                            <div style={{ display: 'flex', gap: 'var(--spacing-lg)' }}>
-                                <div style={{ flex: 1, background: 'var(--color-bg-panel)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border-subtle)', textAlign: 'center' }}>
-                                    <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold', color: 'var(--color-kpi-positive)' }}>{metrics.efficiency}%</div>
-                                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>EFICIENCIA FLOTA</div>
+                        {/* C. RIGHT SIDE "TESO OPS" PANEL (THE COMMAND CENTER) */}
+                        <div style={{
+                            width: '380px',
+                            background: '#09090b', // Deep black/slate
+                            borderLeft: '1px solid #334155',
+                            display: 'flex', flexDirection: 'column',
+                            padding: '20px',
+                            zIndex: 50,
+                            boxShadow: '-10px 0 30px rgba(0,0,0,0.8)'
+                        }}>
+                            {/* Title Section */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <div>
+                                    <h2 style={{ margin: 0, color: '#ef4444', fontFamily: 'monospace', letterSpacing: '2px', fontSize: '1.5rem' }}>TESO OPS</h2>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '5px' }}>UNIDADES: 15 | OPS ACTIVAS: 60</div>
                                 </div>
-                                <div style={{ flex: 1, background: 'var(--color-bg-panel)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border-subtle)', textAlign: 'center' }}>
-                                    <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>{metrics.avgResponse}m</div>
-                                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>TIEMPO RESPUESTA</div>
-                                </div>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c', boxShadow: '0 0 10px #ea580c' }}>🏠</div>
                             </div>
 
-                            {/* CONSOLE */}
-                            <div style={{ flex: 1, background: '#000', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-lg)', fontFamily: 'var(--font-mono)', overflowY: 'auto', position: 'relative' }}>
-                                <div style={{ position: 'sticky', top: 0, background: '#000', borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: '10px', marginBottom: '10px', color: 'var(--color-primary)', fontWeight: 'bold' }}>
-                                    &gt; SYSTEM LOGS
+                            {/* Search Bar */}
+                            <input
+                                type="text"
+                                placeholder="🔍 Buscar Orden, Unidad, Cliente [ENTER]"
+                                style={{ background: '#020617', border: '1px solid #1e293b', padding: '12px', color: '#fff', borderRadius: '4px', marginBottom: '20px', fontFamily: 'monospace', outline: 'none' }}
+                                onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
+                                onBlur={(e) => e.target.style.borderColor = '#1e293b'}
+                            />
+
+                            {/* Actions */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '30px' }}>
+                                <button onClick={handleAuditClick} style={{ padding: '12px', background: 'transparent', border: '1px solid #06b6d4', color: '#06b6d4', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s' }}>
+                                    <span>▶</span> INICIAR SIMULACIÓN
+                                </button>
+                                <button style={{ padding: '12px', background: 'transparent', border: '1px solid #334155', color: '#94a3b8', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span>⚡</span> DESPACHO INTELIGENTE
+                                </button>
+                            </div>
+
+                            {/* Agent Selection Chips */}
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                                <div style={{ padding: '5px 10px', background: '#1e293b', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', borderLeft: '3px solid #a855f7' }}>Seleccionar Cli</div>
+                                <div style={{ padding: '5px 10px', background: '#dc2626', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>🚀 DESPLEGAR</div>
+                            </div>
+
+                            {/* Console Log (System Events) */}
+                            <div style={{ flex: 1, background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.75rem', marginBottom: '20px' }}>
+                                <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #1e293b', paddingBottom: '5px', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>CONSOLE.LOG :: SYSTEM EVENTS</span>
+                                    <span style={{ color: '#39FF14' }}>●</span>
                                 </div>
-                                {systemLogs.map((log, i) => (
-                                    <div key={i} style={{ marginBottom: '5px', fontSize: 'var(--text-sm)' }}>
-                                        <span style={{ color: 'var(--color-text-muted)' }}>[{log.time}]</span> <span style={{ color: '#ddd' }}>{log.msg}</span>
+
+                                <div style={{ color: '#94a3b8', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] ☁️ NUBE SINCRONIZADA: 86346 Ops.</div>
+                                <div style={{ color: '#fff', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] 🚀 CONNECTING: Sincronizando con "Cerebro" (Python Backend)...</div>
+                                <div style={{ color: '#ec4899', marginBottom: '5px' }}>[{new Date().toLocaleTimeString()}] 🖍️ SYSTEM STARTUP: API Target = 'RELATIVE'</div>
+
+                                {/* Proactive Messages */}
+                                {agentMessages.slice(-5).map((msg, i) => (
+                                    <div key={i} style={{ color: '#39FF14', marginTop: '5px' }}>
+                                        ► {msg}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Unit Status List (Mini) */}
+                            <div style={{ height: '200px', overflowY: 'auto' }}>
+                                <div style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>UNIDADES EN LÍNEA (15)</div>
+                                {['TSO-120', 'TSO-160', 'TSO-189'].map(u => (
+                                    <div key={u} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 5px', borderBottom: '1px solid #1e293b', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'monospace' }}>{u}</span>
+                                            <span style={{ color: '#64748b', fontSize: '0.65rem' }}>Cond: COND-{Math.floor(Math.random() * 999)}</span>
+                                        </div>
+                                        <span style={{ color: '#39FF14', fontSize: '0.6rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <div style={{ width: 6, height: 6, background: '#39FF14', borderRadius: '50%' }}></div>
+                                            DISPONIBLE
+                                        </span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-
-                        {/* COL 3: CORP BILLING */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-                            <div style={{ background: 'var(--color-bg-panel)', border: '1px solid gold', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-lg)', flex: 1, overflowY: 'auto' }}>
-                                <h3 style={{ marginTop: 0, color: 'gold', fontSize: '1.2rem', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span>💳 CORPORATE BILLING</span>
-                                    <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>DIAN SYNC ACTIVE</span>
-                                </h3>
-
-                                {/* NEW: BILLING SEARCH */}
-                                <input
-                                    type="text"
-                                    placeholder="🔍 Buscar empresa..."
-                                    value={billingSearch}
-                                    onChange={(e) => setBillingSearch(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid gold',
-                                        borderRadius: 'var(--radius-sm)',
-                                        padding: '8px 12px',
-                                        color: 'var(--color-text-primary)',
-                                        marginTop: '10px',
-                                        marginBottom: '10px',
-                                        fontFamily: "var(--font-main)"
-                                    }}
-                                />
-
-                                <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', fontStyle: 'italic', marginBottom: '20px' }}>
-                                    Servicios agrupados automáticamente por corte.
-                                </p>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-                                    {corporateAccounts
-                                        .filter(c => c.name.toLowerCase().includes(billingSearch.toLowerCase()))
-                                        .map(company => (
-                                            <div key={company.id} style={{
-                                                background: 'rgba(255,215,0,0.05)',
-                                                border: '1px solid rgba(255,215,0,0.2)',
-                                                borderRadius: '10px',
-                                                padding: '15px'
-                                            }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                                    <strong style={{ color: '#fff', fontSize: '1rem' }}>{company.name}</strong>
-                                                    <StatusBadge status={company.cycleStatus === 'CUTOFF READY' ? 'active' : 'neutral'}>
-                                                        {company.cycleStatus}
-                                                    </StatusBadge>
-                                                </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-                                                    <div style={{ flex: 1, height: '6px', background: '#333', borderRadius: '3px' }}>
-                                                        <div style={{
-                                                            width: `${Math.min(company.currentCycleServices * 4, 100)}%`,
-                                                            height: '100%',
-                                                            background: 'gold',
-                                                            borderRadius: '3px',
-                                                            transition: 'width 0.5s'
-                                                        }}></div>
-                                                    </div>
-                                                    <small style={{ color: 'gold', fontSize: '0.9rem', width: '50px', textAlign: 'right' }}>
-                                                        {company.currentCycleServices} Svc
-                                                    </small>
-                                                </div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <small style={{ color: '#aaa', fontSize: '0.7rem' }}>ÚLTIMA FACTURA</small>
-                                                        <strong style={{ color: '#fff', fontSize: '0.9rem' }}>#{company.lastInvoice}</strong>
-                                                    </div>
-                                                    <TesoButton
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        style={{
-                                                            borderColor: 'gold', color: 'gold', background: 'rgba(255,215,0,0.1)',
-                                                            border: '1px solid gold'
-                                                        }}
-                                                        onClick={() => setPreviewPdf(company.pdf)}
-                                                    >
-                                                        👁️ VER PDF
-                                                    </TesoButton>
-                                                </div>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 ) : (
                     // --- VIRTUAL EXCEL VIEW (Embedded Real-time Sheet) ---
@@ -1612,40 +1511,44 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS
                                     </div>
                                 </div>
 
-                                {/* SHEET TABS (RESTORED) */}
-                                <div style={{ display: 'flex', gap: '5px', padding: '0 15px', background: '#1e293b', borderBottom: '1px solid #334155' }}>
+                                {/* SHEET TABS (ADMIN DATA LAYER 2) */}
+                                <div style={{ display: 'flex', gap: '2px', padding: '0 10px', background: '#020617', borderBottom: '1px solid #334155', paddingTop: '10px' }}>
                                     {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (
                                         <button
                                             key={sheet}
                                             onClick={() => setActiveSheet(sheet)}
                                             style={{
-                                                background: activeSheet === sheet ? '#0f172a' : 'transparent',
-                                                color: activeSheet === sheet ? 'var(--neon-green)' : '#94a3b8',
-                                                border: 'none',
-                                                borderBottom: activeSheet === sheet ? '2px solid var(--neon-green)' : '2px solid transparent',
-                                                padding: '10px 15px',
+                                                background: activeSheet === sheet ? '#1e293b' : '#0f172a',
+                                                color: activeSheet === sheet ? '#38bdf8' : '#64748b',
+                                                borderTop: activeSheet === sheet ? '3px solid #38bdf8' : '3px solid transparent',
+                                                borderLeft: '1px solid #334155',
+                                                borderRight: '1px solid #334155',
+                                                borderBottom: 'none',
+                                                padding: '8px 20px',
                                                 cursor: 'pointer',
                                                 fontWeight: 'bold',
-                                                fontSize: '0.8rem',
+                                                fontSize: '0.75rem',
                                                 transition: 'all 0.2s',
-                                                marginBottom: '-1px' // Overlap border
+                                                borderRadius: '6px 6px 0 0',
+                                                opacity: activeSheet === sheet ? 1 : 0.8,
+                                                letterSpacing: '0.5px'
                                             }}
-                                            onMouseOver={(e) => activeSheet !== sheet && (e.currentTarget.style.color = '#cbd5e1')}
-                                            onMouseOut={(e) => activeSheet !== sheet && (e.currentTarget.style.color = '#94a3b8')}
+                                            onMouseOver={(e) => activeSheet !== sheet && (e.currentTarget.style.background = '#1e293b')}
+                                            onMouseOut={(e) => activeSheet !== sheet && (e.currentTarget.style.background = '#0f172a')}
                                         >
                                             {sheet}
                                         </button>
                                     ))}
                                 </div>
 
-                                {/* SPREADSHEET GRID */}
-                                <div style={{ flex: 1, overflow: 'auto', background: '#0f172a', color: '#cbd5e1', fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                        <thead style={{ position: 'sticky', top: 0, zIndex: 10, borderBottom: '3px solid var(--neon-green)' }}>
+                                {/* SPREADSHEET GRID (ADMIN CONTROL) */}
+                                <div style={{ flex: 1, overflow: 'auto', background: '#1e293b', color: '#cbd5e1', fontFamily: "'Segoe UI', Roboto, Helvetica, sans-serif" }}>
+                                    <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '0.85rem' }}>
+                                        <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                                             <tr>
-                                                {/* DYNAMIC HEADERS WITH SORT ICONS */}
+                                                {/* DYNAMIC HEADERS */}
                                                 {activeSheet === 'PROGRAMACION' && ['ID', 'FECHA', 'HORA', 'CLIENTE (Pax)', 'RUTA DESTINO', 'ESTADO', 'CONDUCTOR', 'VEHÍCULO', 'TARIFA', 'PIN SEGURIDAD'].map(h => (
-                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                    <th key={h} style={{ background: '#0f172a', borderRight: '1px solid #334155', borderBottom: '2px solid #38bdf8', padding: '12px 15px', textAlign: 'left', color: '#fff', fontWeight: 'bold', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
                                                 ))}
                                                 {activeSheet === 'CXC' && ['CLIENTE CORPORATIVO', 'SALDO PENDIENTE', 'ESTADO', 'DÍAS MORA', 'FACTURA / SOPORTE', 'ACCIÓN'].map(h => (
                                                     <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
