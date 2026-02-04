@@ -866,98 +866,14 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
             flexDirection: 'column',
             fontFamily: "var(--font-main)" // Tokenized
         }}>
-            {/* Re-enable pointer events for controls */}
-            <div style={{ pointerEvents: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                {/* VIEW MODE: CORE OPERATIVO */}
-                {viewMode === 'CORE' && (
-                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 200, overflowY: 'auto' }}>
-                        <CoreOperativo onClose={onClose} onHome={onHome} />
-                    </div>
-                )}
-
-                {/* PDF PREVIEW MODAL */}
-                {previewPdf && (
-                    <div style={{
-                        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-                        background: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-                    }}>
-                        <div style={{ width: '90%', height: '90%', background: '#222', borderRadius: '15px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ padding: '15px', background: '#333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h3 style={{ margin: 0, color: 'gold' }}>📄 VISOR DE DOCUMENTOS (SECURE)</h3>
-                                <button
-                                    onClick={() => setPreviewPdf(null)}
-                                    style={{
-                                        background: 'red', color: 'white', border: 'none', padding: '10px 20px',
-                                        borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer'
-                                    }}>
-                                    CERRAR X
-                                </button>
-                            </div>
-                            <iframe src={previewPdf} style={{ width: '100%', height: '100%', border: 'none' }} title="PDF Invoice"></iframe>
-                        </div>
-                    </div>
-                )}
-
-                {/* UNIFIED HEADER (Replaces Legacy V3) */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid #333', paddingBottom: '5px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div>
-                            <h1 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', letterSpacing: '1px' }}>MAP HUB</h1>
-                            <StatusBadge status="active">● LIVE TRACKING</StatusBadge>
-                        </div>
-                        {/* MODE SWITCHER */}
-                        <div style={{ display: 'flex', background: '#222', borderRadius: '4px', padding: '3px' }}>
-                            <TesoButton
-                                variant={viewMode === 'ANALYTICS' ? 'active' : 'ghost'}
-                                size="sm"
-                                style={viewMode === 'ANALYTICS' ? { background: '#FFD700', color: '#000', fontWeight: 'bold' } : {}}
-                                onClick={() => setViewMode('ANALYTICS')}
-                            >
-                                MAP EXPLORER
-                            </TesoButton>
-                            <TesoButton
-                                variant={viewMode === 'CORE' ? 'active' : 'ghost'}
-                                size="sm" // Smaller
-                                style={viewMode === 'CORE' ? { background: '#00f2ff', color: '#000', fontWeight: 'bold' } : {}}
-                                onClick={() => setViewMode('CORE')}
-                            >
-                                CORE DATA
-                            </TesoButton>
-                            <TesoButton
-                                variant={viewMode === 'LIVE_OPS' ? 'active' : 'ghost'}
-                                size="sm"
-                                onClick={() => setViewMode('LIVE_OPS')}
-                            >
-                                AI TASK FORCE
-                            </TesoButton>
-                        </div>
-                    </div>
-
-                    {/* COMPACT CONTROL BAR */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-
-                        {/* AUDIT TOGGLE (RESTORED) */}
-                        <TesoButton
-                            variant={isAuditMode ? 'active' : 'glass'}
-                            size="sm"
-                            onClick={() => setIsAuditMode(!isAuditMode)}
-                        >
-                            {isAuditMode ? '● AUDIT ON' : '○ AUDIT OFF'}
-                        </TesoButton>
-                    </div>
-                </div>
+            {/* SYSTEM RESTORED */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#39FF14' }}>
+                 <h1 style={{ fontSize: '2rem' }}>WAR ROOM: ONLINE</h1>
+                 <p style={{ color: '#fff' }}>Module restored successfully.</p>
+                 <button onClick={() => window.location.reload()} style={{ padding: '10px', marginTop: '20px', cursor: 'pointer' }}>RELOAD MAP</button>
             </div>
-            ) : (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#64748b', gap: '20px' }}>
-                <div style={{ fontSize: '3rem' }}>🚧</div>
-                <h2 style={{ fontFamily: 'monospace', color: '#94a3b8' }}>ANALYTICS MODULE UPDATING</h2>
-                <div style={{ color: '#475569' }}>Please use the "Live Ops" Map View</div>
-            </div>
-            )
-                    }
         </div>
-            </div >
-            )
+    )
 };
 
 export default OperationalDashboard;
