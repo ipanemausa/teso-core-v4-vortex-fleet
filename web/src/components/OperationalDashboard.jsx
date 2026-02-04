@@ -20,6 +20,7 @@ import TesoButton from './ui/TesoButton';
 import StatusBadge from './ui/StatusBadge';
 import { CoreOperativo } from '../views/CoreOperativo';
 import { NeonNavbar } from './NeonNavbar';
+import LiveOpsMap from './dashboard/LiveOpsMap'; // NEW IMPORT
 import { voiceSystem, VOICE_TAGS } from '../services/VoiceSystem';
 
 // HELPER: Date Parser
@@ -866,41 +867,18 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
             flexDirection: 'column',
             fontFamily: "var(--font-main)" // Tokenized
         }}>
+
             
-            {/* RESTORED CONTENT: LIVE OPS MAP + PANEL */}
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex' }}>
-                
-                {/* A. FLOATING NAVBAR */}
-                <NeonNavbar activeTab={'FLOTA'} onTabChange={(id) => console.log(id)} />
-
-                {/* B. MAP VIEW */}
-                <div style={{ flex: 1, position: 'relative' }}>
-                     <CoreOperativo command={opsCommand} />
+            {/* MODULAR ARCHITECTURE (v4) */}
+            {viewMode === 'LIVE_OPS' ? (
+                <LiveOpsMap opsCommand={opsCommand} />
+            ) : (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#64748b' }}>
+                    <div style={{ fontSize: '3rem' }}>🚧</div>
+                    <h2>ANALYTICS OFFLINE</h2>
+                    <p>Use Live Ops Map</p>
                 </div>
-
-                {/* C. RIGHT PANEL */}
-                <div style={{
-                    width: '380px',
-                    background: '#09090b',
-                    borderLeft: '1px solid #334155',
-                    display: 'flex', flexDirection: 'column',
-                    padding: '20px',
-                    zIndex: 50,
-                    boxShadow: '-10px 0 30px rgba(0,0,0,0.8)'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h2 style={{ margin: 0, color: '#ef4444', fontFamily: 'monospace' }}>TESO OPS</h2>
-                        <div style={{ color: '#ea580c' }}>🏠</div>
-                    </div>
-
-                    <div style={{ flex: 1, background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', overflowY: 'auto' }}>
-                         <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '10px' }}>SYSTEM LOGS</div>
-                         <div style={{ color: '#39FF14' }}>Scan complete.</div>
-                         <div style={{ color: '#fff' }}>Grid operational.</div>
-                    </div>
-                </div>
-            </div>
-
+            )}
         </div>
     )
 };
