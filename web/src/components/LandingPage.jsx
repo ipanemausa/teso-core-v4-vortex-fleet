@@ -464,7 +464,7 @@ export default function LandingPage({ onEnter }) {
                 )}
 
                 <div style={{ fontSize: '0.7rem', color: '#555', letterSpacing: '1px' }}>
-                    SECURE CONNECTION v4.1.5 | MEDELLÍN
+                    SECURE CONNECTION v4.2 (ORCHESTRA) | MEDELLÍN
                 </div>
             </div>
 
