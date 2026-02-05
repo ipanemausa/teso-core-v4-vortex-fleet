@@ -21,7 +21,7 @@ const jobIcon = divIcon({
 const CENTER_LAT = 6.2442;
 const CENTER_LNG = -75.5812;
 
-export function CoreOperativo({ onClose, onHome, command, simulationData }) {
+export function CoreOperativo({ onClose, onHome, command, simulationData, activeLayers }) {
     const [fleet, setFleet] = useState([]);
     const [jobs, setJobs] = useState([]); // Active Passenger Requests
     const [planes, setPlanes] = useState([]); // Active Flights
@@ -133,8 +133,8 @@ export function CoreOperativo({ onClose, onHome, command, simulationData }) {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 />
 
-                {/* LIVE FLEET MARKERS */}
-                {fleet.map(car => (
+                {/* LAYER 1: FLEET VECTORS */}
+                {(!activeLayers || activeLayers.includes('FLEET')) && fleet.map(car => (
                     <Marker key={car.id} position={[car.lat, car.lng]} icon={carIcon}>
                         <Popup>
                             <div style={{ color: '#000' }}>
@@ -146,8 +146,8 @@ export function CoreOperativo({ onClose, onHome, command, simulationData }) {
                     </Marker>
                 ))}
 
-                {/* JOB MARKERS (PASSENGERS) */}
-                {jobs.map(job => (
+                {/* LAYER 2: DEMAND/JOBS */}
+                {(!activeLayers || activeLayers.includes('JOBS')) && jobs.map(job => (
                     <Marker key={job.id} position={[job.lat, job.lng]} icon={jobIcon}>
                         <Popup>
                             <div style={{ color: '#000' }}>
@@ -159,8 +159,8 @@ export function CoreOperativo({ onClose, onHome, command, simulationData }) {
                     </Marker>
                 ))}
 
-                {/* LAYER 2: PLANES */}
-                {planes.map(p => (
+                {/* LAYER 3: AIRSPACE/RADAR */}
+                {(!activeLayers || activeLayers.includes('RADAR')) && planes.map(p => (
                     <PlaneMarker key={p.id} p={p} isSelected={false} />
                 ))}
 

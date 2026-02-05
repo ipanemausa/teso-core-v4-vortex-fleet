@@ -14,45 +14,58 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
     // This component encapsulates the "Map View" logic.
     const [activeTab, setActiveTab] = useState('FLOTA');
 
+    // LAYER CONTROL STATE (The "Subcapas" Logic)
+    const [activeLayers, setActiveLayers] = useState(['FLEET', 'JOBS']); // Default layers
+
+    const toggleLayer = (layerId) => {
+        setActiveLayers(prev => {
+            if (prev.includes(layerId)) return prev.filter(l => l !== layerId);
+            return [...prev, layerId];
+        });
+    };
+
     // --- FLY.IO LAYOUT RECONSTRUCTION ---
     // (Based on user screenshots: Left Dock, Full Right Panel, Bottom Bar)
 
-    // A. LEFT DOCK COMPONENT
-    const V6Dock = () => (
+    // A. LEFT DOCK COMPONENT (Interactive)
+    const V6Dock = ({ activeLayers, onToggle }) => (
         <div style={{
             position: 'absolute', top: '100px', left: '20px', bottom: '100px',
             display: 'flex', flexDirection: 'column', gap: '15px',
             zIndex: 400
         }}>
             {[
-                { label: 'RADAR JMC', icon: '📡', color: '#a855f7' },
-                { label: 'VISIÓN IA', icon: '🧠', color: '#ec4899' },
-                { label: 'OPTIMIZE', icon: '📈', color: '#f59e0b' },
-                { label: 'SIMULACRO', icon: '🔥', color: '#ef4444' },
-                { label: 'PITCH DECK', icon: '📢', color: '#ec4899' },
-                { label: 'WHATSAPP', icon: '💬', color: '#22c55e' },
-                { label: 'SOURCE GIT', icon: '👾', color: '#64748b' },
-            ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: 0.9 }}>
-                    <div style={{
-                        width: '40px', height: '40px',
-                        background: 'rgba(15, 23, 42, 0.9)',
-                        border: `1px solid ${item.color}`,
-                        borderRadius: '12px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '1.2rem',
-                        boxShadow: `0 0 10px ${item.color}40`
-                    }}>
-                        {item.icon}
+                { id: 'RADAR', label: 'RADAR JMC', icon: '📡', color: '#a855f7' },
+                { id: 'VISION', label: 'VISIÓN IA', icon: '🧠', color: '#ec4899' },
+                { id: 'OPTIMIZE', label: 'OPTIMIZE', icon: '📈', color: '#f59e0b' },
+                { id: 'JOBS', label: 'PEDIDOS', icon: '🔥', color: '#ef4444' }, // Renamed SIMULACRO -> PEDIDOS (Layer intent)
+                { id: 'FLEET', label: 'FLOTA V4', icon: '🚙', color: '#39FF14' } // Added Fleet Toggle
+            ].map((item, i) => {
+                const isActive = activeLayers.includes(item.id);
+                return (
+                    <div key={i}
+                        onClick={() => onToggle(item.id)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: isActive ? 1 : 0.5, transition: 'opacity 0.2s' }}>
+                        <div style={{
+                            width: '40px', height: '40px',
+                            background: isActive ? `rgba(${parseInt(item.color.slice(1, 3), 16)}, ${parseInt(item.color.slice(3, 5), 16)}, ${parseInt(item.color.slice(5, 7), 16)}, 0.2)` : 'rgba(15, 23, 42, 0.9)',
+                            border: `1px solid ${item.color}`,
+                            borderRadius: '12px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '1.2rem',
+                            boxShadow: isActive ? `0 0 15px ${item.color}` : 'none'
+                        }}>
+                            {item.icon}
+                        </div>
+                        <div style={{
+                            color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '1px',
+                            textShadow: '0 2px 4px #000', fontFamily: 'monospace'
+                        }}>
+                            {item.label}
+                        </div>
                     </div>
-                    <div style={{
-                        color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '1px',
-                        textShadow: '0 2px 4px #000', fontFamily: 'monospace'
-                    }}>
-                        {item.label}
-                    </div>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 
@@ -165,7 +178,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             </div>
 
             {/* B. LEFT DOCK (V6 Style) */}
-            <V6Dock />
+            <V6Dock activeLayers={activeLayers} onToggle={toggleLayer} />
 
             {/* C. BOTTOM BAR (Robot Icon) */}
             <div style={{
@@ -186,7 +199,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             <div style={{ flex: 1, position: 'relative' }}>
                 {/* MAP RENDERS HERE IN LIVE OPS MODE */}
                 {activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && (
-                    <CoreOperativo command={opsCommand} simulationData={simulationData} />
+                    <CoreOperativo command={opsCommand} simulationData={simulationData} activeLayers={activeLayers} />
                 )}
                 {/* OTHER TABS */}
                 {activeTab === 'CLIENTES' && <ClientDashboard />}
