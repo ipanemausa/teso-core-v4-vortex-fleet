@@ -368,12 +368,14 @@ def optimize_routes_decision():
 # --- IMPORT AGENTS ---
 from agents.financial_agent import FinancialAgent
 from agents.logistics_agent import LogisticsAgent
+from agents.gemini_business import GeminiBusinessAgent
 # from agents.orchestrator import OrchestratorAgent (DEPRECATED V1)
 from agents.orchestrator_v2 import StrategicOrchestrator
 
 # Initialize Agents
 fin_agent = FinancialAgent()
 log_agent = LogisticsAgent()
+biz_agent = GeminiBusinessAgent()
 orchestrator = StrategicOrchestrator() # V2 CEO AGENT
 
 @app.post("/api/strategic-cycle")
@@ -412,6 +414,21 @@ def unified_agent_command(command_payload: dict):
     if triggers:
         response["autonomous_triggers"] = triggers
         
+    return response
+
+@app.post("/api/agently/business/gemini")
+def gemini_business_consult(query_payload: dict):
+    """
+    AGENTIC ENDPOINT: VORTEX_BUSINESS_STRATEGIST
+    Direct line to Gemini Pro (via GeminiBusinessAgent).
+    Payload: { "query": "Should we buy more cars?", "context_override": {} }
+    """
+    query = query_payload.get("query", "Estado General")
+    print(f"👔 AGENT ACTIVATION: {biz_agent.identity['rol']} answering '{query}'...")
+    
+    simulation_state = GLOBAL_CACHE.get("json_data", {})
+    response = biz_agent.consult(query, simulation_state)
+    
     return response
 
 @app.get("/api/agently/alerts")

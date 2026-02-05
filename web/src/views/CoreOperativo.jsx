@@ -158,11 +158,11 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 zoomControl={false}
                 attributionControl={false} // Hidden as per user request for clean UI
             >
-                {/* DARK MODE MAP TILE (Fly.io Style) */}
+                {/* DARK MODE MAP TILE (Fly.io Style - High Visibility) */}
                 <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                    opacity={0.85} // High contrast
+                    opacity={1.0} // FULL VISIBILITY: Reset to 1.0 to match Fly.io
                 />
 
                 {/* LAYER 1: FLEET VECTORS */}

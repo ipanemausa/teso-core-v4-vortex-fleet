@@ -268,20 +268,34 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
                                         onClick={() => {
                                             setShowQueryMenu(false); // Close menu
                                             console.log("🗣️ User Query:", q);
-                                            alert(`🤖 PROCESANDO CONSULTA CON LLM/MCP...\n\n"${q}"\n\n(Conectando con Backend Python...)`);
+
+                                            // INTELLIGENT ROUTING: STRATEGY -> GEMINI BUSINESS
+                                            const isStrategy = group.category.includes('ESTRATEGIA');
+                                            const endpoint = isStrategy ? '/api/agently/business/gemini' : '/api/agently/command';
+                                            const payload = isStrategy
+                                                ? { query: q }
+                                                : { intent: 'CUSTOM_QUERY', query: q, context: { view: 'LIVE_MAP' } };
+
+                                            alert(`🤖 CONTACTANDO AGENTE [${isStrategy ? 'GEMINI BUSINESS' : 'ORCHESTRATOR'}]...\n\n"${q}"`);
 
                                             // Real Backend Call
-                                            fetch('/api/agently/command', {
+                                            fetch(endpoint, {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ intent: 'CUSTOM_QUERY', query: q, context: { view: 'LIVE_MAP' } })
+                                                body: JSON.stringify(payload)
                                             })
                                                 .then(res => res.json())
                                                 .then(data => {
-                                                    const story = data.narrative || "Análisis completado. Datos enviados a consola.";
-                                                    alert(`📊 REPORTE DE INTELIGENCIA:\n\n${story}`);
+                                                    // Handle Unified Response Format
+                                                    const story = data.response?.text || data.narrative || "Análisis completado. Datos enviados a consola.";
+                                                    const voice = data.response?.voice_script;
+
+                                                    alert(`📊 RESPUESTA DE AGENTE:\n\n${story}`);
+
+                                                    // Optional: Log technical details
+                                                    console.log("Agent Telemetry:", data.meta || data);
                                                 })
-                                                .catch(err => alert("Error de conexión (Backend Offline)."));
+                                                .catch(err => alert(`Error de conexión con ${endpoint}: ${err.message}`));
                                         }}
                                         style={{
                                             background: 'rgba(255,255,255,0.05)',
