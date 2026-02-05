@@ -424,14 +424,6 @@ def get_autonomous_alerts():
 @app.post("/api/decisions/financial-audit")
 def financial_audit_decision():
     """
-    LEGACY ENDPOINT (Kept for backward compatibility, internally uses Agent)
-    """
-    # ... (rest of function remains same, acting as wrapper)
-    simulation_state = GLOBAL_CACHE.get("json_data", {})
-    return fin_agent.run_audit(simulation_state) # Direct call for specific endpoint
-    
-# ... (Logistics endpoint logic preserved similarly)
-    """
     AGENTIC ENDPOINT: VORTEX_FINANCIAL_AUDITOR
     Uses the FinancialAgent (Learning Heroes Framework) to analyze the live simulation state.
     """
