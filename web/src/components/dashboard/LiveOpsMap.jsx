@@ -28,49 +28,61 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
     // (Based on user screenshots: Left Dock, Full Right Panel, Bottom Bar)
 
     // A. LEFT DOCK COMPONENT (Interactive)
-    const V6Dock = ({ activeLayers, onToggle }) => (
-        <div style={{
-            position: 'absolute', top: '100px', left: '20px', bottom: '100px',
-            display: 'flex', flexDirection: 'column', gap: '15px',
-            zIndex: 400
-        }}>
-            {[
-                { id: 'RADAR', label: 'RADAR JMC', icon: '📡', color: '#a855f7' },
-                { id: 'VISION', label: 'VISIÓN IA', icon: '🧠', color: '#ec4899' },
-                { id: 'OPTIMIZE', label: 'OPTIMIZE', icon: '📈', color: '#f59e0b' },
-                { id: 'JOBS', label: 'PEDIDOS', icon: '🔥', color: '#ef4444' }, // Renamed SIMULACRO -> PEDIDOS (Layer intent)
-                { id: 'FLEET', label: 'FLOTA V4', icon: '🚙', color: '#39FF14' }, // Added Fleet Toggle
-                { id: 'PITCH', label: 'PITCH DECK', icon: '📢', color: '#ec4899' },
-                { id: 'WHATSAPP', label: 'WHATSAPP', icon: '💬', color: '#22c55e' },
-                { id: 'C_GIT', label: 'SOURCE GIT', icon: '👾', color: '#64748b' }
-            ].map((item, i) => {
-                const isActive = activeLayers.includes(item.id);
-                return (
-                    <div key={i}
-                        onClick={() => onToggle(item.id)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: isActive ? 1 : 0.5, transition: 'opacity 0.2s' }}>
-                        <div style={{
-                            width: '40px', height: '40px',
-                            background: isActive ? `rgba(${parseInt(item.color.slice(1, 3), 16)}, ${parseInt(item.color.slice(3, 5), 16)}, ${parseInt(item.color.slice(5, 7), 16)}, 0.2)` : 'rgba(15, 23, 42, 0.9)',
-                            border: `1px solid ${item.color}`,
-                            borderRadius: '12px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '1.2rem',
-                            boxShadow: isActive ? `0 0 15px ${item.color}` : 'none'
-                        }}>
-                            {item.icon}
+    const V6Dock = ({ activeLayers, onToggle }) => {
+        const handleDockClick = (item) => {
+            // EXTERNAL ACTIONS
+            if (item.id === 'C_GIT') return window.open('https://github.com/GuillermoHoyos/teso_core', '_blank');
+            if (item.id === 'PITCH') return window.open('https://gamma.app/docs/TESO-AI-Logistics-Deck-v4-PREVIEW-ONLY-u88ffx882', '_blank'); // Placeholder/Real
+            if (item.id === 'WHATSAPP') return window.open('https://wa.me/573001234567?text=Hola%20TESO%20AI', '_blank');
+
+            // LAYER TOGGLES (Internal)
+            onToggle(item.id);
+        };
+
+        return (
+            <div style={{
+                position: 'absolute', top: '100px', left: '20px', bottom: '100px',
+                display: 'flex', flexDirection: 'column', gap: '15px',
+                zIndex: 400
+            }}>
+                {[
+                    { id: 'RADAR', label: 'RADAR JMC', icon: '📡', color: '#a855f7' },
+                    { id: 'VISION', label: 'VISIÓN IA', icon: '🧠', color: '#ec4899' },
+                    { id: 'OPTIMIZE', label: 'OPTIMIZE', icon: '📈', color: '#f59e0b' },
+                    { id: 'JOBS', label: 'PEDIDOS', icon: '🔥', color: '#ef4444' },
+                    { id: 'FLEET', label: 'FLOTA V4', icon: '🚙', color: '#39FF14' },
+                    { id: 'PITCH', label: 'PITCH DECK', icon: '📢', color: '#ec4899' },
+                    { id: 'WHATSAPP', label: 'WHATSAPP', icon: '💬', color: '#22c55e' },
+                    { id: 'C_GIT', label: 'SOURCE GIT', icon: '👾', color: '#64748b' }
+                ].map((item, i) => {
+                    const isActive = activeLayers.includes(item.id);
+                    return (
+                        <div key={i}
+                            onClick={() => handleDockClick(item)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: isActive || ['PITCH', 'WHATSAPP', 'C_GIT'].includes(item.id) ? 1 : 0.5, transition: 'opacity 0.2s' }}>
+                            <div style={{
+                                width: '40px', height: '40px',
+                                background: isActive ? `rgba(${parseInt(item.color.slice(1, 3), 16)}, ${parseInt(item.color.slice(3, 5), 16)}, ${parseInt(item.color.slice(5, 7), 16)}, 0.2)` : 'rgba(15, 23, 42, 0.9)',
+                                border: `1px solid ${item.color}`,
+                                borderRadius: '12px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '1.2rem',
+                                boxShadow: isActive ? `0 0 15px ${item.color}` : 'none'
+                            }}>
+                                {item.icon}
+                            </div>
+                            <div style={{
+                                color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '1px',
+                                textShadow: '0 2px 4px #000', fontFamily: 'monospace'
+                            }}>
+                                {item.label}
+                            </div>
                         </div>
-                        <div style={{
-                            color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '1px',
-                            textShadow: '0 2px 4px #000', fontFamily: 'monospace'
-                        }}>
-                            {item.label}
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
-    );
+                    );
+                })}
+            </div>
+        );
+    };
 
     // B. FULL RIGHT PANEL COMPONENT (Restored)
     const TesoOpsPanel = () => (
