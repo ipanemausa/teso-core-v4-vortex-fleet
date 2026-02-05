@@ -16,6 +16,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
 
     // LAYER CONTROL STATE (The "Subcapas" Logic)
     const [activeLayers, setActiveLayers] = useState(['FLEET', 'JOBS', 'RADAR']); // Default layers (RADAR ON by default)
+    const [showQueryMenu, setShowQueryMenu] = useState(false); // New Menu State
 
     const toggleLayer = (layerId) => {
         setActiveLayers(prev => {
@@ -197,46 +198,144 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             <V6Dock activeLayers={activeLayers} onToggle={toggleLayer} />
 
             {/* C. BOTTOM BAR (Robot Icon) */}
-            {/* C. BOTTOM BAR (Active AI Interface) */}
-            <div
-                onClick={() => {
-                    const q = prompt("🔍 CONSULTA AL AGENTE DE OPERACIONES (LLM):\n\nEj: 'Dame un reporte de bias en la flota' o 'Analiza la eficiencia actual'");
-                    if (q) {
-                        // 1. Optimistic UI Update
-                        console.log("🗣️ User Query:", q);
-                        alert(`🤖 PROCESANDO CONSULTA CON LLM/MCP...\n\n"${q}"\n\n(Conectando con Backend Python...)`);
+            {/* C. INTELLIGENCE HUB (Active AI Interface) */}
+            {/* 1. QUERY MENU POPUP */}
+            {activeTab === 'FLOTA' && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: '80px',
+                    left: '20px',
+                    width: '350px',
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid #334155',
+                    borderRadius: '16px',
+                    padding: '15px',
+                    display: showQueryMenu ? 'block' : 'none', // Toggle visibility
+                    zIndex: 2000,
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                }}>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>
+                        SELECT ANALYSIS PROTOCOL
+                    </div>
 
-                        // 2. Real Backend Call (Fullstack Connection)
-                        fetch('/api/agently/command', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ intent: 'CUSTOM_QUERY', query: q, context: { view: 'LIVE_MAP' } })
-                        })
-                            .then(res => res.json())
-                            .then(data => {
-                                console.log("🧠 LLM Response:", data);
-                                // 3. Data Storytelling Output
-                                const story = data.narrative || "Análisis completado. Revisa la consola para el Data Storytelling completo.";
-                                alert(`📊 REPORTE DE INTELIGENCIA DE NEGOCIOS\n\n${story}`);
-                            })
-                            .catch(err => {
-                                console.error("❌ API Error:", err);
-                                alert("Error de conexión con el Agente (Backend Offline).");
-                            });
-                    }
-                }}
+                    {[
+                        {
+                            category: "📖 DATA STORYTELLING",
+                            questions: [
+                                "Genera una narrativa sobre el estado actual de la operación",
+                                "Explica las anomalías recientes como una historia",
+                                "¿Cuál es el 'clímax' operativo de hoy?"
+                            ],
+                            color: '#fbbf24'
+                        },
+                        {
+                            category: "⚖️ ANÁLISIS DE SESGOS (BIAS)",
+                            questions: [
+                                "¿Detectas sesgo algorítmico en la asignación?",
+                                "¿Hay distribución inequitativa por zonas?",
+                                "Analiza la equidad de ingresos entre conductores"
+                            ],
+                            color: '#f87171'
+                        },
+                        {
+                            category: "📊 BUSINESS INTELLIGENCE",
+                            questions: [
+                                "Resumen ejecutivo de KPIs en tiempo real",
+                                "Predicción de demanda (Próxima Hora)",
+                                "Identifica cuellos de botella críticos"
+                            ],
+                            color: '#34d399'
+                        }
+                    ].map((group, i) => (
+                        <div key={i} style={{ marginBottom: '15px' }}>
+                            <div style={{ color: group.color, fontSize: '0.9rem', marginBottom: '5px', fontWeight: 'bold' }}>
+                                {group.category}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                {group.questions.map((q, j) => (
+                                    <button
+                                        key={j}
+                                        onClick={() => {
+                                            setShowQueryMenu(false); // Close menu
+                                            console.log("🗣️ User Query:", q);
+                                            alert(`🤖 PROCESANDO CONSULTA CON LLM/MCP...\n\n"${q}"\n\n(Conectando con Backend Python...)`);
+
+                                            // Real Backend Call
+                                            fetch('/api/agently/command', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ intent: 'CUSTOM_QUERY', query: q, context: { view: 'LIVE_MAP' } })
+                                            })
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                    const story = data.narrative || "Análisis completado. Datos enviados a consola.";
+                                                    alert(`📊 REPORTE DE INTELIGENCIA:\n\n${story}`);
+                                                })
+                                                .catch(err => alert("Error de conexión (Backend Offline)."));
+                                        }}
+                                        style={{
+                                            background: 'rgba(255,255,255,0.05)',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            padding: '8px',
+                                            color: '#e2e8f0',
+                                            textAlign: 'left',
+                                            fontSize: '0.8rem',
+                                            cursor: 'pointer',
+                                            transition: 'background 0.2s'
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                    >
+                                        • {q}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                    <button
+                        onClick={() => {
+                            const custom = prompt("Escribe tu consulta personalizada:");
+                            if (custom) {
+                                setShowQueryMenu(false); // Close menu after prompt
+                                console.log("🗣️ User Query:", custom);
+                                alert(`🤖 PROCESANDO CONSULTA CON LLM/MCP...\n\n"${custom}"\n\n(Conectando con Backend Python...)`);
+
+                                fetch('/api/agently/command', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ intent: 'CUSTOM_QUERY', query: custom, context: { view: 'LIVE_MAP' } })
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const story = data.narrative || "Análisis completado. Datos enviados a consola.";
+                                        alert(`📊 REPORTE DE INTELIGENCIA:\n\n${story}`);
+                                    })
+                                    .catch(err => alert("Error de conexión (Backend Offline)."));
+                            }
+                        }}
+                        style={{ width: '100%', padding: '8px', background: 'transparent', border: '1px dashed #475569', color: '#94a3b8', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                        + Escribir consulta manual...
+                    </button>
+                </div>
+            )}
+
+            <div
+                onClick={() => setShowQueryMenu(!showQueryMenu)} // Toggle Menu
                 style={{
                     position: 'absolute',
                     bottom: '20px',
                     left: '20px',
                     zIndex: 1000,
                     display: 'flex', alignItems: 'center', gap: '10px',
-                    background: 'rgba(15, 23, 42, 0.9)',
+                    background: 'rgba(15, 23, 42, 0.95)',
                     border: '1px solid #06b6d4',
                     borderRadius: '50px',
                     padding: '10px 25px',
                     boxShadow: '0 0 20px rgba(6, 182, 212, 0.4)',
-                    cursor: 'pointer', // Interactive
+                    cursor: 'pointer',
                     transition: 'all 0.2s'
                 }}
                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
@@ -244,9 +343,9 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             >
                 <div style={{ fontSize: '1.5rem' }}>🤖</div>
                 <div style={{ color: '#fff', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 'bold' }}>
-                    CONSULTAR INTELLIGENCE (LLM)
+                    {showQueryMenu ? 'CERRAR PANEL DE INTELIGENCIA' : 'CONSULTAR INTELLIGENCE (LLM)'}
                 </div>
-                <div style={{ color: '#06b6d4', animation: 'pulse 2s infinite' }}>🔴</div>
+                <div style={{ color: '#06b6d4' }}>{showQueryMenu ? '⬇️' : '⬆️'}</div>
             </div>
 
             {/* MAIN CONTENT AREA */}
