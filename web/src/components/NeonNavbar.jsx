@@ -18,11 +18,10 @@ export function NeonNavbar({ activeTab, onTabChange }) {
             justifyContent: 'center',
             gap: '15px',
             padding: '10px',
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(8px)',
-            borderRadius: '20px', // Fully rounded for better floating look
-            borderBottom: '1px solid #334155',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+            // background: 'transparent', // Removed 'barra'
+            // backdropFilter: 'none',
+            // border: 'none',
+            // boxShadow: 'none'
         }}>
             {tabs.map(tab => (
                 <button

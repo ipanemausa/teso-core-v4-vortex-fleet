@@ -146,7 +146,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
     }, []);
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%', background: '#f8fafc' }}>
+        <div style={{ position: 'relative', width: '100%', height: '100%', background: '#000000' }}>
 
 
 
@@ -158,10 +158,11 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 zoomControl={false}
                 attributionControl={false} // Hidden as per user request for clean UI
             >
-                {/* LIGHT MODE MAP TILE (Daylight) */}
+                {/* DARK MODE MAP TILE (Fly.io Style) */}
                 <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    opacity={0.85} // High contrast
                 />
 
                 {/* LAYER 1: FLEET VECTORS */}
