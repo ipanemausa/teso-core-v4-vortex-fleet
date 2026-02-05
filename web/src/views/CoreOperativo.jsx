@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { divIcon } from 'leaflet';
+import { PlaneMarker } from '../components/PlaneMarker';
 
 // --- CUSTOM FLEET ICONS ---
 const carIcon = divIcon({
@@ -20,22 +21,47 @@ const jobIcon = divIcon({
 const CENTER_LAT = 6.2442;
 const CENTER_LNG = -75.5812;
 
-export function CoreOperativo({ onClose, onHome, command }) {
+export function CoreOperativo({ onClose, onHome, command, simulationData }) {
     const [fleet, setFleet] = useState([]);
     const [jobs, setJobs] = useState([]); // Active Passenger Requests
+    const [planes, setPlanes] = useState([]); // Active Flights
 
-    // 1. INITIALIZE FLEET
+    // 1. INITIALIZE FLEET & DATA FROM SIMULATION
     useEffect(() => {
-        const initialFleet = Array.from({ length: 15 }).map((_, i) => ({
-            id: `V-0${i + 10}`,
-            lat: CENTER_LAT + (Math.random() - 0.5) * 0.06,
-            lng: CENTER_LNG + (Math.random() - 0.5) * 0.06,
-            status: Math.random() > 0.6 ? 'ACTIVE' : 'IDLE',
-            speed: 0,
-            target: null
-        }));
-        setFleet(initialFleet);
-    }, []);
+        if (simulationData) {
+            // Load Planes
+            if (simulationData.planes) {
+                setPlanes(simulationData.planes);
+            }
+
+            // Load Fleet (Derived from Active Services for visualization)
+            // We take a slice of services to simulate "Active" cars on the map
+            if (simulationData.services) {
+                const activeServices = simulationData.services.slice(0, 15); // Top 15 active
+                const mappedFleet = activeServices.map((svc, i) => ({
+                    id: svc.plate || `V-0${i + 10}`,
+                    lat: svc.lat || (CENTER_LAT + (Math.random() - 0.5) * 0.05),
+                    lng: svc.lng || (CENTER_LNG + (Math.random() - 0.5) * 0.05),
+                    status: svc.status === 'COMPLETED' ? 'ACTIVE' : 'IDLE',
+                    speed: Math.floor(Math.random() * 60) + 20,
+                    target: null,
+                    driver: svc.driver_name
+                }));
+                setFleet(mappedFleet);
+            }
+        } else {
+            // Fallback: Random Stub
+            const initialFleet = Array.from({ length: 15 }).map((_, i) => ({
+                id: `V-0${i + 10}`,
+                lat: CENTER_LAT + (Math.random() - 0.5) * 0.06,
+                lng: CENTER_LNG + (Math.random() - 0.5) * 0.06,
+                status: Math.random() > 0.6 ? 'ACTIVE' : 'IDLE',
+                speed: 0,
+                target: null
+            }));
+            setFleet(initialFleet);
+        }
+    }, [simulationData]);
 
     // 2. LISTEN FOR COMMANDS (The Brain Logic)
     useEffect(() => {
@@ -131,6 +157,11 @@ export function CoreOperativo({ onClose, onHome, command }) {
                             </div>
                         </Popup>
                     </Marker>
+                ))}
+
+                {/* LAYER 2: PLANES */}
+                {planes.map(p => (
+                    <PlaneMarker key={p.id} p={p} isSelected={false} />
                 ))}
 
             </MapContainer>

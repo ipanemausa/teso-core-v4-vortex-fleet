@@ -94,8 +94,8 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
 
         const pollAlerts = async () => {
             try {
-                // Poll backend for background alerts
-                const res = await fetch('https://teso-api-dev.fly.dev/api/agently/alerts');
+                // Poll backend for background alerts (Relative path)
+                const res = await fetch('/api/agently/alerts');
                 if (!res.ok) return;
 
                 const alerts = await res.json();
@@ -263,9 +263,22 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
                     description: 'Comisión Teso Ops'
                 }));
 
+                // 4. GENERATE LIVE PLANES (LAYER 2 ASSETS)
+                const planes = Array.from({ length: 8 }).map((_, i) => ({
+                    id: `FL-${500 + i}`,
+                    lat: 6.24 + (Math.random() * 0.1 - 0.05),
+                    lng: -75.58 + (Math.random() * 0.1 - 0.05),
+                    heading: Math.floor(Math.random() * 360),
+                    alt: 8000 + Math.floor(Math.random() * 5000),
+                    spd: 240 + Math.floor(Math.random() * 40),
+                    status: Math.random() > 0.3 ? 'AIRBORNE' : 'LANDED',
+                    from: ['MIA', 'BOG', 'CLO', 'JFK', 'MAD'][Math.floor(Math.random() * 5)]
+                }));
+
                 setSimulationData({
                     ...v4Result,
                     services: services, // Populates Map & Table
+                    planes: planes,     // Populates Map (Layer 2)
                     bankTransactions: bankTransactions
                 });
 
@@ -868,10 +881,10 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
             fontFamily: "var(--font-main)" // Tokenized
         }}>
 
-            
+
             {/* MODULAR ARCHITECTURE (v4) */}
             {viewMode === 'LIVE_OPS' ? (
-                <LiveOpsMap opsCommand={opsCommand} />
+                <LiveOpsMap opsCommand={opsCommand} simulationData={simulationData} />
             ) : (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#64748b' }}>
                     <div style={{ fontSize: '3rem' }}>🚧</div>
