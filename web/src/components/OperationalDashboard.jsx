@@ -94,8 +94,8 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
 
         const pollAlerts = async () => {
             try {
-                // Poll backend for background alerts (Relative path)
-                const res = await fetch('/api/agently/alerts');
+                // Poll backend for background alerts
+                const res = await fetch('https://teso-api-dev.fly.dev/api/agently/alerts');
                 if (!res.ok) return;
 
                 const alerts = await res.json();
