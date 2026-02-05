@@ -96,11 +96,12 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
     return (
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', height: '100%' }}>
 
-            {/* A. FLOATING NAVBAR (Docked Left to avoid Panel collision) */}
+            {/* A. FLOATING NAVBAR (Centered - User Preference) */}
             <div style={{
                 position: 'absolute',
                 top: 20,
-                left: 20, /* Moved from Center to Left */
+                left: '50%',
+                transform: 'translateX(-50%)',
                 zIndex: 1000,
                 width: 'auto'
             }}>
