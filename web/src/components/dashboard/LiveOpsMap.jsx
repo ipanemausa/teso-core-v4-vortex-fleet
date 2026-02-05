@@ -32,7 +32,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
         const handleDockClick = (item) => {
             // EXTERNAL ACTIONS
             if (item.id === 'C_GIT') return window.open('https://github.com/GuillermoHoyos/teso_core', '_blank');
-            if (item.id === 'PITCH') return window.open('https://gamma.app/docs/TESO-AI-Logistics-Deck-v4-PREVIEW-ONLY-u88ffx882', '_blank'); // Placeholder/Real
+            if (item.id === 'PITCH') return window.dispatchEvent(new Event('SHOW_PITCH')); // Internal Presentation Trigger
             if (item.id === 'WHATSAPP') return window.open('https://wa.me/573001234567?text=Hola%20TESO%20AI', '_blank');
 
             // LAYER TOGGLES (Internal)

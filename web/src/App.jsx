@@ -346,6 +346,13 @@ function App() {
     return () => window.removeEventListener('error', handler);
   }, []);
 
+  // EVENT LISTENER FOR REMOTE ACTIONS (Fix for prop drilling)
+  useEffect(() => {
+    const handlePitch = () => setShowPresentation(true);
+    window.addEventListener('SHOW_PITCH', handlePitch);
+    return () => window.removeEventListener('SHOW_PITCH', handlePitch);
+  }, []);
+
   const [showLanding, setShowLanding] = useState(true);
   const autoAssignRef = useRef(null);
   const [showPresentation, setShowPresentation] = useState(false); // NEW: Investor Pitch Mode
