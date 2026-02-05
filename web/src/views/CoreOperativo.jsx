@@ -191,9 +191,13 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                     </Marker>
                 ))}
 
-                {/* LAYER 3: AIRSPACE/RADAR */}
-                {(!activeLayers || activeLayers.includes('RADAR')) && planes.map(p => (
-                    <PlaneMarker key={p.id} p={p} isSelected={false} />
+                {/* LAYER 3: AIRSPACE/RADAR (Fixed Rendering) */}
+                {(!activeLayers || activeLayers.includes('RADAR')) && planes.length > 0 && planes.map(p => (
+                    <PlaneMarker
+                        key={p.id}
+                        p={p}
+                        isSelected={false} // Default state
+                    />
                 ))}
 
             </MapContainer>

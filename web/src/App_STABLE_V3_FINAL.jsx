@@ -201,15 +201,26 @@ const FLIGHT_DATA = [
 
 
 // --- RESPONSIVE RADAR CONTROLLER (SAFE IMPLEMENTATION) ---
+// --- RESPONSIVE RADAR CONTROLLER (SAFE IMPLEMENTATION) ---
 const createPlane = (bounds, center) => {
   const airlines = ['AA', 'AV', 'LA', 'CM', 'NK', 'IB', 'DL', 'AM'];
   const markets = ['MIA', 'MAD', 'BOG', 'PTY', 'JFK', 'SCL', 'LIM', 'MEX'];
 
-  const airline = airlines[Math.floor(Math.random() * airlines.length)];
-  const south = bounds.getSouth();
-  const north = bounds.getNorth();
-  const west = bounds.getWest();
-  const east = bounds.getEast();
+  let south, north, west, east;
+
+  // SAFETY: Fallback bounds if map not ready (Medellin Default)
+  if (!bounds || !bounds.getSouth) {
+    south = 6.15; north = 6.35; west = -75.65; east = -75.50;
+  } else {
+    south = bounds.getSouth();
+    north = bounds.getNorth();
+    west = bounds.getWest();
+    east = bounds.getEast();
+  }
+
+  // Ensure Center is valid
+  const safeCenter = (center && typeof center.lat === 'number') ? center : { lat: 6.25, lng: -75.57 };
+
   const latSpan = north - south;
   const lngSpan = east - west;
 
@@ -232,14 +243,14 @@ const createPlane = (bounds, center) => {
     lng = east + PADDING;
   }
 
-  const targetLat = center.lat + (Math.random() - 0.5) * (latSpan * 0.5);
-  const targetLng = center.lng + (Math.random() - 0.5) * (lngSpan * 0.5);
+  const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.5);
+  const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.5);
   const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
   const speed = (latSpan * 0.005) + (Math.random() * (latSpan * 0.005));
 
   return {
-    id: `${airline}${Math.floor(100 + Math.random() * 900)}`,
-    airline,
+    id: `${airlines[Math.floor(Math.random() * airlines.length)]}${Math.floor(100 + Math.random() * 900)}`,
+    airline: airlines[Math.floor(Math.random() * airlines.length)],
     from: markets[Math.floor(Math.random() * markets.length)],
     lat, lng,
     heading: angleToCenter,
