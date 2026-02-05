@@ -14,92 +14,148 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
     // This component encapsulates the "Map View" logic.
     const [activeTab, setActiveTab] = useState('FLOTA');
 
-    // --- MODULE RENDERER ---
-    const renderContent = () => {
-        switch (activeTab) {
-            case 'CLIENTES':
-                return (
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 50 }}>
-                        <ClientDashboard />
+    // --- FLY.IO LAYOUT RECONSTRUCTION ---
+    // (Based on user screenshots: Left Dock, Full Right Panel, Bottom Bar)
+
+    // A. LEFT DOCK COMPONENT
+    const V6Dock = () => (
+        <div style={{
+            position: 'absolute', top: '100px', left: '20px', bottom: '100px',
+            display: 'flex', flexDirection: 'column', gap: '15px',
+            zIndex: 400
+        }}>
+            {[
+                { label: 'RADAR JMC', icon: '📡', color: '#a855f7' },
+                { label: 'VISIÓN IA', icon: '🧠', color: '#ec4899' },
+                { label: 'OPTIMIZE', icon: '📈', color: '#f59e0b' },
+                { label: 'SIMULACRO', icon: '🔥', color: '#ef4444' },
+                { label: 'PITCH DECK', icon: '📢', color: '#ec4899' },
+                { label: 'WHATSAPP', icon: '💬', color: '#22c55e' },
+                { label: 'SOURCE GIT', icon: '👾', color: '#64748b' },
+            ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: 0.9 }}>
+                    <div style={{
+                        width: '40px', height: '40px',
+                        background: 'rgba(15, 23, 42, 0.9)',
+                        border: `1px solid ${item.color}`,
+                        borderRadius: '12px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '1.2rem',
+                        boxShadow: `0 0 10px ${item.color}40`
+                    }}>
+                        {item.icon}
                     </div>
-                );
-            case 'ORDENES':
-                return (
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 50, background: '#f4f6f8' }}>
-                        {/* Logistics uses simulationData for its grid */}
-                        <LogisticsDashboard simulationData={simulationData} />
+                    <div style={{
+                        color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '1px',
+                        textShadow: '0 2px 4px #000', fontFamily: 'monospace'
+                    }}>
+                        {item.label}
                     </div>
-                );
-            case 'FLOTA':
-            case 'VUELOS':
-            default:
-                // Default Layout: Map + Right Panel
-                return (
-                    <>
-                        {/* B. MAP VIEW */}
-                        <div style={{ flex: 1, position: 'relative' }}>
-                            <CoreOperativo command={opsCommand} simulationData={simulationData} />
+                </div>
+            ))}
+        </div>
+    );
+
+    // B. FULL RIGHT PANEL COMPONENT (Restored)
+    const TesoOpsPanel = () => (
+        <div style={{
+            width: '350px',
+            background: 'rgba(9, 9, 11, 0.95)',
+            borderLeft: '1px solid #334155',
+            display: 'flex', flexDirection: 'column',
+            padding: '20px',
+            zIndex: 50,
+            boxShadow: '-10px 0 40px rgba(0,0,0,0.8)',
+            height: '100%'
+        }}>
+            {/* HEADER */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div>
+                    <h2 style={{ margin: 0, color: '#ef4444', fontFamily: 'monospace', fontSize: '1.2rem' }}>TESO OPS</h2>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>UNIDADES: {simulationData?.services?.length || 15} | OPS ACTIVAS: {simulationData?.services?.filter(s => s.status !== 'COMPLETED').length || 60}</div>
+                </div>
+                <div style={{
+                    width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #ea580c',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c', cursor: 'pointer'
+                }}>🏠</div>
+            </div>
+
+            {/* SEARCH */}
+            <div style={{ marginBottom: '20px', position: 'relative' }}>
+                <input type="text" placeholder="Buscar Orden, Unidad, Cliente [ENTER]"
+                    style={{
+                        width: '100%', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px',
+                        padding: '8px 10px', color: '#fff', fontSize: '0.8rem', outline: 'none'
+                    }}
+                />
+                <span style={{ position: 'absolute', right: '10px', top: '8px', color: '#64748b' }}>🔍</span>
+            </div>
+
+            {/* CONTROLS */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                <button style={{
+                    background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', color: '#06b6d4',
+                    padding: '10px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px',
+                    fontWeight: 'bold', fontSize: '0.8rem'
+                }}>
+                    ▶ INICIAR SIMULACIÓN
+                </button>
+                <button style={{
+                    background: 'rgba(234, 88, 12, 0.1)', border: '1px solid #ea580c', color: '#ea580c',
+                    padding: '10px', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px',
+                    fontWeight: 'bold', fontSize: '0.8rem'
+                }}>
+                    ⚡ DESPACHO INTELIGENTE
+                </button>
+            </div>
+
+            {/* CONSOLE */}
+            <div style={{
+                background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px',
+                marginBottom: '20px', height: '120px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.7rem'
+            }}>
+                <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '5px' }}>CONSOLE.LOG :: SYSTEM EVENTS</div>
+                <div style={{ color: '#39FF14' }}>[9:07:55 AM] 🟩 NUBE SINCRONIZADA: 86346 Operaciones cargadas.</div>
+                <div style={{ color: '#fff' }}>[9:07:49 AM] ☁️ CONNECTING: sincronizando con "Cerebro" (Python Backend)...</div>
+                <div style={{ color: '#ef4444' }}>[9:07:40 AM] 🚀 SYSTEM STARTUP: API Target = 'RELATIVE'</div>
+            </div>
+
+            {/* UNITS LIST */}
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+                <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #334155', paddingBottom: '5px' }}>
+                    UNIDADES EN LÍNEA ({simulationData?.services?.length || 15})
+                </div>
+                {[
+                    { id: 'TSO-128', status: 'DISPONIBLE', cond: 'COND-021' },
+                    { id: 'TSO-160', status: 'DISPONIBLE', cond: 'COND-248' },
+                    { id: 'TSO-109', status: 'DISPONIBLE', cond: 'COND-142' }
+                ].map((u, i) => (
+                    <div key={i} style={{
+                        background: 'rgba(255,255,255,0.03)', padding: '8px', marginBottom: '5px', borderRadius: '4px',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                    }}>
+                        <div>
+                            <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.8rem' }}>{u.id}</div>
+                            <div style={{ color: '#64748b', fontSize: '0.7rem' }}>Cond: {u.cond}</div>
                         </div>
-
-                        {/* C. RIGHT PANEL (Glassmorphism) */}
-                        <div style={{
-                            width: '320px', /* Slightly narrower */
-                            background: 'rgba(9, 9, 11, 0.85)', /* Translucent */
-                            backdropFilter: 'blur(12px)',
-                            borderLeft: '1px solid #334155',
-                            display: 'flex', flexDirection: 'column',
-                            padding: '20px',
-                            zIndex: 50,
-                            boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
-                            transition: 'all 0.3s ease'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div style={{ width: '8px', height: '8px', background: '#39FF14', borderRadius: '50%', boxShadow: '0 0 5px #39FF14' }}></div>
-                                    <h2 style={{ margin: 0, color: '#fff', fontSize: '1rem', letterSpacing: '2px' }}>TESO OPS</h2>
-                                </div>
-                                <div style={{ color: '#64748b', cursor: 'pointer', fontSize: '1.2rem' }}>⚙️</div>
-                            </div>
-
-                            <div style={{ flex: 1, background: 'rgba(0,0,0,0.5)', border: '1px solid #1e293b', borderRadius: '8px', padding: '15px', overflowY: 'auto' }}>
-                                <div style={{
-                                    color: '#06b6d4',
-                                    fontWeight: 'bold',
-                                    marginBottom: '15px',
-                                    fontSize: '0.8rem',
-                                    borderBottom: '1px solid #1e293b',
-                                    paddingBottom: '5px'
-                                }}>SYSTEM LOGS</div>
-
-                                <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <div style={{ color: '#39FF14' }}>[OK] Grid operational.</div>
-                                    <div style={{ color: '#94a3b8' }}>Scanning sectors...</div>
-
-                                    {simulationData?.planes && (
-                                        <div style={{ marginTop: '10px', padding: '8px', background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', borderRadius: '4px', color: '#06b6d4' }}>
-                                            ✈️ {simulationData.planes.length} Active Flights
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div style={{ color: '#475569', fontSize: '0.7rem', marginTop: '20px', textAlign: 'center' }}>
-                                    LiveOpsMap v1.2 (Stable)
-                                </div>
-                            </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', color: '#39FF14' }}>
+                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#39FF14' }}></div>
+                            {u.status}
                         </div>
-                    </>
-                );
-        }
-    };
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 
-    // --- REFINED LAYOUT: NAVBAR LEFT, PANEL GLASS ---
+    // --- REFINED LAYOUT: NAVBAR TOP, LEFT DOCK, RIGHT PANEL ---
     return (
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', height: '100%' }}>
+        <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', display: 'flex' }}>
 
-            {/* A. FLOATING NAVBAR (Centered - User Preference) */}
+            {/* A. FLOATING NAVBAR (Top Center) */}
             <div style={{
                 position: 'absolute',
-                top: 80, /* FIXED: Moved down to avoid overlap with HUD (top:20) */
+                top: 20, /* Restored to generic top position */
                 left: '50%',
                 transform: 'translateX(-50%)',
                 zIndex: 1000,
@@ -108,13 +164,45 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
                 <NeonNavbar activeTab={activeTab} onTabChange={setActiveTab} />
             </div>
 
+            {/* B. LEFT DOCK (V6 Style) */}
+            <V6Dock />
+
+            {/* C. BOTTOM BAR (Robot Icon) */}
+            <div style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '20px',
+                zIndex: 1000,
+                display: 'flex', alignItems: 'center', gap: '10px',
+                background: '#0f172a', border: '1px solid #06b6d4', borderRadius: '50px',
+                padding: '10px 20px', boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
+            }}>
+                <div style={{ fontSize: '1.5rem' }}>🤖</div>
+                <div style={{ color: '#fff', fontSize: '0.9rem', fontFamily: 'monospace' }}>Consultar Operaciones...</div>
+                <div style={{ color: '#06b6d4' }}>🎤</div>
+            </div>
+
             {/* MAIN CONTENT AREA */}
-            {renderContent()}
+            <div style={{ flex: 1, position: 'relative' }}>
+                {/* MAP RENDERS HERE IN LIVE OPS MODE */}
+                {activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && (
+                    <CoreOperativo command={opsCommand} simulationData={simulationData} />
+                )}
+                {/* OTHER TABS */}
+                {activeTab === 'CLIENTES' && <ClientDashboard />}
+                {activeTab === 'ORDENES' && <div style={{ padding: '50px', color: '#fff' }}>Logistics View (Active)</div>}
+            </div>
+
+            {/* D. RIGHT PANEL (Always Visible in default view) */}
+            {(activeTab === 'FLOTA' || activeTab === 'VUELOS' || activeTab === 'AGENDA') && (
+                <div style={{ height: '100%', zIndex: 100 }}>
+                    <TesoOpsPanel />
+                </div>
+            )}
 
         </div>
     );
 };
-
 
 
 export default LiveOpsMap;
