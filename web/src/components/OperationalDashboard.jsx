@@ -886,11 +886,198 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
             {viewMode === 'LIVE_OPS' ? (
                 <LiveOpsMap opsCommand={opsCommand} simulationData={simulationData} />
             ) : (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#64748b' }}>
-                    <div style={{ fontSize: '3rem' }}>🚧</div>
-                    <h2>ANALYTICS OFFLINE</h2>
-                    <p>Use Live Ops Map</p>
-                </div>
+                <>
+                    {/* --- ANALYTICS & STRATEGY VIEW --- */}
+
+                    {/* 1. HEADER & NAVIGATION */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', pointerEvents: 'auto' }}>
+                        <NeonNavbar
+                            activeTab={activeSheet}
+                            onTabChange={setActiveSheet}
+                            tabs={[
+                                { id: 'PROGRAMACION', label: 'AGENDA', icon: '📅' },
+                                { id: 'FINANCE', label: 'FINANZAS', icon: '💰' },
+                                { id: 'CLIENTS', label: 'CLIENTES', icon: '🏢' },
+                                { id: 'MARKETING', label: 'MERCADO', icon: '📢' },
+                                { id: 'WAR_ROOM', label: 'WAR ROOM', icon: '⚔️' }
+                            ]}
+                        />
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <TesoButton
+                                label={isAuditMode ? "🔓 EXIT AUDIT" : "🔒 AUDIT MODE"}
+                                active={isAuditMode}
+                                onClick={() => setIsAuditMode(!isAuditMode)}
+                                variant="secondary"
+                            />
+                            <TesoButton label="✖ CLOSE" onClick={onClose} variant="danger" />
+                        </div>
+                    </div>
+
+                    {/* 2. CEO INTELLIGENCE PANEL */}
+                    <div style={{ pointerEvents: 'auto' }}>
+                        <CeoPanel />
+                    </div>
+
+                    {/* 3. SUB-VIEW ROUTER */}
+                    <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', pointerEvents: 'auto' }}>
+
+                        {/* A. AGENDA (PROGRAMACION) */}
+                        {activeSheet === 'PROGRAMACION' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                                {/* KPIS */}
+                                <div className="glass-panel" style={{ padding: '20px' }}>
+                                    <h3>METRICAS OPERATIVAS</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <div>
+                                            <div className="label">Eficiencia</div>
+                                            <div className="value-lg" style={{ color: 'var(--color-kpi-positive)' }}>{metrics.efficiency}%</div>
+                                        </div>
+                                        <div>
+                                            <div className="label">Conflictos</div>
+                                            <div className="value-lg" style={{ color: metrics.errorRate > 0 ? 'var(--color-kpi-danger)' : 'var(--color-text-secondary)' }}>
+                                                {simulationData?.conflicts?.cancellations || 0}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* WORKFORCE VISUALIZER */}
+                                <div className="glass-panel" style={{ padding: '20px', gridColumn: 'span 2' }}>
+                                    <h3>ORQUESTADOR DE IA (WORKFORCE)</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+                                        {workforce.nodes.map((node, i) => (
+                                            <div key={node.id} style={{ textAlign: 'center', opacity: node.status === 'IDLE' ? 0.4 : 1, width: '18%' }}>
+                                                <div style={{ fontSize: '2rem', marginBottom: '10px', filter: node.status === 'WORKING' ? 'drop-shadow(0 0 8px cyan)' : 'none' }}>
+                                                    {node.icon}
+                                                </div>
+                                                <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fff' }}>{node.label}</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#aaa', height: '15px' }}>{node.status === 'WORKING' ? node.logs[0] : node.status}</div>
+                                                {/* Progress Bar */}
+                                                <div style={{ height: '4px', background: '#333', marginTop: '5px', borderRadius: '2px' }}>
+                                                    <div style={{ width: `${node.load}%`, height: '100%', background: node.id === 'DISPATCH' ? '#10b981' : '#06b6d4', transition: 'width 0.2s' }}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {/* SYSTEM LOG */}
+                                    <div style={{ marginTop: '20px', background: '#000', padding: '10px', borderRadius: '4px', height: '100px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.8rem', color: '#39FF14' }}>
+                                        {systemLogs.map((log, i) => (
+                                            <div key={i}>[{log.time}] {log.msg}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* B. FINANZAS */}
+                        {activeSheet === 'FINANCE' && (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '20px' }}>
+                                {/* SIDEBAR METRICS */}
+                                <div className="glass-panel" style={{ padding: '20px' }}>
+                                    <h2>CAJA: {formatCurrency(analytics.margin)}</h2>
+                                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <div><div className="label">Ingresos Totales</div><div className="value">{formatCurrency(analytics.totalRevenue)}</div></div>
+                                        <div><div className="label">Costos Operativos</div><div className="value" style={{ color: '#ef4444' }}>{formatCurrency(analytics.totalCost)}</div></div>
+                                        <div><div className="label">Margen Neto</div><div className="value" style={{ color: '#39FF14' }}>{analytics.marginPercent}%</div></div>
+                                        <hr style={{ borderColor: '#333' }} />
+                                        <div><div className="label">CxC Pendiente</div><div className="value" style={{ color: '#f59e0b' }}>{formatCurrency(analytics.cxcPending)}</div></div>
+                                        <div><div className="label">CxP Drivers</div><div className="value" style={{ color: '#6366f1' }}>{formatCurrency(analytics.cxpPending)}</div></div>
+                                    </div>
+                                    <div style={{ marginTop: '30px' }}>
+                                        <TesoButton label="🔍 AUDITAR CAJA" onClick={handleAuditClick} />
+                                    </div>
+                                </div>
+
+                                {/* MAIN GRAPH AREA */}
+                                <div className="glass-panel" style={{ padding: '20px' }}>
+                                    <h3>PROYECCIÓN DE FLUJO DE CAJA (STRESS TEST)</h3>
+                                    <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '2px', paddingBottom: '20px', borderBottom: '1px solid #333', position: 'relative' }}>
+                                        {/* SVG GRAPH RENDERER */}
+                                        {stressResult && stressResult.graphPath && (
+                                            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                                {/* Grid */}
+                                                <line x1="0" y1="50" x2="100" y2="50" stroke="#333" strokeDasharray="2" strokeWidth="0.5" />
+                                                {/* Data Path */}
+                                                <path d={stressResult.graphPath} fill="none" stroke={stressResult.status === 'INSOLVENT' ? '#ef4444' : '#39FF14'} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+                                                {/* Fill Gradient */}
+                                                <path d={`${stressResult.graphPath} L 100 100 L 0 100 Z`} fill={stressResult.status === 'INSOLVENT' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(57, 255, 20, 0.1)'} stroke="none" />
+                                            </svg>
+                                        )}
+                                        {/* Scenario Indicator */}
+                                        <div style={{ position: 'absolute', top: 10, right: 10, textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.8rem', color: '#aaa' }}>RUNWAY ACTUAL</div>
+                                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: stressResult?.runway === '∞' ? '#39FF14' : '#ef4444' }}>{stressResult?.runway}</div>
+                                        </div>
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '10px' }}>
+                                        * Proyección basada en {analytics.cxcPending > 0 ? 'ciclo de cobro actual' : 'datos históricos'}.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* C. WAR ROOM (CONTROL) */}
+                        {activeSheet === 'WAR_ROOM' && (
+                            <div className="glass-panel" style={{ padding: '30px', maxWidth: '800px', margin: '0 auto' }}>
+                                <h2 style={{ color: '#ef4444' }}>⚔️ COMMAND CENTER (WAR ROOM) ⚔️</h2>
+                                <p>Ajuste parámetros globales de simulación. Use con precaución.</p>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '30px' }}>
+                                    <div>
+                                        <h4>ESCENARIO DE ESTRÉS</h4>
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <label>Días de Cartera (CxC)</label>
+                                            <input
+                                                type="range" min="0" max="120"
+                                                value={scenario.cxcDays}
+                                                onChange={(e) => setScenario({ ...scenario, cxcDays: e.target.value })}
+                                                style={{ width: '100%' }}
+                                            />
+                                            <div style={{ textAlign: 'right', color: '#39FF14' }}>{scenario.cxcDays} Días</div>
+                                        </div>
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <label>Frecuencia Nómina</label>
+                                            <select
+                                                value={scenario.cxpFreq}
+                                                onChange={(e) => setScenario({ ...scenario, cxpFreq: parseInt(e.target.value) })}
+                                                style={{ width: '100%', background: '#000', color: '#fff', padding: '5px' }}
+                                            >
+                                                <option value={15}>Quincenal (15)</option>
+                                                <option value={30}>Mensual (30)</option>
+                                                <option value={7}>Semanal (7)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center' }}>
+                                        <TesoButton
+                                            label="🚨 SIMULAR QUIEBRA (STRESS TEST)"
+                                            variant="danger"
+                                            onClick={() => {
+                                                setScenario({ cxcDays: 90, cxpFreq: 7, growth: 0.5 }); // Killer scenario
+                                                alert("Simulando escenario 'Perfect Storm'...");
+                                            }}
+                                        />
+                                        <TesoButton
+                                            label="📄 DESCARGAR REPORTE PDF"
+                                            variant="primary"
+                                            onClick={handleDownloadReport}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* D. CLIENTS & OTHERS (Placeholder) */}
+                        {['CLIENTS', 'MARKETING'].includes(activeSheet) && (
+                            <div style={{ textAlign: 'center', padding: '50px', color: '#666' }}>
+                                <h1>MÓDULO {activeSheet}</h1>
+                                <p>Datos en vivo conectando con API v4...</p>
+                            </div>
+                        )}
+
+                    </div>
+                </>
             )}
         </div>
     )
