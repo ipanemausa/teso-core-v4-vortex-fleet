@@ -123,6 +123,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    opacity={0.6}
                 />
 
                 {/* LAYER 1: FLEET VECTORS */}
