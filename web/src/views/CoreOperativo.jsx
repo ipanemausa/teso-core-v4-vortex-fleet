@@ -110,15 +110,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%', background: '#000' }}>
 
-            {/* L2 ADMIN HUD (Mini stats overlay, keeping it simple as we have the big right panel now) */}
-            <div style={{
-                position: 'absolute', top: 20, left: 20, zIndex: 1000,
-                background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(5px)',
-                padding: '10px 15px', borderRadius: '8px', border: '1px solid #334155',
-                color: '#fff', fontSize: '0.8rem'
-            }}>
-                <span style={{ color: '#39FF14' }}>●</span> SYSTEM ONLINE | FLOTA: {fleet.length} | ORDENES: {jobs.length}
-            </div>
+
 
             {/* THE MAP ITSELF */}
             <MapContainer
