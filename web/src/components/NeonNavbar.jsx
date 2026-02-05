@@ -20,14 +20,8 @@ export function NeonNavbar({ activeTab, onTabChange }) {
             padding: '10px',
             background: 'rgba(0,0,0,0.6)',
             backdropFilter: 'blur(8px)',
-            borderRadius: '0 0 20px 20px',
+            borderRadius: '20px', // Fully rounded for better floating look
             borderBottom: '1px solid #334155',
-            position: 'absolute',
-            top: 20, // Floating below the main header
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 1000,
-            width: '80%',
             boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
         }}>
             {tabs.map(tab => (
