@@ -9,7 +9,7 @@ export function NeonNavbar({ activeTab, onTabChange }) {
         { id: 'AGENDA', icon: '📅', label: 'AGENDA' },
         { id: 'FINANZAS', icon: '💰', label: 'FINANZAS' },
         { id: 'MERCADO', icon: '📢', label: 'MERCADO' },
-        { id: 'CORE_V4', icon: '🔋', label: 'CORE V4' },
+        { id: 'CORE_V4', icon: '🔋', label: 'CORE v4.2 LIGHT' },
     ];
 
     return (
