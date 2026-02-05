@@ -41,9 +41,11 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
 
         return (
             <div style={{
-                position: 'absolute', top: '100px', left: '20px', bottom: '100px',
-                display: 'flex', flexDirection: 'column', gap: '15px',
-                zIndex: 400
+                position: 'absolute', top: '75px', left: '20px', bottom: '100px',
+                display: 'flex', flexDirection: 'column', gap: '8px',
+                zIndex: 400,
+                overflowY: 'auto',
+                scrollbarWidth: 'none'
             }}>
                 {[
                     { id: 'RADAR', label: 'RADAR JMC', icon: '📡', color: '#a855f7' },
