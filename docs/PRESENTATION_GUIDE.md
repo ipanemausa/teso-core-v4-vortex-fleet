@@ -29,6 +29,21 @@ Se honesto sobre la fase actual:
 *   **Lógica:** 80% Validada (Algoritmos de despacho documentados).
 *   **Lo que falta (La Ayuda):** "Infraestructura de Nube para escalar y soporte regulatorio para operar formalmente como empresa de transporte especial digitalizada."
 
+## 5. Estrategia de Soberanía (El "As" bajo la manga)
+*Este es tu argumento de cierre para Gobierno/Alcaldía.*
+
+### A. La "Grieta" Tributaria (La Verdad sobre las Apps Extranjeras)
+*   **Argumento:** "Las apps extranjeras cumplen con lo mínimo (IVA digital), pero tienen una **fuga estructural de capital**."
+*   **La Diferencia TESO:** 
+    1.  **Retención de Riqueza:** El 100% de la comisión se queda en el ecosistema local (Mantenimiento, Seguros Nacionales, Banca Local), no se va a paraísos fiscales o Silicon Valley.
+    2.  **Formalización Real:** No son "socios conductores" en el aire. Son micro-empresarios verificados. Integramos pago de parafiscales en el flujo de caja.
+
+### B. Control vs. Intermediación
+*   **El Problema Actual:** Uber/Didi solo hacen *intermediación*. Si hay un problema grave, bloquean al conductor y ya. No responden por la seguridad ciudadana.
+*   **La Solución TESO:** Nosotros hacemos **Control Operativo**.
+    *   **Validación RNT/SOAT en Tiempo Real:** Nuestra IA bloquea automáticamente vehículos con seguros vencidos (Las apps extranjeras a veces dejan pasar esto por meses).
+    *   **Soberanía de Datos:** La data de movilidad de Medellín le pertenece a Medellín, no a un servidor en California.
+
 ## Conclusión
 **SÍ, ESTÁ LISTO.**
 Lo que tienes visualmente supera a muchos proyectos que ganan capital semilla. La "profundidad" de la simulación demuestra que has pensado en los problemas reales (conflictos, retrasos, facturación). 
