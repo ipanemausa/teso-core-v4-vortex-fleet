@@ -60,6 +60,19 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 target: null
             }));
             setFleet(initialFleet);
+
+            // Fallback: Random Planes
+            const initialPlanes = Array.from({ length: 5 }).map((_, i) => ({
+                id: `AV-${900 + i}`,
+                lat: CENTER_LAT + (Math.random() - 0.5) * 0.1,
+                lng: CENTER_LNG + (Math.random() - 0.5) * 0.1,
+                heading: Math.floor(Math.random() * 360),
+                speed: 300 + Math.floor(Math.random() * 200),
+                alt: 15000,
+                status: 'IN_AIR',
+                from: 'MIA'
+            }));
+            setPlanes(initialPlanes);
         }
     }, [simulationData]);
 
@@ -89,7 +102,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
         }
     }, [command]);
 
-    // 3. LIVE ANIMATION LOOP (Physics)
+    // 3. LIVE ANIMATION LOOP (Fleet Physics)
     useEffect(() => {
         const interval = setInterval(() => {
             setFleet(prev => prev.map(car => {
@@ -104,6 +117,31 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 };
             }));
         }, 1000); // 1 FPS update for smoothness
+        return () => clearInterval(interval);
+    }, []);
+
+    // 4. PLANE ANIMATION LOOP (Radar Physics) 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setPlanes(prev => prev.map(p => {
+                // Motion math: Move based on heading
+                const headingRad = (p.heading || 0) * (Math.PI / 180);
+                const speedFactor = (p.speed || 300) * 0.000005; // Scale for map
+
+                let newLat = p.lat + Math.cos(headingRad) * speedFactor;
+                let newLng = p.lng + Math.sin(headingRad) * speedFactor;
+
+                // Simple World Wrap (keep them in bounds roughly)
+                if (Math.abs(newLat - CENTER_LAT) > 0.2) newLat = CENTER_LAT;
+                if (Math.abs(newLng - CENTER_LNG) > 0.2) newLng = CENTER_LNG;
+
+                return {
+                    ...p,
+                    lat: newLat,
+                    lng: newLng
+                };
+            }));
+        }, 100); // Smooth 10 FPS for planes
         return () => clearInterval(interval);
     }, []);
 
