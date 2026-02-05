@@ -197,18 +197,56 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             <V6Dock activeLayers={activeLayers} onToggle={toggleLayer} />
 
             {/* C. BOTTOM BAR (Robot Icon) */}
-            <div style={{
-                position: 'absolute',
-                bottom: '20px',
-                left: '20px',
-                zIndex: 1000,
-                display: 'flex', alignItems: 'center', gap: '10px',
-                background: '#0f172a', border: '1px solid #06b6d4', borderRadius: '50px',
-                padding: '10px 20px', boxShadow: '0 0 15px rgba(6, 182, 212, 0.3)'
-            }}>
+            {/* C. BOTTOM BAR (Active AI Interface) */}
+            <div
+                onClick={() => {
+                    const q = prompt("🔍 CONSULTA AL AGENTE DE OPERACIONES (LLM):\n\nEj: 'Dame un reporte de bias en la flota' o 'Analiza la eficiencia actual'");
+                    if (q) {
+                        // 1. Optimistic UI Update
+                        console.log("🗣️ User Query:", q);
+                        alert(`🤖 PROCESANDO CONSULTA CON LLM/MCP...\n\n"${q}"\n\n(Conectando con Backend Python...)`);
+
+                        // 2. Real Backend Call (Fullstack Connection)
+                        fetch('/api/agently/command', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ intent: 'CUSTOM_QUERY', query: q, context: { view: 'LIVE_MAP' } })
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                console.log("🧠 LLM Response:", data);
+                                // 3. Data Storytelling Output
+                                const story = data.narrative || "Análisis completado. Revisa la consola para el Data Storytelling completo.";
+                                alert(`📊 REPORTE DE INTELIGENCIA DE NEGOCIOS\n\n${story}`);
+                            })
+                            .catch(err => {
+                                console.error("❌ API Error:", err);
+                                alert("Error de conexión con el Agente (Backend Offline).");
+                            });
+                    }
+                }}
+                style={{
+                    position: 'absolute',
+                    bottom: '20px',
+                    left: '20px',
+                    zIndex: 1000,
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    background: 'rgba(15, 23, 42, 0.9)',
+                    border: '1px solid #06b6d4',
+                    borderRadius: '50px',
+                    padding: '10px 25px',
+                    boxShadow: '0 0 20px rgba(6, 182, 212, 0.4)',
+                    cursor: 'pointer', // Interactive
+                    transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
                 <div style={{ fontSize: '1.5rem' }}>🤖</div>
-                <div style={{ color: '#fff', fontSize: '0.9rem', fontFamily: 'monospace' }}>Consultar Operaciones...</div>
-                <div style={{ color: '#06b6d4' }}>🎤</div>
+                <div style={{ color: '#fff', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 'bold' }}>
+                    CONSULTAR INTELLIGENCE (LLM)
+                </div>
+                <div style={{ color: '#06b6d4', animation: 'pulse 2s infinite' }}>🔴</div>
             </div>
 
             {/* MAIN CONTENT AREA */}
