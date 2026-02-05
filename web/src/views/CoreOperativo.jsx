@@ -118,6 +118,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 zoom={13}
                 style={{ height: '100%', width: '100%' }}
                 zoomControl={false}
+                attributionControl={false} // Hidden as per user request for clean UI
             >
                 {/* DARK MODE MAP TILE */}
                 <TileLayer
