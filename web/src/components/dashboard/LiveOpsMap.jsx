@@ -99,7 +99,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             {/* A. FLOATING NAVBAR (Centered - User Preference) */}
             <div style={{
                 position: 'absolute',
-                top: 20,
+                top: 80, /* FIXED: Moved down to avoid overlap with HUD (top:20) */
                 left: '50%',
                 transform: 'translateX(-50%)',
                 zIndex: 1000,
