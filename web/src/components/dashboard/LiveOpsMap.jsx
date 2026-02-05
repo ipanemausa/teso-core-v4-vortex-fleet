@@ -39,7 +39,10 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
                 { id: 'VISION', label: 'VISIÓN IA', icon: '🧠', color: '#ec4899' },
                 { id: 'OPTIMIZE', label: 'OPTIMIZE', icon: '📈', color: '#f59e0b' },
                 { id: 'JOBS', label: 'PEDIDOS', icon: '🔥', color: '#ef4444' }, // Renamed SIMULACRO -> PEDIDOS (Layer intent)
-                { id: 'FLEET', label: 'FLOTA V4', icon: '🚙', color: '#39FF14' } // Added Fleet Toggle
+                { id: 'FLEET', label: 'FLOTA V4', icon: '🚙', color: '#39FF14' }, // Added Fleet Toggle
+                { id: 'PITCH', label: 'PITCH DECK', icon: '📢', color: '#ec4899' },
+                { id: 'WHATSAPP', label: 'WHATSAPP', icon: '💬', color: '#22c55e' },
+                { id: 'C_GIT', label: 'SOURCE GIT', icon: '👾', color: '#64748b' }
             ].map((item, i) => {
                 const isActive = activeLayers.includes(item.id);
                 return (
