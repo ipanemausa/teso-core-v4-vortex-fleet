@@ -246,6 +246,15 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
                                 "Identifica cuellos de botella críticos"
                             ],
                             color: '#34d399'
+                        },
+                        {
+                            category: "🏢 ESTRATEGIA CORPORATIVA (Gemini/Copilot)",
+                            questions: [
+                                "Auditoría de eficiencia Cloud vs On-Premise",
+                                "Evaluación de Riesgos de Expansión LATAM",
+                                "Proyección de Crecimiento (Forecast Q4)"
+                            ],
+                            color: '#8b5cf6'
                         }
                     ].map((group, i) => (
                         <div key={i} style={{ marginBottom: '15px' }}>
