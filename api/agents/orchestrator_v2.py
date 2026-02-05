@@ -5,6 +5,9 @@ from services.voice_system import VoiceSystem
 # Importar los Expertos del Dominio (Sub-Agentes)
 # En una arquitectura real, estos serían microservicios o clases separadas
 from agents.agency_protocol import VORTEX_BUS
+from agents.financial_agent import FinancialAgent
+from agents.logistics_agent import LogisticsAgent
+from agents.design_agent import DesignDirectorAgent
 
 class StrategicOrchestrator:
     """

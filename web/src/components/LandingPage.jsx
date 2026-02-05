@@ -478,6 +478,18 @@ export default function LandingPage({ onEnter }) {
                         >
                             Soy Conductor
                         </button>
+                        <button
+                            onClick={() => setRegistrationMode('admin')}
+                            style={{
+                                background: 'transparent', border: '1px solid #00f2ff', color: '#00f2ff',
+                                padding: '10px 20px', cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '1px',
+                                fontSize: '0.8rem', transition: 'all 0.3s'
+                            }}
+                            onMouseEnter={(e) => e.target.style.boxShadow = '0 0 10px #00f2ff'}
+                            onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
+                        >
+                            Admin
+                        </button>
                     </div>
                 )}
 
@@ -487,6 +499,43 @@ export default function LandingPage({ onEnter }) {
             </div>
 
             {/* --- MODALS --- */}
+            {registrationMode === 'admin' && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.9)', zIndex: 1000,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <div style={{
+                        background: '#111', border: '1px solid #00f2ff', padding: '30px',
+                        display: 'flex', flexDirection: 'column', gap: '15px', width: '300px'
+                    }}>
+                        <h3 style={{ color: '#00f2ff', margin: 0 }}>ACCESO CLASIFICADO</h3>
+                        <input
+                            type="password"
+                            placeholder="CÓDIGO DE ACCESO"
+                            style={{
+                                background: '#222', border: '1px solid #333', color: '#fff',
+                                padding: '10px', outline: 'none'
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    if (e.target.value === 'TESO2026') {
+                                        handleRegistrationComplete({ role: 'admin' });
+                                    } else {
+                                        alert('ACCESO DENEGADO');
+                                    }
+                                }
+                            }}
+                        />
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                onClick={() => setRegistrationMode(null)}
+                                style={{ flex: 1, padding: '10px', background: '#333', color: '#fff', border: 'none', cursor: 'pointer' }}
+                            >CANCELAR</button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {registrationMode === 'user' && (
                 <UserRegistration
                     onComplete={handleRegistrationComplete}
