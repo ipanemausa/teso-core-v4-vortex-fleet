@@ -29,9 +29,10 @@ export function NeonNavbar({ activeTab, onTabChange }) {
                     key={tab.id}
                     onClick={() => onTabChange(tab.id)}
                     style={{
-                        background: activeTab === tab.id ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
-                        border: activeTab === tab.id ? '1px solid #06b6d4' : '1px solid #475569',
-                        color: activeTab === tab.id ? '#22d3ee' : '#cbd5e1',
+                        background: activeTab === tab.id ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255, 255, 255, 0.03)', // Glassy inactive
+                        backdropFilter: 'blur(4px)',
+                        border: activeTab === tab.id ? '1px solid #06b6d4' : '1px solid rgba(255, 255, 255, 0.1)',
+                        color: activeTab === tab.id ? '#22d3ee' : '#94a3b8',
                         padding: '8px 16px',
                         borderRadius: '12px',
                         display: 'flex',
@@ -41,7 +42,7 @@ export function NeonNavbar({ activeTab, onTabChange }) {
                         fontSize: '0.8rem',
                         fontWeight: 'bold',
                         transition: 'all 0.2s',
-                        boxShadow: activeTab === tab.id ? '0 0 10px rgba(6, 182, 212, 0.5)' : 'none'
+                        boxShadow: activeTab === tab.id ? '0 0 15px rgba(6, 182, 212, 0.3)' : 'inset 0 0 10px rgba(0,0,0,0.2)'
                     }}
                 >
                     <span>{tab.icon}</span>

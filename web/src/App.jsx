@@ -8,6 +8,18 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 
 
+// --- HELPER FOR ROBUST LAZY LOADING (Auto-Reload on Version Mismatch) ---
+const lazyWithReload = (importFn) => lazy(() =>
+  importFn().catch(error => {
+    console.warn("Version mismatch detected (Chunk Load Error). Reloading app...", error);
+    // Only reload if it's likely a network/chunk error (not a logic error) to avoid infinite loops
+    if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('Importing a module script failed'))) {
+      window.location.reload();
+    }
+    throw error;
+  })
+);
+
 // --- DYNAMIC IMPORTS (Fix for Circular Dependencies / ReferenceError) ---
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const Presentation = lazy(() => import('./components/Presentation'));
@@ -16,7 +28,7 @@ const Presentation = lazy(() => import('./components/Presentation'));
 // const WebcamOverlay = lazy(() => import('./components/WebcamOverlay'));
 // const AgenticCommandBar = lazy(() => import('./components/AgenticCommandBar'));
 // const GastroDashboard = lazy(() => import('./components/GastroDashboard'));
-const OperationalDashboard = lazy(() => import('./components/OperationalDashboard'));
+const OperationalDashboard = lazyWithReload(() => import('./components/OperationalDashboard'));
 // const LogisticsDashboard = lazy(() => import('./components/LogisticsDashboard'));
 const ClientDashboard = lazy(() => import('./components/ClientDashboard'));
 const DriverDashboard = lazy(() => import('./components/DriverDashboard'));

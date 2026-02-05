@@ -108,7 +108,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
     }, []);
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100%', background: '#000' }}>
+        <div style={{ position: 'relative', width: '100%', height: '100%', background: '#0f172a' }}>
 
 
 
