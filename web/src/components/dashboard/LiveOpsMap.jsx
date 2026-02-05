@@ -15,7 +15,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
     const [activeTab, setActiveTab] = useState('FLOTA');
 
     // LAYER CONTROL STATE (The "Subcapas" Logic)
-    const [activeLayers, setActiveLayers] = useState(['FLEET', 'JOBS']); // Default layers
+    const [activeLayers, setActiveLayers] = useState(['FLEET', 'JOBS', 'RADAR']); // Default layers (RADAR ON by default)
 
     const toggleLayer = (layerId) => {
         setActiveLayers(prev => {
