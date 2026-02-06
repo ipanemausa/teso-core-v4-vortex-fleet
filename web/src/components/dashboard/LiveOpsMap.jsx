@@ -31,7 +31,6 @@ const V6Dock = ({ activeLayers, onToggle }) => {
             ].map((item, i) => {
                 const isActive = activeLayers.includes(item.id);
                 return (
-                return (
                     <div key={i} onClick={() => handleDockClick(item)}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer',
@@ -52,7 +51,7 @@ const V6Dock = ({ activeLayers, onToggle }) => {
                         <div style={{
                             fontSize: '1.2rem',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            filter: `drop-shadow(0 0 5px ${item.color})`
+                            filter: `drop-shadow(0 0 5px ${item.color})` // Simple icon, no box
                         }}>
                             {item.icon}
                         </div>
@@ -64,7 +63,6 @@ const V6Dock = ({ activeLayers, onToggle }) => {
                             {item.label}
                         </div>
                     </div>
-                );
                 );
             })}
         </div>
