@@ -31,32 +31,33 @@ const V6Dock = ({ activeLayers, onToggle }) => {
             ].map((item, i) => {
                 const isActive = activeLayers.includes(item.id);
                 return (
+                return (
                     <div key={i} onClick={() => handleDockClick(item)}
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
                             opacity: isActive || ['PITCH', 'WHATSAPP', 'C_GIT'].includes(item.id) ? 1 : 0.8,
                             transition: 'all 0.2s',
-                            // CONTAINER GLASS STYLE (Fixes Visibility)
+                            // Updated Glass Style (Compact & Consistent)
                             background: isActive
-                                ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.3) 0%, rgba(8, 145, 178, 0.1) 100%)'
-                                : 'linear-gradient(90deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.6) 100%)',
-                            backdropFilter: 'blur(12px)',
+                                ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.25) 0%, rgba(8, 145, 178, 0.05) 100%)'
+                                : 'rgba(15, 23, 42, 0.5)',
+                            backdropFilter: 'blur(8px)',
                             border: isActive ? `1px solid ${item.color}` : '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '12px',
-                            padding: '8px 12px',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                            width: 'fit-content', // Wrap content
-                            marginBottom: '8px'
+                            borderRadius: '10px',
+                            padding: '6px 10px', // More compact
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                            width: 'fit-content',
+                            marginBottom: '6px'
                         }}>
                         <div style={{
-                            fontSize: '1.2rem',
+                            fontSize: '1rem', // Smaller Icon
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            filter: `drop-shadow(0 0 5px ${item.color})` // Simple icon, no box
+                            filter: `drop-shadow(0 0 5px ${item.color})`
                         }}>
                             {item.icon}
                         </div>
                         <div style={{
-                            color: '#fff', fontSize: '0.75rem', fontWeight: 'bold',
+                            color: '#fff', fontSize: '0.65rem', fontWeight: 'bold', // Smaller Font
                             letterSpacing: '0.5px', fontFamily: 'var(--font-main)',
                             textShadow: '0 2px 4px #000'
                         }}>
@@ -70,22 +71,133 @@ const V6Dock = ({ activeLayers, onToggle }) => {
 };
 
 // --- SUB-COMPONENT: RIGHT PANEL (Extracted for Stability) ---
-const TesoOpsPanel = ({ simulationData }) => {
+const TesoOpsPanel = ({ simulationData, activeView }) => {
     const [agentMetrics, setAgentMetrics] = useState(null);
 
     useEffect(() => {
+        // Poll logic remains same
         const pollAgents = async () => {
             try {
                 const apiUrl = import.meta.env.VITE_API_URL || 'https://teso-api-dev.fly.dev';
                 const res = await fetch(`${apiUrl}/api/strategic-cycle`, { method: 'POST' });
                 const data = await res.json();
                 setAgentMetrics(data);
-            } catch (err) { console.error("Agent Poll Failed", err); }
+            } catch (err) { /* silent */ }
         };
-        const interval = setInterval(pollAgents, 10000); // 10s Poll
         pollAgents();
+        const interval = setInterval(pollAgents, 10000); // 10s Poll
         return () => clearInterval(interval);
     }, []);
+
+    // DYNAMIC CONTENT SWITCHER
+    const renderContent = () => {
+        switch (activeView) {
+            case 'FINANZAS':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', padding: '15px', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#06b6d4', marginBottom: '5px' }}>INGRESOS HOY</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>$12.5M</div>
+                            <div style={{ fontSize: '0.7rem', color: '#39FF14' }}>▲ 15% vs Ayer</div>
+                        </div>
+                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '15px', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#ef4444', marginBottom: '5px' }}>COSTOS OPERATIVOS</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>$8.2M</div>
+                            <div style={{ fontSize: '0.7rem', color: '#ef4444' }}>▼ 5% Optimizado</div>
+                        </div>
+                        <div style={{ height: '150px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                            {[40, 60, 45, 80, 55, 70, 90].map((h, i) => (
+                                <div key={i} style={{ width: '10%', height: `${h}%`, background: i === 6 ? '#39FF14' : '#334155', borderRadius: '4px 4px 0 0' }}></div>
+                            ))}
+                        </div>
+                        <button style={{ background: '#06b6d4', border: 'none', padding: '10px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>DESCARGAR REPORTE</button>
+                    </div>
+                );
+            case 'MERCADO':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'bold' }}>TOP CLIENTES</div>
+                        {['ARGOS', 'NUTRESA', 'BANCOLOMBIA', 'SURA'].map((c, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
+                                <span style={{ color: '#fff' }}>{c}</span>
+                                <span style={{ color: '#f59e0b' }}>{(40 - i * 5)}% Share</span>
+                            </div>
+                        ))}
+                        <div style={{ marginTop: '20px', color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'bold' }}>CAMPAÑAS ACTIVAS</div>
+                        <div style={{ padding: '10px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid #a855f7', borderRadius: '6px' }}>
+                            <div style={{ color: '#a855f7', fontWeight: 'bold' }}>RETORNO EJECUTIVOS</div>
+                            <div style={{ fontSize: '0.7rem', color: '#fff', marginTop: '5px' }}>Impacto: 1,200 Usuarios</div>
+                        </div>
+                    </div>
+                );
+            case 'ORDENES':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {simulationData?.services?.slice(0, 15).map((s, i) => (
+                            <div key={i} style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: 'rgba(255,255,255,0.03)', borderLeft: s.status === 'COMPLETED' ? '3px solid #39FF14' : '3px solid #f59e0b', borderRadius: '4px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>#{s.id}</span>
+                                    <span style={{ color: '#cbd5e1', fontSize: '0.7rem' }}>{s.time || '10:00 AM'}</span>
+                                </div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '2px' }}>{s.client || s.paxName || 'Cliente Corporativo'}</div>
+                                <div style={{ color: '#64748b', fontSize: '0.7rem' }}>{s.route || 'Ruta Estándar'}</div>
+                            </div>
+                        )) || <div style={{ color: '#64748b' }}>No hay ordenes activas.</div>}
+                    </div>
+                );
+            case 'FLOTA':
+            default:
+                return (
+                    <>
+                        {/* AUTONOMOUS GUARDRAILS */}
+                        {agentMetrics && (
+                            <div style={{ marginBottom: '20px', border: '1px solid #334155', borderRadius: '8px', padding: '10px', background: 'rgba(15, 23, 42, 0.5)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <div style={{ color: '#94a3b8', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>🛡️ AUTONOMOUS GUARDRAILS</div>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }}></div>
+                                </div>
+                                <div style={{ marginBottom: '10px', padding: '8px', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '3px solid #ef4444', borderRadius: '0 4px 4px 0' }}>
+                                    <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '0.8rem' }}>CEO DIRECTIVE:</div>
+                                    <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>{agentMetrics.strategic_alignment?.directive || "ANALYZING..."}</div>
+                                    <div style={{ color: '#94a3b8', fontSize: '0.7rem', marginTop: '4px', fontStyle: 'italic' }}>"{agentMetrics.strategic_alignment?.reasoning}"</div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px' }}>
+                                    {['finance', 'ops', 'design'].map(dept => {
+                                        const score = dept === 'finance' ? agentMetrics.department_reports?.finance?.executive_summary?.score :
+                                            dept === 'ops' ? 100 : agentMetrics.department_reports?.design_input?.design_audit?.score;
+                                        const label = dept === 'finance' ? 'FIN' : dept === 'ops' ? 'OPS' : 'UX';
+                                        const icon = dept === 'finance' ? '💰' : dept === 'ops' ? '🚚' : '🎨';
+                                        return (
+                                            <div key={dept} style={{ background: '#020617', padding: '8px', borderRadius: '4px', textAlign: 'center', border: '1px solid #1e293b' }}>
+                                                <div style={{ fontSize: '1.2rem' }}>{icon}</div>
+                                                <div style={{ fontSize: '0.6rem', fontWeight: 'bold', marginTop: '2px', color: (score || 0) < 70 ? '#ef4444' : '#22c55e' }}>{label} {score || 'ON'}%</div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* SEARCH & FILTER */}
+                        <div style={{ marginBottom: '20px', position: 'relative' }}>
+                            <input type="text" placeholder="Buscar Orden, Unidad, Cliente [ENTER]" style={{ width: '100%', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', outline: 'none' }} />
+                            <span style={{ position: 'absolute', right: '10px', top: '8px', color: '#64748b' }}>🔍</span>
+                        </div>
+
+                        {/* UNITS LIST */}
+                        <div style={{ flex: 1, overflowY: 'auto' }}>
+                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #334155', paddingBottom: '5px' }}>UNIDADES EN LÍNEA</div>
+                            {simulationData?.services?.slice(0, 10).map((u, i) => (
+                                <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '8px', marginBottom: '5px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ color: '#fff', fontSize: '0.8rem' }}>{u.plate}</div>
+                                    <div style={{ color: '#39FF14', fontSize: '0.7rem' }}>{u.status}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                );
+        }
+    };
 
     return (
         <div style={{
@@ -95,71 +207,14 @@ const TesoOpsPanel = ({ simulationData }) => {
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <div>
-                    <h2 style={{ margin: 0, color: '#ef4444', fontFamily: 'monospace', fontSize: '1.2rem' }}>TESO OPS</h2>
-                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>UNIDADES: {simulationData?.services?.length || 15} | OPS ACTIVAS: {simulationData?.services?.filter(s => s.status !== 'COMPLETED').length || 60}</div>
+                    <h2 style={{ margin: 0, color: '#ef4444', fontFamily: 'monospace', fontSize: '1.2rem' }}>TESO {activeView}</h2>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>PANEL DE CONTROL INTELIGENTE</div>
                 </div>
                 <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c', cursor: 'pointer' }}>🏠</div>
             </div>
 
-            {/* AUTONOMOUS GUARDRAILS */}
-            {agentMetrics && (
-                <div style={{ marginBottom: '20px', border: '1px solid #334155', borderRadius: '8px', padding: '10px', background: 'rgba(15, 23, 42, 0.5)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <div style={{ color: '#94a3b8', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>🛡️ AUTONOMOUS GUARDRAILS</div>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px #22c55e' }}></div>
-                    </div>
-                    <div style={{ marginBottom: '10px', padding: '8px', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '3px solid #ef4444', borderRadius: '0 4px 4px 0' }}>
-                        <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '0.8rem' }}>CEO DIRECTIVE:</div>
-                        <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>{agentMetrics.strategic_alignment?.directive || "ANALYZING..."}</div>
-                        <div style={{ color: '#94a3b8', fontSize: '0.7rem', marginTop: '4px', fontStyle: 'italic' }}>"{agentMetrics.strategic_alignment?.reasoning}"</div>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px' }}>
-                        {['finance', 'ops', 'design'].map(dept => {
-                            const score = dept === 'finance' ? agentMetrics.department_reports?.finance?.executive_summary?.score :
-                                dept === 'ops' ? 100 : agentMetrics.department_reports?.design_input?.design_audit?.score;
-                            const label = dept === 'finance' ? 'FIN' : dept === 'ops' ? 'OPS' : 'UX';
-                            const icon = dept === 'finance' ? '💰' : dept === 'ops' ? '🚚' : '🎨';
-                            return (
-                                <div key={dept} style={{ background: '#020617', padding: '8px', borderRadius: '4px', textAlign: 'center', border: '1px solid #1e293b' }}>
-                                    <div style={{ fontSize: '1.2rem' }}>{icon}</div>
-                                    <div style={{ fontSize: '0.6rem', fontWeight: 'bold', marginTop: '2px', color: (score || 0) < 70 ? '#ef4444' : '#22c55e' }}>{label} {score || 'ON'}%</div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            )}
+            {renderContent()}
 
-            {/* SEARCH & FILTER */}
-            <div style={{ marginBottom: '20px', position: 'relative' }}>
-                <input type="text" placeholder="Buscar Orden, Unidad, Cliente [ENTER]" style={{ width: '100%', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', padding: '8px 10px', color: '#fff', fontSize: '0.8rem', outline: 'none' }} />
-                <span style={{ position: 'absolute', right: '10px', top: '8px', color: '#64748b' }}>🔍</span>
-            </div>
-
-            {/* ACTION BUTTONS */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-                <button style={{ background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', color: '#06b6d4', padding: '10px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.8rem' }}>▶ INICIAR SIMULACIÓN</button>
-                <button style={{ background: 'rgba(234, 88, 12, 0.1)', border: '1px solid #ea580c', color: '#ea580c', padding: '10px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.8rem' }}>⚡ DESPACHO INTELIGENTE</button>
-            </div>
-
-            {/* CONSOLE */}
-            <div id="teso-console-log" style={{ background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', marginBottom: '20px', height: '120px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.7rem' }}>
-                <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '5px' }}>CONSOLE.LOG :: SYSTEM EVENTS</div>
-                <div style={{ color: '#39FF14' }}>[{new Date().toLocaleTimeString()}] 🟩 CORE v4.8 (STABLE UI) ONLINE</div>
-                <div style={{ color: '#fff' }}>[{new Date().toLocaleTimeString()}] ☁️ CONNECTING: Syncing with VORTEX Node...</div>
-                <div style={{ color: '#facc15' }}>[{new Date().toLocaleTimeString()}] ⚠️ DEBUG MODE: RADAR FORCED ON</div>
-            </div>
-
-            {/* UNITS LIST */}
-            <div style={{ flex: 1, overflowY: 'auto' }}>
-                <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #334155', paddingBottom: '5px' }}>UNIDADES EN LÍNEA</div>
-                {simulationData?.services?.slice(0, 10).map((u, i) => (
-                    <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '8px', marginBottom: '5px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ color: '#fff', fontSize: '0.8rem' }}>{u.plate}</div>
-                        <div style={{ color: '#39FF14', fontSize: '0.7rem' }}>{u.status}</div>
-                    </div>
-                ))}
-            </div>
         </div>
     );
 };
@@ -201,7 +256,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
             <V6Dock activeLayers={activeLayers} onToggle={toggleLayer} />
 
             {/* 3. RIGHT PANEL */}
-            {(activeTab === 'FLOTA' || activeTab === 'VUELOS' || activeTab === 'AGENDA') && (
+            {(activeTab !== 'ARTEFACTO') && (
                 <div style={{
                     position: 'absolute', top: 0, right: 0, height: '100%', width: isPanelOpen ? '350px' : '0px',
                     zIndex: 500, transition: 'width 0.3s ease-in-out', display: 'flex'
@@ -213,7 +268,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                     }}>{isPanelOpen ? '▶' : '◀'}</div>
 
                     <div style={{ width: '350px', height: '100%', transform: isPanelOpen ? 'translateX(0)' : 'translateX(350px)', transition: 'transform 0.3s' }}>
-                        <TesoOpsPanel simulationData={simulationData} />
+                        <TesoOpsPanel simulationData={simulationData} activeView={activeTab} />
                     </div>
                 </div>
             )}
