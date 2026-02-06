@@ -17,8 +17,9 @@ export function NeonNavbar({ activeTab, onTabChange }) {
         <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '15px',
-            padding: '10px',
+            flexWrap: 'wrap', // Allow wrapping for safety
+            gap: '6px', // Reduced gap
+            padding: '5px', // Reduced padding
             // background: 'transparent', // Removed 'barra'
             // backdropFilter: 'none',
             // border: 'none',
@@ -33,13 +34,13 @@ export function NeonNavbar({ activeTab, onTabChange }) {
                         backdropFilter: 'blur(4px)',
                         border: activeTab === tab.id ? '1px solid #06b6d4' : '1px solid rgba(255, 255, 255, 0.2)',
                         color: activeTab === tab.id ? '#67e8f9' : '#f8fafc', // High Contrast White
-                        padding: '8px 16px',
-                        borderRadius: '12px',
+                        padding: '6px 12px', // Compact Padding
+                        borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: '6px',
                         cursor: 'pointer',
-                        fontSize: '0.8rem',
+                        fontSize: '0.75rem', // Smaller text
                         fontWeight: '800', // Extra Bold
                         textShadow: '0 1px 2px rgba(0,0,0,0.9)',
                         transition: 'all 0.2s',

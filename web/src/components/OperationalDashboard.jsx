@@ -878,7 +878,7 @@ const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'L
             pointerEvents: 'auto',
             color: 'var(--color-text-primary)', // Tokenized
             zIndex: 100,
-            padding: 'var(--spacing-xl)', // Tokenized
+            padding: viewMode === 'LIVE_OPS' ? 0 : 'var(--spacing-xl)', // REMOVED PADDING FOR FULLSCREEN MAP
             display: 'flex',
             flexDirection: 'column',
             fontFamily: "var(--font-main)" // Tokenized
