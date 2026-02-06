@@ -133,16 +133,28 @@ const TesoOpsPanel = ({ simulationData, activeView }) => {
             case 'ORDENES':
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {simulationData?.services?.slice(0, 15).map((s, i) => (
-                            <div key={i} style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: 'rgba(255,255,255,0.03)', borderLeft: s.status === 'COMPLETED' ? '3px solid #39FF14' : '3px solid #f59e0b', borderRadius: '4px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>#{s.id}</span>
-                                    <span style={{ color: '#cbd5e1', fontSize: '0.7rem' }}>{s.time || '10:00 AM'}</span>
+                        {simulationData?.services?.slice(0, 50).map((s, i) => (
+                            <div key={i} style={{ display: 'flex', flexDirection: 'column', padding: '12px', background: 'rgba(255,255,255,0.03)', borderLeft: s.status === 'completed' ? '3px solid #39FF14' : '3px solid #f59e0b', borderRadius: '6px', marginBottom: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
+                                    <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                                        {s.company || s.client || s.paxName || s.clientId || 'Cliente Corporativo'}
+                                    </span>
+                                    <span style={{ color: '#bef264', fontSize: '0.75rem', fontWeight: 'bold', background: 'rgba(190, 242, 100, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                                        {s.time || 'PEND'}
+                                    </span>
                                 </div>
-                                <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '2px' }}>{s.client || s.paxName || 'Cliente Corporativo'}</div>
-                                <div style={{ color: '#64748b', fontSize: '0.7rem' }}>{s.route || 'Ruta Estándar'}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ color: '#94a3b8', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <span style={{ color: '#64748b' }}>#{s.id}</span>
+                                        <span>•</span>
+                                        <span>{s.route || 'Zona Metropolitana'}</span>
+                                    </span>
+                                    <span style={{ color: s.status === 'completed' ? '#39FF14' : '#f59e0b', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                        {s.status === 'completed' ? 'FINALIZADO' : 'EN CURSO'}
+                                    </span>
+                                </div>
                             </div>
-                        )) || <div style={{ color: '#64748b' }}>No hay ordenes activas.</div>}
+                        )) || <div style={{ color: '#64748b', padding: '20px', textAlign: 'center' }}>No hay ordenes activas en este momento.</div>}
                     </div>
                 );
             case 'FLOTA':
