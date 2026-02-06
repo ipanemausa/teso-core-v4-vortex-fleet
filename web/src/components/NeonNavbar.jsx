@@ -29,10 +29,10 @@ export function NeonNavbar({ activeTab, onTabChange }) {
                     key={tab.id}
                     onClick={() => onTabChange(tab.id)}
                     style={{
-                        background: activeTab === tab.id ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255, 255, 255, 0.03)', // Glassy inactive
+                        background: activeTab === tab.id ? 'rgba(8, 145, 178, 0.3)' : 'rgba(15, 23, 42, 0.9)', // Solid Dark Background for Contrast
                         backdropFilter: 'blur(4px)',
-                        border: activeTab === tab.id ? '1px solid #06b6d4' : '1px solid rgba(255, 255, 255, 0.1)',
-                        color: activeTab === tab.id ? '#22d3ee' : '#94a3b8',
+                        border: activeTab === tab.id ? '1px solid #06b6d4' : '1px solid rgba(255, 255, 255, 0.2)',
+                        color: activeTab === tab.id ? '#67e8f9' : '#f8fafc', // High Contrast White
                         padding: '8px 16px',
                         borderRadius: '12px',
                         display: 'flex',
@@ -40,9 +40,10 @@ export function NeonNavbar({ activeTab, onTabChange }) {
                         gap: '8px',
                         cursor: 'pointer',
                         fontSize: '0.8rem',
-                        fontWeight: 'bold',
+                        fontWeight: '800', // Extra Bold
+                        textShadow: '0 1px 2px rgba(0,0,0,0.9)',
                         transition: 'all 0.2s',
-                        boxShadow: activeTab === tab.id ? '0 0 15px rgba(6, 182, 212, 0.3)' : 'inset 0 0 10px rgba(0,0,0,0.2)'
+                        boxShadow: activeTab === tab.id ? '0 0 15px rgba(6, 182, 212, 0.3)' : '0 4px 6px rgba(0,0,0,0.3)' // Shadow for lift
                     }}
                 >
                     <span>{tab.icon}</span>

@@ -264,12 +264,14 @@ body {
 }
 
 /* --- MOBILE RESPONSIVE LAYOUT --- */
+/* --- MOBILE RESPONSIVE LAYOUT --- */
 .app-container {
-    display: grid;
-    grid-template-columns: 70% 30%;
+    display: block;
+    /* CHANGED from grid to block for Fullscreen Map */
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 /* UI UTILITY CLASSES (Replaces inline styles for responsiveness) */
