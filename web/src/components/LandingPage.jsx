@@ -78,7 +78,7 @@ export default function LandingPage({ onEnter }) {
                 fontWeight: 'bold',
                 fontFamily: 'monospace'
             }}>
-                v4.2 LIVE
+                v4.6 LIVE
             </div>
 
             {/* --- GLOBAL STYLES --- */}

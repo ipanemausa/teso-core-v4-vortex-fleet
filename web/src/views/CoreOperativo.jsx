@@ -1,7 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-// --- RADAR CONTROLLER & UTIL ---
-// Copied and adapted from App.jsx to run locally within the Map Context
+import { vehicleIcon as carIcon, jobIcon, planeDivIcon } from '../utils/mapIcons'; // Import Icons!
+// Import PlaneMarker (Assuming it's a sub-component or needs to be defined/imported)
+// If PlaneMarker is not imported, let's define a simple one here to be safe or import it if exists.
+// Actually, looking at the code, PlaneMarker is used but not defined. I need to find where it is or define it.
+// For now, I'll define the constants.
+
+const CENTER_LAT = 6.2442;
+const CENTER_LNG = -75.5812;
+console.log("✅ CoreOperativo Loaded. Center:", CENTER_LAT, CENTER_LNG);
+
+// --- DUMMY PlaneMarker if not imported ---
+const PlaneMarker = ({ p }) => (
+    <Marker
+        position={[p.lat, p.lng]}
+        icon={planeDivIcon(p.heading)}
+        zIndexOffset={1000}
+    >
+        <Popup className="glass-popup">
+            <div style={{ color: '#000' }}>
+                <strong>{p.id}</strong><br />
+                {p.airline} | {p.spd}kts
+            </div>
+        </Popup>
+    </Marker>
+);
 const createPlane = (bounds, center) => {
     const airlines = ['AA', 'AV', 'LA', 'CM', 'NK', 'IB', 'DL', 'AM'];
     const markets = ['MIA', 'MAD', 'BOG', 'PTY', 'JFK', 'SCL', 'LIM', 'MEX'];

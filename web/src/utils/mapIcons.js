@@ -38,6 +38,14 @@ export const passengerIcon = new L.DivIcon({
   popupAnchor: [0, -16]
 });
 
+// 2.b Job/Demand Icon (Fire/Hotspot)
+export const jobIcon = new L.DivIcon({
+  className: 'glass-pin-job',
+  html: `<div style="font-size: 16px; filter: drop-shadow(0 0 5px orange);">🔥</div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10]
+});
+
 // 3. Custom Airplane Icon (High Contrast Emoji Debug)
 export const planeDivIcon = (angle) => new L.DivIcon({
   className: 'plane-marker',

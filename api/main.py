@@ -543,6 +543,12 @@ async def serve_frontend(path: str):
     Catch-all route to serve the React Single Page Application (SPA).
     If the file exists in static, serve it. Otherwise, serve index.html.
     """
+    # 0. EXPLICIT VERSION CHECK (Bypass Frontend)
+    if path == "version.json":
+        v_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
+        if os.path.exists(v_path):
+            return FileResponse(v_path)
+
     # 1. API routes are already handled above.
     if path.startswith("api/"):
         raise HTTPException(status_code=404, detail="API Endpoint Not Found")
