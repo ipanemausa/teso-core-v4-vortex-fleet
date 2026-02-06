@@ -59,8 +59,8 @@ const createPlane = (bounds, center) => {
     const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.3);
     const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.3);
     const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
-    // SPEED: Reduced by 10x for Realistic Scale (User Request)
-    const speed = ((latSpan * 0.0002) + (Math.random() * (latSpan * 0.0001)));
+    // SPEED: Increased for Dynamic Visuals (User Request: Escalar Movimiento)
+    const speed = ((latSpan * 0.0015) + (Math.random() * (latSpan * 0.0010)));
 
     return {
         id: `${airlines[Math.floor(Math.random() * airlines.length)]}${Math.floor(100 + Math.random() * 900)}`,
@@ -88,10 +88,10 @@ const RadarController = ({ setPlanes }) => {
                 const deathBounds = bounds.pad(2.0); // Die if very far
 
                 setPlanes(prevPlanes => {
-                    // Initialize or Replenish to 6
+                    // Initialize or Replenish to 15 (SCALED UP)
                     let currentPlanes = [...prevPlanes];
-                    if (currentPlanes.length < 6) {
-                        while (currentPlanes.length < 6) {
+                    if (currentPlanes.length < 15) {
+                        while (currentPlanes.length < 15) {
                             console.log("✈️ Spawning New Plane...");
                             currentPlanes.push(createPlane(bounds, center));
                         }
@@ -111,7 +111,7 @@ const RadarController = ({ setPlanes }) => {
                 });
             } catch (err) { /* silent */ }
         };
-        const interval = setInterval(safeUpdate, 100);
+        const interval = setInterval(safeUpdate, 80); // Slightly faster tick for smoothness
         return () => clearInterval(interval);
     }, [map, setPlanes]);
 
@@ -194,9 +194,8 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 attributionControl={false}
             >
                 <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                    attribution='&copy; CARTO'
-                    opacity={1.0}
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
 
                 {/* ACTIVATE RADAR CONTROLLER */}
