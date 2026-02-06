@@ -93,7 +93,18 @@ const AgenticCommandBar = ({ onCommand }) => {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSend();
+                        if (e.key === 'Tab' && suggestions.length > 0) {
+                            e.preventDefault();
+                            // Simple logic: Autocomplete with the first suggestion's label if input matches start?
+                            // Or better: If user wants "Autocompletion", we usually need a specific 'suggestion' state.
+                            // For now, based on "tomarla con una sola letra", let's assume they want to pick the first suggestion relative to what they typed.
+                            // Simplified: Just set input to the first matching suggestion.
+                            const match = suggestions.find(s => s.label.toLowerCase().startsWith(input.toLowerCase()));
+                            if (match) setInput(match.label);
+                        }
+                    }}
                     placeholder={isThinking ? "Agent processing..." : "Ask Teso Operations AI..."}
                     style={{
                         background: 'transparent',
