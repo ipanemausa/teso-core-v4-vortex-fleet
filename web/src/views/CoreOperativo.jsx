@@ -59,7 +59,8 @@ const createPlane = (bounds, center) => {
     const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.3);
     const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.3);
     const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
-    const speed = (latSpan * 0.002) + (Math.random() * (latSpan * 0.001));
+    // SPEED: Reduced by 10x for Realistic Scale (User Request)
+    const speed = ((latSpan * 0.0002) + (Math.random() * (latSpan * 0.0001)));
 
     return {
         id: `${airlines[Math.floor(Math.random() * airlines.length)]}${Math.floor(100 + Math.random() * 900)}`,
