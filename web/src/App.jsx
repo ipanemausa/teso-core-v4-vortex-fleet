@@ -3826,11 +3826,16 @@ function App() {
               onClick={item.action}
               style={{
                 display: 'flex', alignItems: 'center', gap: '10px',
-                background: 'rgba(255,255,255,0.03)', border: 'none',
+                // Updated to Smokey Glass Gradient for High Contrast
+                background: 'linear-gradient(180deg, rgba(71, 85, 105, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 padding: '10px 15px', borderRadius: '12px', color: '#fff',
                 cursor: 'pointer', transition: 'all 0.2s',
                 textAlign: 'left', minWidth: '160px',
-                borderLeft: `3px solid ${item.color}`
+                borderLeft: `3px solid ${item.color}`,
+                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                textShadow: '0 2px 4px rgba(0,0,0,1)' // Maximum Readability
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
