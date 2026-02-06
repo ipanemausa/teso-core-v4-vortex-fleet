@@ -125,7 +125,7 @@ const TesoOpsPanel = ({ simulationData }) => {
             </div>
 
             {/* CONSOLE */}
-            <div style={{ background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', marginBottom: '20px', height: '120px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.7rem' }}>
+            <div id="teso-console-log" style={{ background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', marginBottom: '20px', height: '120px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.7rem' }}>
                 <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '5px' }}>CONSOLE.LOG :: SYSTEM EVENTS</div>
                 <div style={{ color: '#39FF14' }}>[{new Date().toLocaleTimeString()}] 🟩 CORE v4.8 (STABLE UI) ONLINE</div>
                 <div style={{ color: '#fff' }}>[{new Date().toLocaleTimeString()}] ☁️ CONNECTING: Syncing with VORTEX Node...</div>
