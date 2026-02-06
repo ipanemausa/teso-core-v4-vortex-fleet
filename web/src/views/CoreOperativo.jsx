@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { vehicleIcon as carIcon, jobIcon, planeDivIcon } from '../utils/mapIcons'; // Import Icons!
+import { vehicleIcon as carIcon, jobIcon, planeDivIcon, getAirportIcon } from '../utils/mapIcons'; // Import Icons!
 // Import PlaneMarker (Assuming it's a sub-component or needs to be defined/imported)
 // If PlaneMarker is not imported, let's define a simple one here to be safe or import it if exists.
 // Actually, looking at the code, PlaneMarker is used but not defined. I need to find where it is or define it.
@@ -211,6 +211,16 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 {/* LAYER 2: DEMAND/JOBS */}
                 {(!activeLayers || activeLayers.includes('JOBS')) && jobs.map(job => (
                     <Marker key={job.id} position={[job.lat, job.lng]} icon={jobIcon} />
+                ))}
+
+                {/* LAYER 3: STATIC INFRASTRUCTURE (AIRPORTS) */}
+                {[
+                    { id: 'MDE', lat: 6.17, lng: -75.43, code: 'JMC' }, // Jose Maria Cordova
+                    { id: 'EOH', lat: 6.22, lng: -75.59, code: 'EOH' }  // Olaya Herrera
+                ].map(apt => (
+                    <Marker key={apt.id} position={[apt.lat, apt.lng]} icon={getAirportIcon(apt.code)}>
+                        <Popup>{apt.code}</Popup>
+                    </Marker>
                 ))}
 
                 {/* LAYER 3: AIRSPACE/RADAR (DEBUG: ALWAYS VISIBLE) */}

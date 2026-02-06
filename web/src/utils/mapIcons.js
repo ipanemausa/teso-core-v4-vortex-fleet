@@ -68,7 +68,7 @@ export const getAirportIcon = (code) => new L.DivIcon({
       width: 40px; height: 40px;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 0 15px #FF5722;
-    ">🏢</div>
+    ">🛫</div>
     <div style="font-size: 0.6rem; color: #FF5722; background: rgba(0,0,0,0.8); padding: 2px 4px; border-radius: 4px; margin-top: 5px; border: 1px solid #FF5722;">${code}</div>
   </div>`,
   iconSize: [40, 70],
