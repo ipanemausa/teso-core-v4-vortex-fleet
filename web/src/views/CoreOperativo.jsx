@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import { vehicleIcon as carIcon, jobIcon, planeDivIcon, getAirportIcon } from '../utils/mapIcons'; // Import Icons!
 // Import PlaneMarker (Assuming it's a sub-component or needs to be defined/imported)
 // If PlaneMarker is not imported, let's define a simple one here to be safe or import it if exists.
@@ -16,13 +16,36 @@ const PlaneMarker = ({ p }) => (
         position={[p.lat, p.lng]}
         icon={planeDivIcon(p.heading)}
         zIndexOffset={1000}
+        eventHandlers={{
+            mouseover: (e) => e.target.openTooltip(),
+            mouseout: (e) => e.target.closeTooltip()
+        }}
     >
-        <Popup className="glass-popup">
-            <div style={{ color: '#000' }}>
-                <strong>{p.id}</strong><br />
-                {p.airline} | {p.spd}kts
+        <Tooltip direction="top" offset={[0, -10]} opacity={1} sticky>
+            <div style={{
+                background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: '6px',
+                padding: '10px', minWidth: '160px', color: '#fff', boxShadow: '0 10px 20px rgba(0,0,0,0.5)',
+                fontFamily: 'sans-serif'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '6px', marginBottom: '6px' }}>
+                    <span style={{ fontWeight: '900', color: '#38bdf8', fontSize: '0.9rem' }}>{p.id}</span>
+                    <span style={{ fontSize: '0.6rem', background: '#10b981', padding: '2px 6px', borderRadius: '10px', color: '#fff', fontWeight: 'bold', border: '1px solid #059669' }}>IN FLIGHT</span>
+                </div>
+                <div style={{ fontSize: '0.75rem', lineHeight: '1.5', color: '#e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                        <span style={{ color: '#94a3b8' }}>Ruta:</span>
+                        <span style={{ fontWeight: 'bold' }}>{p.from} ➔ MDE</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>📡 {p.alt.toLocaleString()} ft</span>
+                        <span>🚀 {p.spd} kts</span>
+                    </div>
+                    <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #334155', color: '#94a3b8', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>✈️</span> {p.airline} Airlines • B737
+                    </div>
+                </div>
             </div>
-        </Popup>
+        </Tooltip>
     </Marker>
 );
 const createPlane = (bounds, center) => {
