@@ -219,8 +219,16 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                     <div style={{ color: '#94a3b8', marginBottom: '10px' }}>Panel de Inteligencia Activo</div>
                     {['Analizar Situación Financiera', 'Optimizar Rutas', 'Recomendar Agentes'].map(q => (
                         <div key={q} onClick={() => {
-                            // Quick Action Logic
-                            alert(`Ejecutando: ${q}`);
+                            // Quick Action Logic - Non-blocking UI update
+                            console.log(`🤖 AI AGENT ACTIVATED: ${q}`);
+                            const consoleDiv = document.getElementById('teso-console-log');
+                            if (consoleDiv) {
+                                const msg = document.createElement('div');
+                                msg.style.color = '#06b6d4';
+                                msg.innerText = `[${new Date().toLocaleTimeString()}] 🤖 EXECUTING: ${q}...`;
+                                consoleDiv.appendChild(msg);
+                                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+                            }
                         }} style={{ padding: '8px', borderBottom: '1px solid #333', cursor: 'pointer', color: '#fff' }}>• {q}</div>
                     ))}
                 </div>
