@@ -70,7 +70,7 @@ const V6Dock = ({ activeLayers, onToggle }) => {
 };
 
 // --- SUB-COMPONENT: RIGHT PANEL (Extracted for Stability) ---
-const TesoOpsPanel = ({ simulationData, activeView }) => {
+const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
     const [agentMetrics, setAgentMetrics] = useState(null);
     const [hoveredOrder, setHoveredOrder] = useState(null);
 
@@ -161,6 +161,17 @@ const TesoOpsPanel = ({ simulationData, activeView }) => {
             default:
                 return (
                     <>
+                        {/* DISPATCH CONTROLS */}
+                        <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button style={{
+                                background: 'transparent', border: '1px solid #06b6d4', color: '#06b6d4',
+                                padding: '10px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase'
+                            }} onClick={() => alert('IA: Simulación Pausada.')}>⏸ PAUSAR SIMULACIÓN</button>
+                            <button style={{
+                                background: '#06b6d4', border: 'none', color: '#000',
+                                padding: '10px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase', boxShadow: '0 0 15px rgba(6, 182, 212, 0.4)'
+                            }} onClick={onDispatch}>⚡ DESPACHO INTELIGENTE</button>
+                        </div>
                         {/* AUTONOMOUS GUARDRAILS */}
                         {agentMetrics && (
                             <div style={{ marginBottom: '20px', border: '1px solid #334155', borderRadius: '8px', padding: '10px', background: 'rgba(15, 23, 42, 0.5)' }}>
@@ -312,6 +323,9 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
         });
     };
 
+    // INTERNAL STATE FOR COMMANDS
+    const [internalCommand, setInternalCommand] = useState(null);
+
     // --- MAIN RETURN: LAYOUT ---
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: '#000' }}>
@@ -319,7 +333,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
             {/* 1. MAP LAYER */}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
                 {activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && activeTab !== 'ARTEFACTO' && (
-                    <CoreOperativo command={opsCommand} simulationData={simulationData} activeLayers={activeLayers} planes={planes} />
+                    <CoreOperativo command={internalCommand || opsCommand} simulationData={simulationData} activeLayers={activeLayers} planes={planes} />
                 )}
                 {activeTab === 'CLIENTES' && <ClientDashboard />}
                 {activeTab === 'ARTEFACTO' && (
@@ -347,7 +361,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                     }}>{isPanelOpen ? '▶' : '◀'}</div>
 
                     <div style={{ width: '350px', height: '100%', transform: isPanelOpen ? 'translateX(0)' : 'translateX(350px)', transition: 'transform 0.3s' }}>
-                        <TesoOpsPanel simulationData={simulationData} activeView={activeTab} />
+                        <TesoOpsPanel simulationData={simulationData} activeView={activeTab} onDispatch={() => setInternalCommand('DISPATCH_WAVE')} />
                     </div>
                 </div>
             )}
