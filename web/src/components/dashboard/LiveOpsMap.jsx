@@ -386,12 +386,18 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             {/* MAIN CONTENT AREA */}
             <div style={{ flex: 1, position: 'relative' }}>
                 {/* MAP RENDERS HERE IN LIVE OPS MODE */}
-                {activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && (
+                {activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && activeTab !== 'ARTEFACTO' && (
                     <CoreOperativo command={opsCommand} simulationData={simulationData} activeLayers={activeLayers} />
                 )}
                 {/* OTHER TABS */}
                 {activeTab === 'CLIENTES' && <ClientDashboard />}
                 {activeTab === 'ORDENES' && <div style={{ padding: '50px', color: '#fff' }}>Logistics View (Active)</div>}
+                {/* ARTEFACTO RENDER */}
+                {activeTab === 'ARTEFACTO' && (
+                    <React.Suspense fallback={<div>Cargando Artefacto...</div>}>
+                        <GeminiConsultantArtifact onClose={() => setActiveTab('FLOTA')} />
+                    </React.Suspense>
+                )}
             </div>
 
             {/* D. RIGHT PANEL (Always Visible in default view) */}
@@ -405,5 +411,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
     );
 };
 
+// Lazy Import for Artifact to avoid bundle bloat
+const GeminiConsultantArtifact = React.lazy(() => import('./GeminiConsultantArtifact'));
 
 export default LiveOpsMap;
