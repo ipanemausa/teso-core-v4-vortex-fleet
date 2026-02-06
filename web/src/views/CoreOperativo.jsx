@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import { vehicleIcon as carIcon, jobIcon, planeDivIcon, getAirportIcon } from '../utils/mapIcons'; // Import Icons!
+import L from 'leaflet';
 // Import PlaneMarker (Assuming it's a sub-component or needs to be defined/imported)
 // If PlaneMarker is not imported, let's define a simple one here to be safe or import it if exists.
 // Actually, looking at the code, PlaneMarker is used but not defined. I need to find where it is or define it.
@@ -176,8 +177,22 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
     useEffect(() => {
         if (command === 'DISPATCH_WAVE') {
             // ... dispatch logic ...
+            console.log("🌊 Dispatching Wave...");
         }
     }, [command]);
+
+    // INTERNAL COMPONENT: MAP COMMAND HANDLER
+    const MapCommandHandler = ({ cmd }) => {
+        const map = useMap();
+        useEffect(() => {
+            if (cmd && cmd.type === 'FLY_TO' && cmd.payload) {
+                console.log("✈️ FLYING TO:", cmd.payload);
+                map.flyTo([cmd.payload.lat, cmd.payload.lng], 15, { duration: 2.0, easeLinearity: 0.25 });
+                map.openPopup(L.popup().setLatLng([cmd.payload.lat, cmd.payload.lng]).setContent(`Target: ${cmd.payload.id || 'Location'}`));
+            }
+        }, [cmd, map]);
+        return null;
+    };
 
     // 3. LIVE FLEET ANIMATION LOOP 
     useEffect(() => {
@@ -222,6 +237,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 />
 
                 {/* ACTIVATE RADAR CONTROLLER */}
+                <MapCommandHandler cmd={command} />
                 <RadarController setPlanes={setInternalPlanes} />
 
                 {/* LAYER 1: FLEET VECTORS */}
