@@ -38,17 +38,16 @@ export const passengerIcon = new L.DivIcon({
   popupAnchor: [0, -16]
 });
 
-// 3. Custom Airplane Icon
 // 3. Custom Airplane Icon (SVG for better control)
 export const planeDivIcon = (angle) => new L.DivIcon({
   className: 'plane-marker',
-  html: `<div style="transform: rotate(${angle}deg); width: 24px; height: 24px;">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 5px #00F0FF);">
+  html: `<div style="transform: rotate(${angle}deg); width: 32px; height: 32px;">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 8px #00F0FF);">
             <path d="M21 16V14L13 9V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V9L2 14V16L10 13.5V19L8 20.5V22L11.5 21L15 22V20.5L13 19V13.5L21 16Z" fill="#00F0FF"/>
         </svg>
     </div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
 });
 
 // 4. Airport Icon Generator (Static Infrastructure)
