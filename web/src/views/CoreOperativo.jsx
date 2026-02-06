@@ -21,22 +21,20 @@ const jobIcon = divIcon({
 const CENTER_LAT = 6.2442;
 const CENTER_LNG = -75.5812;
 
-export function CoreOperativo({ onClose, onHome, command, simulationData, activeLayers }) {
+export function CoreOperativo({ onClose, onHome, command, simulationData, activeLayers, planes }) {
     const [fleet, setFleet] = useState([]);
     const [jobs, setJobs] = useState([]); // Active Passenger Requests
-    const [planes, setPlanes] = useState([]); // Active Flights
+    // const [planes, setPlanes] = useState([]); // Active Flights - DISABLED: USES PROP NOWLOCAL STATE FOR PLANES - USE PROP
 
     // 1. INITIALIZE FLEET & DATA FROM SIMULATION
     useEffect(() => {
         if (simulationData) {
-            // Load Planes
-            if (simulationData.planes) {
-                setPlanes(simulationData.planes);
-            }
-
-            // Load Fleet (Derived from Active Services for visualization)
-            // We take a slice of services to simulate "Active" cars on the map
+            // Load Planes - IGNORED (Props Driven)
+            // if (simulationData.planes) {
+            //    setPlanes(simulationData.planes);
+            // }  // Load Fleet (Derived from Active Services for visualization)
             if (simulationData.services) {
+                // We take a slice of services to simulate "Active" cars on the map
                 const activeServices = simulationData.services.slice(0, 15); // Top 15 active
                 const mappedFleet = activeServices.map((svc, i) => ({
                     id: svc.plate || `V-0${i + 10}`,
@@ -61,18 +59,8 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
             }));
             setFleet(initialFleet);
 
-            // Fallback: Random Planes
-            const initialPlanes = Array.from({ length: 5 }).map((_, i) => ({
-                id: `AV-${900 + i}`,
-                lat: CENTER_LAT + (Math.random() - 0.5) * 0.1,
-                lng: CENTER_LNG + (Math.random() - 0.5) * 0.1,
-                heading: Math.floor(Math.random() * 360),
-                speed: 300 + Math.floor(Math.random() * 200),
-                alt: 15000,
-                status: 'IN_AIR',
-                from: 'MIA'
-            }));
-            setPlanes(initialPlanes);
+            // Fallback: Random Planes - DISABLED (Props Driven)
+            // setPlanes(initialPlanes);
         }
     }, [simulationData]);
 
@@ -120,30 +108,9 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
         return () => clearInterval(interval);
     }, []);
 
-    // 4. PLANE ANIMATION LOOP (Radar Physics) 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setPlanes(prev => prev.map(p => {
-                // Motion math: Move based on heading
-                const headingRad = (p.heading || 0) * (Math.PI / 180);
-                const speedFactor = (p.speed || 300) * 0.000005; // Scale for map
+    // 4. PLANE ANIMATION LOOP - MOVED TO APP.JSX (RADAR CONTROLLER)
+    // CoreOperativo is now just a renderer for planes passed via props.
 
-                let newLat = p.lat + Math.cos(headingRad) * speedFactor;
-                let newLng = p.lng + Math.sin(headingRad) * speedFactor;
-
-                // Simple World Wrap (keep them in bounds roughly)
-                if (Math.abs(newLat - CENTER_LAT) > 0.2) newLat = CENTER_LAT;
-                if (Math.abs(newLng - CENTER_LNG) > 0.2) newLng = CENTER_LNG;
-
-                return {
-                    ...p,
-                    lat: newLat,
-                    lng: newLng
-                };
-            }));
-        }, 100); // Smooth 10 FPS for planes
-        return () => clearInterval(interval);
-    }, []);
 
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -192,7 +159,7 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                 ))}
 
                 {/* LAYER 3: AIRSPACE/RADAR (Fixed Rendering) */}
-                {(!activeLayers || activeLayers.includes('RADAR')) && planes.length > 0 && planes.map(p => (
+                {(!activeLayers || activeLayers.includes('RADAR')) && planes && planes.map(p => (
                     <PlaneMarker
                         key={p.id}
                         p={p}

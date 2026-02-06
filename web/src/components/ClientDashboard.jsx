@@ -101,7 +101,7 @@ function Recenter({ lat, lng }) {
     return null;
 }
 
-export default function ClientDashboard() {
+export default function ClientDashboard({ onBack }) {
     const [destination, setDestination] = useState('');
     const [selectedType, setSelectedType] = useState('vip');
     const [status, setStatus] = useState('idle'); // idle, searching, confirmed
@@ -130,7 +130,23 @@ export default function ClientDashboard() {
             {/* TOP BAR */}
             <div style={styles.header}>
                 <div style={styles.logo}>TESO VIP</div>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#333', border: '1px solid #ffd700' }}></div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                        onClick={onBack}
+                        style={{
+                            background: 'transparent',
+                            border: '1px solid #333',
+                            color: '#aaa',
+                            padding: '5px 15px',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem'
+                        }}
+                    >
+                        ⮌ VOLVER
+                    </button>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#333', border: '1px solid #ffd700' }}></div>
+                </div>
             </div>
 
             {/* MAP AREA */}

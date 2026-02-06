@@ -78,7 +78,7 @@ const carIcon = new L.DivIcon({
     iconAnchor: [15, 15]
 });
 
-export default function DriverDashboard() {
+export default function DriverDashboard({ onBack }) {
     const [isOnline, setIsOnline] = useState(false);
     const [request, setRequest] = useState(null);
 
@@ -107,6 +107,21 @@ export default function DriverDashboard() {
         <div style={styles.container}>
             {/* STATS HEADER */}
             <div style={styles.topBar}>
+                <button
+                    onClick={onBack}
+                    style={{
+                        background: '#333',
+                        border: 'none',
+                        color: '#fff',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        marginRight: '10px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    ⮌ SALIR
+                </button>
                 <div style={styles.statCard}>
                     <div style={{ fontSize: '0.8rem', color: '#aaa' }}>Ganancias</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#39FF14' }}>$240k</div>

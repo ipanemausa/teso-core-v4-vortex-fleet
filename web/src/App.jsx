@@ -778,7 +778,7 @@ function App() {
     if (userRole === 'driver') {
       return (
         <Suspense fallback={<div style={{ color: '#39FF14' }}>Cargando Panel de Conductor...</div>}>
-          <DriverDashboard />
+          <DriverDashboard onBack={() => { setShowLanding(true); setUserRole(null); }} />
         </Suspense>
       );
     }
@@ -786,7 +786,7 @@ function App() {
     if (userRole === 'client') {
       return (
         <Suspense fallback={<div style={{ color: 'gold' }}>Cargando Servicio VIP...</div>}>
-          <ClientDashboard />
+          <ClientDashboard onBack={() => { setShowLanding(true); setUserRole(null); }} />
         </Suspense>
       );
     }

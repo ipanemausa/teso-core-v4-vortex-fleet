@@ -40,7 +40,7 @@ const formatCurrency = (amount) => {
     }).format(amount);
 };
 
-const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS', onRowClick, simulationData: propSimulationData, onClose, onHome, onRegenerate, onSimulateStress, onRunMacro }) => {
+const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'LIVE_OPS', onRowClick, simulationData: propSimulationData, onClose, onHome, onRegenerate, onSimulateStress, onRunMacro }) => {
 
     // --- STATE ---
     const [simulationData, setSimulationData] = useState(propSimulationData || null);
@@ -887,7 +887,19 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
 
             {/* MODULAR ARCHITECTURE (v4) */}
             {viewMode === 'LIVE_OPS' ? (
-                <LiveOpsMap opsCommand={opsCommand} simulationData={simulationData} />
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                    <LiveOpsMap
+                        opsCommand={opsCommand}
+                        simulationData={{
+                            ...simulationData,
+                            // MERGE PROPS: Use App.jsx real-time state if available, fallback to simulationData
+                            services: requests || simulationData?.services,
+                            vehicles: vehicles || simulationData?.vehicles
+                        }}
+                        // PASS PLANES DIRECTLY (Bypass simulationData for Radar)
+                        planes={planes}
+                    />
+                </div>
             ) : (
                 <>
                     {/* --- ANALYTICS & STRATEGY VIEW --- */}

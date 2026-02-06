@@ -9,10 +9,24 @@ import LogisticsDashboard from '../LogisticsDashboard';
 // TesoOpsPanel seemed to be inline in the 'restored' version or imported.
 // I will assume for now they are imports or I will recreate the structure found in the 'restored' version.
 
-const LiveOpsMap = ({ opsCommand, simulationData }) => {
+const LiveOpsMap = ({ opsCommand, simulationData, planes }) => { // Accept planes prop
 
     // This component encapsulates the "Map View" logic.
     const [activeTab, setActiveTab] = useState('FLOTA');
+
+    // ... inside JSX ...
+    // MAIN CONTENT AREA
+    // ...
+    {
+        activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && activeTab !== 'ARTEFACTO' && (
+            <CoreOperativo
+                command={opsCommand}
+                simulationData={simulationData}
+                activeLayers={activeLayers}
+                planes={planes} // Pass planes to CoreOperativo
+            />
+        )
+    }
 
     // LAYER CONTROL STATE (The "Subcapas" Logic)
     const [activeLayers, setActiveLayers] = useState(['FLEET', 'JOBS', 'RADAR']); // Default layers (RADAR ON by default)
@@ -387,7 +401,12 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             <div style={{ flex: 1, position: 'relative' }}>
                 {/* MAP RENDERS HERE IN LIVE OPS MODE */}
                 {activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && activeTab !== 'ARTEFACTO' && (
-                    <CoreOperativo command={opsCommand} simulationData={simulationData} activeLayers={activeLayers} />
+                    <CoreOperativo
+                        command={opsCommand}
+                        simulationData={simulationData}
+                        activeLayers={activeLayers}
+                        planes={planes}
+                    />
                 )}
                 {/* OTHER TABS */}
                 {activeTab === 'CLIENTES' && <ClientDashboard />}
