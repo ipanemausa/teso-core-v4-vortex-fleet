@@ -176,7 +176,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
             </div>
 
             {/* 2. UI OVERLAYS */}
-            <div style={{ position: 'absolute', top: 10, left: 90, zIndex: 1000 }}>
+            <div style={{ position: 'absolute', top: 5, left: 60, zIndex: 1000 }}>
                 <NeonNavbar activeTab={activeTab} onTabChange={setActiveTab} />
             </div>
 
