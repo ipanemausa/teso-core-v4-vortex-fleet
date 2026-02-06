@@ -190,8 +190,9 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
                     <Marker key={job.id} position={[job.lat, job.lng]} icon={jobIcon} />
                 ))}
 
-                {/* LAYER 3: AIRSPACE/RADAR (Use Local State) */}
-                {(!activeLayers || activeLayers.includes('RADAR')) && internalPlanes.map(p => (
+                {/* LAYER 3: AIRSPACE/RADAR (DEBUG: ALWAYS VISIBLE) */}
+                {/* Removed condition checking activeLayers to force visibility */}
+                {internalPlanes.map(p => (
                     <PlaneMarker
                         key={p.id}
                         p={p}
