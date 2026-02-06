@@ -68,6 +68,7 @@ const RadarController = ({ setPlanes }) => {
                     let currentPlanes = [...prevPlanes];
                     if (currentPlanes.length < 6) {
                         while (currentPlanes.length < 6) {
+                            console.log("✈️ Spawning New Plane...");
                             currentPlanes.push(createPlane(bounds, center));
                         }
                     }
@@ -135,16 +136,27 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
     useEffect(() => {
         const interval = setInterval(() => {
             setFleet(prev => prev.map(car => {
-                // ... car movement ...
+                const isMoving = car.status === 'ACTIVE' || car.status === 'DISPATCHED';
+                if (!isMoving) return car;
+
                 return {
                     ...car,
                     lat: car.lat + (Math.random() - 0.5) * 0.0015,
                     lng: car.lng + (Math.random() - 0.5) * 0.0015,
+                    speed: Math.max(20, Math.floor(Math.random() * 70))
                 };
             }));
         }, 1000);
         return () => clearInterval(interval);
     }, []);
+
+    // DEBUG: Monitor Plane Count
+    useEffect(() => {
+        console.log("✈️ [CoreOperativo] Active Planes:", internalPlanes.length);
+        if (internalPlanes.length > 0) {
+            console.log("✈️ [CoreOperativo] Sample Plane:", internalPlanes[0]);
+        }
+    }, [internalPlanes]);
 
 
     return (

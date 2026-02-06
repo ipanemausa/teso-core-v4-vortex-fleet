@@ -4,8 +4,8 @@ import L from 'leaflet';
 
 // 1. Vehicle (Translucent Luminous Core)
 export const vehicleIcon = new L.DivIcon({
-    className: 'glass-pin-vehicle',
-    html: `<div style="
+  className: 'glass-pin-vehicle',
+  html: `<div style="
     background: rgba(224, 255, 255, 0.6); /* Translucent Luminous Center */
     border: 2px solid rgba(0, 240, 255, 0.9); /* Defined Blue Border */
     width: 12px; height: 12px;
@@ -15,15 +15,15 @@ export const vehicleIcon = new L.DivIcon({
     position: relative;
     backdrop-filter: blur(1px); /* Slight blur for glass effect */
   "></div>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 16],
-    popupAnchor: [0, -16]
+  iconSize: [16, 16],
+  iconAnchor: [8, 16],
+  popupAnchor: [0, -16]
 });
 
 // 2. Passenger (Translucent Luminous Core)
 export const passengerIcon = new L.DivIcon({
-    className: 'glass-pin-passenger',
-    html: `<div style="
+  className: 'glass-pin-passenger',
+  html: `<div style="
     background: rgba(255, 250, 240, 0.6); /* Translucent Luminous Center */
     border: 2px solid rgba(255, 215, 0, 0.9); /* Defined Gold Border */
     width: 12px; height: 12px;
@@ -33,23 +33,28 @@ export const passengerIcon = new L.DivIcon({
     position: relative;
     backdrop-filter: blur(1px); /* Slight blur for glass effect */
   "></div>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 16],
-    popupAnchor: [0, -16]
+  iconSize: [16, 16],
+  iconAnchor: [8, 16],
+  popupAnchor: [0, -16]
 });
 
 // 3. Custom Airplane Icon
+// 3. Custom Airplane Icon (SVG for better control)
 export const planeDivIcon = (angle) => new L.DivIcon({
-    className: 'plane-marker',
-    html: `<div style="font-size: 32px; transform: rotate(${angle - 45}deg); text-shadow: 0 0 15px cyan; filter: drop-shadow(0 0 8px cyan) brightness(2);">✈️</div>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
+  className: 'plane-marker',
+  html: `<div style="transform: rotate(${angle}deg); width: 24px; height: 24px;">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 5px #00F0FF);">
+            <path d="M21 16V14L13 9V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V9L2 14V16L10 13.5V19L8 20.5V22L11.5 21L15 22V20.5L13 19V13.5L21 16Z" fill="#00F0FF"/>
+        </svg>
+    </div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12]
 });
 
 // 4. Airport Icon Generator (Static Infrastructure)
 export const getAirportIcon = (code) => new L.DivIcon({
-    className: 'airport-marker',
-    html: `<div style="display: flex; flex-direction: column; align-items: center;">
+  className: 'airport-marker',
+  html: `<div style="display: flex; flex-direction: column; align-items: center;">
     <div style="
       font-size: 24px;
       background: rgba(5, 10, 20, 0.8);
@@ -61,14 +66,14 @@ export const getAirportIcon = (code) => new L.DivIcon({
     ">🏢</div>
     <div style="font-size: 0.6rem; color: #FF5722; background: rgba(0,0,0,0.8); padding: 2px 4px; border-radius: 4px; margin-top: 5px; border: 1px solid #FF5722;">${code}</div>
   </div>`,
-    iconSize: [40, 70],
-    iconAnchor: [20, 20]
+  iconSize: [40, 70],
+  iconAnchor: [20, 20]
 });
 
 // 5. Parked Plane Icon (Static Fleet)
 export const parkedPlaneIcon = new L.DivIcon({
-    className: 'parked-plane-marker',
-    html: `<div style="font-size: 20px; transform: rotate(-45deg); filter: grayscale(100%) brightness(0.8);">🛩️</div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
+  className: 'parked-plane-marker',
+  html: `<div style="font-size: 20px; transform: rotate(-45deg); filter: grayscale(100%) brightness(0.8);">🛩️</div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10]
 });
