@@ -186,12 +186,15 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
             {/* A. FLOATING NAVBAR (Top Left - "Barra Superior Izquierda") */}
             <div style={{
                 position: 'absolute',
-                top: 5,
-                left: 20, /* Moved to Left as requested */
+                top: 10,
+                left: 90, /* Moved Right to clear Dock */
                 zIndex: 1000,
-                width: 'auto'
+                width: 'auto',
+                pointerEvents: 'none' // Prevent container from blocking map clicks
             }}>
-                <NeonNavbar activeTab={activeTab} onTabChange={setActiveTab} />
+                <div style={{ pointerEvents: 'auto' }}>
+                    <NeonNavbar activeTab={activeTab} onTabChange={setActiveTab} />
+                </div>
             </div>
 
             {/* B. LEFT DOCK (V6 Style) */}
@@ -239,13 +242,22 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
                             color: '#f87171'
                         },
                         {
+                            category: "🚀 CONSULTOR LHU (Clase Gemini)",
+                            questions: [
+                                "Analizar URL de empresa (Simular)",
+                                "Recomendar Agentes para Pyme Logística",
+                                "¿Cómo usar 'Meeting Preparer' aquí?"
+                            ],
+                            color: '#e879f9' // Fuchsia
+                        },
+                        {
                             category: "📊 BUSINESS INTELLIGENCE",
                             questions: [
                                 "Resumen ejecutivo de KPIs en tiempo real",
                                 "Predicción de demanda (Próxima Hora)",
                                 "Identifica cuellos de botella críticos"
                             ],
-                            color: '#34d399'
+                            color: '#34d399' // Emerald
                         },
                         {
                             category: "🏢 ESTRATEGIA CORPORATIVA (Gemini/Copilot)",
@@ -254,7 +266,7 @@ const LiveOpsMap = ({ opsCommand, simulationData }) => {
                                 "Evaluación de Riesgos de Expansión LATAM",
                                 "Proyección de Crecimiento (Forecast Q4)"
                             ],
-                            color: '#8b5cf6'
+                            color: '#8b5cf6' // Violet
                         }
                     ].map((group, i) => (
                         <div key={i} style={{ marginBottom: '15px' }}>

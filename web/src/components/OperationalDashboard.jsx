@@ -869,10 +869,10 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
             left: 0,
             width: '100%',
             height: '100%',
-            // FIX: Make background transparent in Map Explorer mode so MapContainer (App.jsx) is visible
-            background: viewMode === 'ANALYTICS' ? 'transparent' : 'var(--color-bg-app)',
-            // Also allow click-through for map interaction if in Analytics mode
-            pointerEvents: viewMode === 'ANALYTICS' ? 'none' : 'auto',
+            // FIX: Transparency for Map Visibility (No Glass Overlay)
+            background: viewMode === 'LIVE_OPS' ? 'transparent' : 'var(--color-bg-app)',
+            // Enable interaction in both modes now, relying on z-index
+            pointerEvents: 'auto',
             color: 'var(--color-text-primary)', // Tokenized
             zIndex: 100,
             padding: 'var(--spacing-xl)', // Tokenized
