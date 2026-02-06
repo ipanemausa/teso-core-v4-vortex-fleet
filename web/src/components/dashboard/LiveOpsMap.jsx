@@ -31,20 +31,40 @@ const V6Dock = ({ activeLayers, onToggle }) => {
             ].map((item, i) => {
                 const isActive = activeLayers.includes(item.id);
                 return (
+                return (
                     <div key={i} onClick={() => handleDockClick(item)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', opacity: isActive || ['PITCH', 'WHATSAPP', 'C_GIT'].includes(item.id) ? 1 : 0.5, transition: 'opacity 0.2s' }}>
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer',
+                            opacity: isActive || ['PITCH', 'WHATSAPP', 'C_GIT'].includes(item.id) ? 1 : 0.8,
+                            transition: 'all 0.2s',
+                            // CONTAINER GLASS STYLE (Fixes Visibility)
+                            background: isActive
+                                ? 'linear-gradient(90deg, rgba(6, 182, 212, 0.3) 0%, rgba(8, 145, 178, 0.1) 100%)'
+                                : 'linear-gradient(90deg, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.6) 100%)',
+                            backdropFilter: 'blur(12px)',
+                            border: isActive ? `1px solid ${item.color}` : '1px solid rgba(255, 255, 255, 0.1)',
+                            borderRadius: '12px',
+                            padding: '8px 12px',
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                            width: 'fit-content', // Wrap content
+                            marginBottom: '8px'
+                        }}>
                         <div style={{
-                            width: '40px', height: '40px',
-                            background: isActive ? `rgba(${parseInt(item.color.slice(1, 3), 16)}, ${parseInt(item.color.slice(3, 5), 16)}, ${parseInt(item.color.slice(5, 7), 16)}, 0.2)` : 'rgba(15, 23, 42, 0.9)',
-                            border: `1px solid ${item.color}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem',
-                            boxShadow: isActive ? `0 0 15px ${item.color}` : 'none'
+                            fontSize: '1.2rem',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            filter: `drop-shadow(0 0 5px ${item.color})`
                         }}>
                             {item.icon}
                         </div>
-                        <div style={{ color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '1px', textShadow: '0 2px 4px #000', fontFamily: 'monospace' }}>
+                        <div style={{
+                            color: '#fff', fontSize: '0.75rem', fontWeight: 'bold',
+                            letterSpacing: '0.5px', fontFamily: 'var(--font-main)',
+                            textShadow: '0 2px 4px #000'
+                        }}>
                             {item.label}
                         </div>
                     </div>
+                );
                 );
             })}
         </div>
