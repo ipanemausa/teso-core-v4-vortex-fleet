@@ -871,6 +871,9 @@ const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'LIVE_OPS'
             height: '100%',
             // FIX: Transparency for Map Visibility (No Glass Overlay)
             background: viewMode === 'LIVE_OPS' ? 'transparent' : 'var(--color-bg-app)',
+            backdropFilter: viewMode === 'LIVE_OPS' ? 'none' : 'blur(20px)',
+            boxShadow: viewMode === 'LIVE_OPS' ? 'none' : '0 0 50px rgba(0,0,0,0.5)',
+            border: viewMode === 'LIVE_OPS' ? 'none' : '1px solid var(--color-border-subtle)',
             // Enable interaction in both modes now, relying on z-index
             pointerEvents: 'auto',
             color: 'var(--color-text-primary)', // Tokenized

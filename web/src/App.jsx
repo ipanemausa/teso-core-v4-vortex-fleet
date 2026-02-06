@@ -223,9 +223,10 @@ const createPlane = (bounds, center) => {
 
   let south, north, west, east;
 
-  // SAFETY: Fallback bounds if map not ready (Medellin Default)
-  if (!bounds || !bounds.getSouth) {
-    south = 6.15; north = 6.35; west = -75.65; east = -75.50;
+  // SAFETY: Fallback bounds if map not ready or invalid
+  if (!bounds || !bounds.getSouth || !bounds.isValid()) {
+    // Default JMC Area (Medellin)
+    south = 6.00; north = 6.40; west = -75.70; east = -75.30;
   } else {
     south = bounds.getSouth();
     north = bounds.getNorth();
@@ -233,35 +234,44 @@ const createPlane = (bounds, center) => {
     east = bounds.getEast();
   }
 
-  // Ensure Center is validLat/Lng
+  // Ensure Center is valid
   const safeCenter = (center && typeof center.lat === 'number') ? center : { lat: 6.2442, lng: -75.5812 };
 
   const latSpan = north - south;
   const lngSpan = east - west;
 
-  // SPAWN LOGIC: 
-  const PADDING = latSpan * 0.1;
+  // SPAWN LOGIC: SPAWN FAR OUTSIDE (1.2x - 1.5x distance)
+  // This ensures they appear "coming from outside"
+  const PADDING_LAT = latSpan * 0.8;
+  const PADDING_LNG = lngSpan * 0.8;
+
   const edge = Math.floor(Math.random() * 4);
   let lat, lng;
 
-  if (edge === 0) { // Top
-    lat = north + PADDING;
-    lng = west + Math.random() * lngSpan;
-  } else if (edge === 1) { // Bottom
-    lat = south - PADDING;
-    lng = west + Math.random() * lngSpan;
-  } else if (edge === 2) { // Left
-    lat = south + Math.random() * latSpan;
-    lng = west - PADDING;
-  } else { // Right
-    lat = south + Math.random() * latSpan;
-    lng = east + PADDING;
+  if (edge === 0) { // From North (Top)
+    lat = north + PADDING_LAT;
+    lng = west + (Math.random() * lngSpan); // Random horizontal
+  } else if (edge === 1) { // From South (Bottom)
+    lat = south - PADDING_LAT;
+    lng = west + (Math.random() * lngSpan);
+  } else if (edge === 2) { // From West (Left)
+    lat = south + (Math.random() * latSpan);
+    lng = west - PADDING_LNG;
+  } else { // From East (Right)
+    lat = south + (Math.random() * latSpan);
+    lng = east + PADDING_LNG;
   }
 
-  const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.5);
-  const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.5);
+  // HEADING LOGIC: AIM FOR CENTER (plus/minus random jitter)
+  // atan2(deltaLon, deltaLat) aligns 0 with North
+  const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.3); // Aim near center
+  const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.3);
+
   const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
-  const speed = (latSpan * 0.005) + (Math.random() * (latSpan * 0.005));
+
+  // SPEED: Traversing the map should take ~20-30 seconds
+  // Speed needs to be proportional to span
+  const speed = (latSpan * 0.002) + (Math.random() * (latSpan * 0.001));
 
   return {
     id: `${airlines[Math.floor(Math.random() * airlines.length)]}${Math.floor(100 + Math.random() * 900)}`,
@@ -283,41 +293,66 @@ const RadarController = ({ setPlanes }) => {
 
     const safeUpdate = () => {
       try {
-        // STRICT SAFETY CHECK: Core fix for the crash
         if (!map || !map._leaflet_id || !map.getContainer()) return;
 
         const bounds = map.getBounds();
         const center = map.getCenter();
-        const deathBounds = bounds.pad(0.2);
+        // DEATH BOUNDS: When to despawn?
+        // Must be slightly LARGER than current view, but smaller than spawn point
+        // Pad 0.5 means 50% larger view. Spawn is at 0.8 padding.
+        // So plane spawns at 0.8, enters 0.5 (death), enters 0.0 (view), exits 0.0, exits 0.5 -> Despawn
+        const deathBounds = bounds.pad(0.6);
 
         setPlanes(prevPlanes => {
-          // Initialize if empty
+          // Initialize filling
           if (prevPlanes.length === 0) {
             return Array.from({ length: 6 }).map(() => createPlane(bounds, center));
           }
 
-          // Update existing
+          // Maintain Count (Replenish if low)
           let currentPlanes = [...prevPlanes];
           while (currentPlanes.length < 6) {
+            // "Sale uno, entra otro" logic handled here implicitly by array length
             currentPlanes.push(createPlane(bounds, center));
           }
 
+          // MOVE PLANES
           return currentPlanes.map(p => {
+            // Trig for North=0 system
             const nextLat = p.lat + (Math.cos(p.heading * Math.PI / 180) * p.speed);
             const nextLng = p.lng + (Math.sin(p.heading * Math.PI / 180) * p.speed);
 
-            if (!deathBounds.contains([nextLat, nextLng])) {
+            // CHECK DESPAWN: If it flies OUT of death bounds (after passing through?)
+            // We need a simple check: allow them to exist for a while? 
+            // Better: If they are moving AWAY from center and are Far away.
+            // Simplified: If outside deathbounds, respawn NEW ONE.
+            // Since they spawn OUTSIDE deathbounds (0.8 > 0.6), we need to ensure they don't die instantly.
+            // FIX: Only kill if moving AWAY? Or just ensure spawn is inside death bounds?
+            // User wants "Appear outside, move in".
+            // So spawn MUST be visible or just on edge? "Desde afuera hacia adentro".
+            // Let's spawn at Pad 0.6 (Edge of Life) and Death at Pad 0.7?
+            // Actually, if we spawn at Pad 0.8, and Death is Pad 0.6, they die instantly.
+            // We should Set Death at Pad 1.0 (Huge). Spawn at Pad 1.1?
+
+            // NEW STRATEGY: 
+            // Death boundary is HUGE (Pad 2.0).
+            // Spawn boundary is Pad 1.2.
+            // They fly to center. Once they pass center and exit Pad 2.0, they die.
+            const lifeBounds = bounds.pad(2.0);
+
+            if (!lifeBounds.contains([nextLat, nextLng])) {
+              // It traveled all the way across and left. Respawn new incoming.
               return createPlane(bounds, center);
             }
             return { ...p, lat: nextLat, lng: nextLng };
           });
         });
       } catch (err) {
-        // Silent fail to prevent crash loop
+        // Silent fail
       }
     };
 
-    const interval = setInterval(safeUpdate, 800);
+    const interval = setInterval(safeUpdate, 100); // Smoother animation (100ms)
     return () => clearInterval(interval);
   }, [map, setPlanes]);
 
