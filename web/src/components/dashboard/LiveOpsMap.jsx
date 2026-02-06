@@ -72,6 +72,7 @@ const V6Dock = ({ activeLayers, onToggle }) => {
 // --- SUB-COMPONENT: RIGHT PANEL (Extracted for Stability) ---
 const TesoOpsPanel = ({ simulationData, activeView }) => {
     const [agentMetrics, setAgentMetrics] = useState(null);
+    const [hoveredOrder, setHoveredOrder] = useState(null);
 
     useEffect(() => {
         // Poll logic remains same
@@ -199,8 +200,20 @@ const TesoOpsPanel = ({ simulationData, activeView }) => {
                         <div style={{ flex: 1, overflowY: 'auto' }}>
                             <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #334155', paddingBottom: '5px' }}>UNIDADES EN LÍNEA</div>
                             {simulationData?.services?.slice(0, 10).map((u, i) => (
-                                <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '8px', marginBottom: '5px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ color: '#fff', fontSize: '0.8rem' }}>{u.plate}</div>
+                                <div
+                                    key={i}
+                                    onMouseEnter={() => setHoveredOrder(u)}
+                                    onMouseLeave={() => setHoveredOrder(null)}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.03)', padding: '8px',
+                                        marginBottom: '5px', borderRadius: '4px',
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        cursor: 'pointer', transition: 'background 0.2s'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                >
+                                    <div style={{ color: '#fff', fontSize: '0.8rem' }}>{u.plate || u.vehiclePlate || 'TSO-000'}</div>
                                     <div style={{ color: '#39FF14', fontSize: '0.7rem' }}>{u.status}</div>
                                 </div>
                             ))}
@@ -226,6 +239,61 @@ const TesoOpsPanel = ({ simulationData, activeView }) => {
 
             {renderContent()}
 
+            {/* HOVER DETAIL CARD (Fly.io Parity) */}
+            {hoveredOrder && (
+                <div style={{
+                    position: 'fixed', top: '20%', right: '370px', width: '300px',
+                    background: 'rgba(9, 9, 11, 0.98)', border: '1px solid #39FF14', borderRadius: '8px',
+                    padding: '20px', zIndex: 1000, boxShadow: '0 0 20px rgba(57, 255, 20, 0.2)',
+                    backdropFilter: 'blur(10px)', pointerEvents: 'none'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
+                        <div style={{ fontSize: '1.2rem' }}>📄</div>
+                        <div style={{ fontWeight: 'bold', color: '#fff' }}>DETALLE DE ORDEN</div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.8rem', color: '#ccc' }}>
+                        <div>
+                            <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>ID OPERACIÓN</span>
+                            <span style={{ color: '#39FF14', fontWeight: 'bold' }}>#{hoveredOrder.id}</span>
+                        </div>
+                        <div>
+                            <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>ESTADO</span>
+                            <span style={{ color: hoveredOrder.status === 'completed' ? '#22c55e' : '#f59e0b', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                {hoveredOrder.status === 'completed' ? 'FINALIZADO' : (hoveredOrder.status || 'EN CURSO')}
+                            </span>
+                        </div>
+
+                        <div style={{ gridColumn: 'span 2' }}>
+                            <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>PASAJERO</span>
+                            <span style={{ color: '#fff', fontWeight: 'bold' }}>{hoveredOrder.paxName || hoveredOrder.client || 'N/A'}</span>
+                        </div>
+
+                        <div style={{ gridColumn: 'span 2' }}>
+                            <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>EMPRESA</span>
+                            <span style={{ color: '#fff' }}>{hoveredOrder.company || 'PARTICULAR'}</span>
+                        </div>
+
+                        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #333', gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                            <div>
+                                <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>CONDUCTOR</span>
+                                <span style={{ color: '#fff' }}>{hoveredOrder.driverName || 'PENDIENTE'}</span>
+                            </div>
+                            <div>
+                                <span style={{ color: '#64748b', display: 'block', fontSize: '0.7rem' }}>VEHÍCULO</span>
+                                <span style={{ color: '#fff' }}>{hoveredOrder.vehiclePlate || 'TBA'}</span>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '10px', gridColumn: 'span 2', background: 'rgba(57, 255, 20, 0.05)', padding: '8px', borderRadius: '4px', border: '1px solid rgba(57, 255, 20, 0.2)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem' }}>
+                                <span style={{ color: '#39FF14' }}>PIN SEGURIDAD:</span>
+                                <span style={{ color: '#fff', fontWeight: 'bold' }}>{hoveredOrder.pin || 'A-1234'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
