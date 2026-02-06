@@ -30,21 +30,21 @@ export function NeonNavbar({ activeTab, onTabChange }) {
                     key={tab.id}
                     onClick={() => onTabChange(tab.id)}
                     style={{
-                        background: activeTab === tab.id ? 'rgba(8, 145, 178, 0.3)' : 'rgba(15, 23, 42, 0.9)', // Solid Dark Background for Contrast
-                        backdropFilter: 'blur(4px)',
-                        border: activeTab === tab.id ? '1px solid #06b6d4' : '1px solid rgba(255, 255, 255, 0.2)',
-                        color: activeTab === tab.id ? '#67e8f9' : '#f8fafc', // High Contrast White
-                        padding: '6px 12px', // Compact Padding
-                        borderRadius: '8px',
+                        background: activeTab === tab.id ? 'rgba(6, 182, 212, 0.25)' : 'rgba(15, 23, 42, 0.4)', // Glassy Dark
+                        backdropFilter: 'blur(12px)', // Strong Blur
+                        border: activeTab === tab.id ? '1px solid #06b6d4' : '1px solid rgba(255, 255, 255, 0.15)',
+                        color: activeTab === tab.id ? '#67e8f9' : '#e2e8f0', // Soft White
+                        padding: '6px 12px',
+                        borderRadius: '12px',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
                         cursor: 'pointer',
-                        fontSize: '0.75rem', // Smaller text
-                        fontWeight: '800', // Extra Bold
-                        textShadow: '0 1px 2px rgba(0,0,0,0.9)',
+                        fontSize: '0.75rem',
+                        fontWeight: '700',
+                        textShadow: '0 1px 4px rgba(0,0,0,0.8)', // Legibility Support
                         transition: 'all 0.2s',
-                        boxShadow: activeTab === tab.id ? '0 0 15px rgba(6, 182, 212, 0.3)' : '0 4px 6px rgba(0,0,0,0.3)' // Shadow for lift
+                        boxShadow: activeTab === tab.id ? '0 0 15px rgba(6, 182, 212, 0.2)' : '0 2px 4px rgba(0,0,0,0.1)'
                     }}
                 >
                     <span>{tab.icon}</span>
