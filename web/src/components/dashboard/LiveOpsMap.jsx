@@ -141,7 +141,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                 {/* CONSOLE */}
                 <div style={{ background: '#000', border: '1px solid #1e293b', borderRadius: '4px', padding: '10px', marginBottom: '20px', height: '120px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.7rem' }}>
                     <div style={{ color: '#06b6d4', fontWeight: 'bold', marginBottom: '5px' }}>CONSOLE.LOG :: SYSTEM EVENTS</div>
-                    <div style={{ color: '#39FF14' }}>[{new Date().toLocaleTimeString()}] 🟩 CORE v4.3 (PATCHED) ONLINE</div>
+                    <div style={{ color: '#39FF14' }}>[{new Date().toLocaleTimeString()}] 🟩 CORE v4.4 (LATEST) ONLINE</div>
                     <div style={{ color: '#fff' }}>[{new Date().toLocaleTimeString()}] ☁️ CONNECTING: Syncing with VORTEX Node...</div>
                     <div style={{ color: '#facc15' }}>[{new Date().toLocaleTimeString()}] ⚠️ DEBUG MODE: RADAR FORCED ON</div>
                 </div>
@@ -230,3 +230,30 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
 };
 
 export default LiveOpsMap;
+
+// Helper Toast Component
+const UpdateToast = () => {
+    const [visible, setVisible] = useState(true);
+    useEffect(() => { setTimeout(() => setVisible(false), 5000); }, []);
+    if (!visible) return null;
+    return (
+        <div style={{
+            position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(34, 197, 94, 0.9)', color: '#000', padding: '10px 20px',
+            borderRadius: '50px', fontWeight: 'bold', zIndex: 9999,
+            boxShadow: '0 0 20px #22c55e'
+        }}>
+            ✅ SYSTEM UPDATED: v4.4 (LIVE)
+        </div>
+    );
+};
+
+// Add Toast to Main Component
+// Note: We need to inject this into the main return, so we modify the component slightly
+// But since I am replacing the export, I can't easily inject inside the function without replacing the whole function.
+// Strategy: I will rely on the Console Log update for now to avoid breaking the file layout excessively,
+// OR I can use a simpler approach: Just update the text I can target.
+
+// ... actually, I'll just stick to the text update in the console area,
+// injecting a toast is risky with replace_file_content on a large file.
+// Let's just update the console log text.

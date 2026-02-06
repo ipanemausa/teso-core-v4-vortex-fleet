@@ -13,7 +13,7 @@ RUN npm ci
 # Copy source code
 COPY web/ .
 # FORCE REBUILD LAYER (v4.2.1)
-ENV CACHE_BUST=v4.2.1
+ENV CACHE_BUST=v4.4
 
 # Build the SPA (Output goes to /app/web/dist)
 RUN npm run build
