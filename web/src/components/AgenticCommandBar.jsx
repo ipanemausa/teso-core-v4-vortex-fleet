@@ -95,14 +95,22 @@ const AgenticCommandBar = ({ onCommand }) => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') handleSend();
-                        if (e.key === 'Tab' && suggestions.length > 0) {
-                            e.preventDefault();
-                            // Simple logic: Autocomplete with the first suggestion's label if input matches start?
-                            // Or better: If user wants "Autocompletion", we usually need a specific 'suggestion' state.
-                            // For now, based on "tomarla con una sola letra", let's assume they want to pick the first suggestion relative to what they typed.
-                            // Simplified: Just set input to the first matching suggestion.
-                            const match = suggestions.find(s => s.label.toLowerCase().startsWith(input.toLowerCase()));
-                            if (match) setInput(match.label);
+                        if (e.key === 'Tab') {
+                            e.preventDefault(); // Stop focus change
+
+                            // 1. Find the BEST match (StartsWith first, then Includes)
+                            let match = suggestions.find(s => s.label.toLowerCase().startsWith(input.toLowerCase()));
+                            if (!match) {
+                                match = suggestions.find(s => s.label.toLowerCase().includes(input.toLowerCase()));
+                            }
+
+                            // 2. If valid match found, FILL IT
+                            if (match) {
+                                setInput(match.label);
+                            } else if (suggestions.length > 0) {
+                                // Default fallback: Fill the "first" suggestion if input is empty or no match
+                                setInput(suggestions[0].label);
+                            }
                         }
                     }}
                     placeholder={isThinking ? "Agent processing..." : "Ask Teso Operations AI..."}
