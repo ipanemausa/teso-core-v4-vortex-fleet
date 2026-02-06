@@ -164,13 +164,33 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                         {/* DISPATCH CONTROLS */}
                         <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <button style={{
-                                background: 'transparent', border: '1px solid #06b6d4', color: '#06b6d4',
-                                padding: '10px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase'
-                            }} onClick={() => alert('IA: Simulación Pausada.')}>⏸ PAUSAR SIMULACIÓN</button>
+                                background: 'transparent',
+                                border: '1px solid #06b6d4',
+                                color: '#06b6d4',
+                                padding: '10px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                textTransform: 'uppercase',
+                                boxShadow: '0 0 10px rgba(6, 182, 212, 0.2)',
+                                transition: 'all 0.2s'
+                            }} onClick={() => console.log('⏸ SIMULATION PAUSED (Visual Layer)')}>
+                                ⏸ PAUSAR SIMULACIÓN
+                            </button>
                             <button style={{
-                                background: '#06b6d4', border: 'none', color: '#000',
-                                padding: '10px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase', boxShadow: '0 0 15px rgba(6, 182, 212, 0.4)'
-                            }} onClick={onDispatch}>⚡ DESPACHO INTELIGENTE</button>
+                                background: '#06b6d4',
+                                border: 'none',
+                                color: '#000',
+                                padding: '10px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                textTransform: 'uppercase',
+                                boxShadow: '0 0 15px rgba(6, 182, 212, 0.4)',
+                                transition: 'all 0.2s'
+                            }} onClick={onDispatch}>
+                                ⚡ DESPACHO INTELIGENTE
+                            </button>
                         </div>
                         {/* AUTONOMOUS GUARDRAILS */}
                         {agentMetrics && (
@@ -361,7 +381,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                     }}>{isPanelOpen ? '▶' : '◀'}</div>
 
                     <div style={{ width: '350px', height: '100%', transform: isPanelOpen ? 'translateX(0)' : 'translateX(350px)', transition: 'transform 0.3s' }}>
-                        <TesoOpsPanel simulationData={simulationData} activeView={activeTab} onDispatch={() => setInternalCommand('DISPATCH_WAVE')} />
+                        <TesoOpsPanel simulationData={simulationData} activeView={activeTab} onDispatch={() => setInternalCommand({ type: 'DISPATCH_WAVE', ts: Date.now() })} />
                     </div>
                 </div>
             )}

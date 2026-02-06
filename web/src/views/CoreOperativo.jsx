@@ -175,9 +175,20 @@ export function CoreOperativo({ onClose, onHome, command, simulationData, active
 
     // 2. LISTEN FOR COMMANDS (The Brain Logic)
     useEffect(() => {
-        if (command === 'DISPATCH_WAVE') {
-            // ... dispatch logic ...
-            console.log("🌊 Dispatching Wave...");
+        const cmdType = command?.type || command;
+        if (cmdType === 'DISPATCH_WAVE') {
+            // VISUAL DISPATCH EFFECT
+            setFleet(prev => prev.map(v => ({
+                ...v,
+                status: 'DISPATCHED',
+                target: {
+                    // Move to a random nearby point to simulate activity
+                    lat: v.lat + (Math.random() - 0.5) * 0.02,
+                    lng: v.lng + (Math.random() - 0.5) * 0.02
+                },
+                speed: Math.floor(Math.random() * 40) + 60 // Accelerate
+            })));
+            console.log("🌊 DISPATCH WAVE EXECUTED: Units Mobilized.");
         }
     }, [command]);
 
