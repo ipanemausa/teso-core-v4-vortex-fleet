@@ -10,7 +10,7 @@ export function NeonNavbar({ activeTab, onTabChange }) {
         { id: 'FINANZAS', icon: '💰', label: 'FINANZAS' },
         { id: 'MERCADO', icon: '📢', label: 'MERCADO' },
         { id: 'CORE_V4', icon: '🔋', label: 'CORE v4.8 LIVE' },
-        { id: 'ARTEFACTO', icon: '🧬', label: 'LHU ARTEFACT' }, // New Tab
+        { id: 'ARTEFACTO', icon: '🧬', label: 'GEMINI AI' }, // Renamed for Clarity
     ];
 
     return (

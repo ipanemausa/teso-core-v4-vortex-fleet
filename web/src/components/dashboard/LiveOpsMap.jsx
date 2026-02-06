@@ -70,7 +70,8 @@ const V6Dock = ({ activeLayers, onToggle }) => {
 };
 
 // --- SUB-COMPONENT: RIGHT PANEL (Extracted for Stability) ---
-const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
+// --- SUB-COMPONENT: RIGHT PANEL (Extracted for Stability) ---
+const TesoOpsPanel = ({ simulationData, activeView, onDispatch, planes }) => {
     const [agentMetrics, setAgentMetrics] = useState(null);
     const [hoveredOrder, setHoveredOrder] = useState(null);
 
@@ -115,46 +116,203 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                 );
             case 'MERCADO':
                 return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'bold' }}>TOP CLIENTES</div>
-                        {['ARGOS', 'NUTRESA', 'BANCOLOMBIA', 'SURA'].map((c, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}>
-                                <span style={{ color: '#fff' }}>{c}</span>
-                                <span style={{ color: '#f59e0b' }}>{(40 - i * 5)}% Share</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid #F59E0B' }}>
+                            <div style={{ color: '#F59E0B', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px' }}>MARKET SHARE (Tiempo Real)</div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                <span style={{ color: '#fff' }}>TESO (Nosotros)</span>
+                                <span style={{ color: '#39FF14', fontWeight: 'bold' }}>42% ▲</span>
                             </div>
-                        ))}
-                        <div style={{ marginTop: '20px', color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'bold' }}>CAMPAÑAS ACTIVAS</div>
-                        <div style={{ padding: '10px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid #a855f7', borderRadius: '6px' }}>
-                            <div style={{ color: '#a855f7', fontWeight: 'bold' }}>RETORNO EJECUTIVOS</div>
-                            <div style={{ fontSize: '0.7rem', color: '#fff', marginTop: '5px' }}>Impacto: 1,200 Usuarios</div>
+                            <div style={{ width: '100%', height: '6px', background: '#334155', borderRadius: '3px', marginBottom: '15px', overflow: 'hidden' }}>
+                                <div style={{ width: '42%', height: '100%', background: '#39FF14' }}></div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                <span style={{ color: '#94a3b8' }}>Uber / InDrive</span>
+                                <span style={{ color: '#ef4444', fontWeight: 'bold' }}>35% ▼</span>
+                            </div>
+                            <div style={{ width: '100%', height: '6px', background: '#334155', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ width: '35%', height: '100%', background: '#ef4444' }}></div>
+                            </div>
                         </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            <div style={{ background: 'rgba(6, 182, 212, 0.1)', padding: '10px', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(6, 182, 212, 0.3)' }}>
+                                <div style={{ fontSize: '1.5rem' }}>🔥</div>
+                                <div style={{ color: '#00F0FF', fontWeight: 'bold', fontSize: '0.9rem' }}>ALTA DEMANDA</div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Zona: El Poblado</div>
+                            </div>
+                            <div style={{ background: 'rgba(168, 85, 247, 0.1)', padding: '10px', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+                                <div style={{ fontSize: '1.5rem' }}>⛈️</div>
+                                <div style={{ color: '#A855F7', fontWeight: 'bold', fontSize: '0.9rem' }}>CLIMA</div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Lluvias Fuertes</div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'CORE_V4':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontFamily: 'monospace' }}>
+                        <div style={{ color: '#39FF14', fontSize: '0.8rem', borderBottom: '1px solid #333', paddingBottom: '5px' }}>
+                            &gt; SIMULATION ENGINE V4.8
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            <div style={{ background: '#111', padding: '10px', borderRadius: '4px' }}>
+                                <div style={{ color: '#888', fontSize: '0.7rem' }}>TPS (Ticks/Sec)</div>
+                                <div style={{ color: '#00F0FF', fontSize: '1.2rem' }}>59.94</div>
+                            </div>
+                            <div style={{ background: '#111', padding: '10px', borderRadius: '4px' }}>
+                                <div style={{ color: '#888', fontSize: '0.7rem' }}>ENTITIES</div>
+                                <div style={{ color: '#F59E0B', fontSize: '1.2rem' }}>14,502</div>
+                            </div>
+                        </div>
+                        <div style={{ background: '#0a0a0a', padding: '10px', borderRadius: '4px', height: '200px', overflowY: 'auto', fontSize: '0.7rem', color: '#666' }}>
+                            {Array.from({ length: 10 }).map((_, i) => (
+                                <div key={i} style={{ marginBottom: '4px' }}>
+                                    <span style={{ color: '#333' }}>[15:4{i}:{10 + i}]</span> <span style={{ color: '#aaa' }}>INFO: Processing batch #{3920 + i}...</span>
+                                </div>
+                            ))}
+                            <div style={{ color: '#39FF14' }}>_cursor_active</div>
+                        </div>
+                        <button style={{ background: '#ef4444', border: 'none', color: '#fff', padding: '10px', fontWeight: 'bold', cursor: 'pointer', borderRadius: '4px' }}>EMERGENCY DUMP</button>
                     </div>
                 );
             case 'ORDENES':
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {simulationData?.services?.slice(0, 50).map((s, i) => (
-                            <div key={i} style={{ display: 'flex', flexDirection: 'column', padding: '12px', background: 'rgba(255,255,255,0.03)', borderLeft: s.status === 'completed' ? '3px solid #39FF14' : '3px solid #f59e0b', borderRadius: '6px', marginBottom: '8px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
-                                    <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
-                                        {s.company || s.client || s.paxName || s.clientId || 'Cliente Corporativo'}
-                                    </span>
-                                    <span style={{ color: '#bef264', fontSize: '0.75rem', fontWeight: 'bold', background: 'rgba(190, 242, 100, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-                                        {s.time || 'PEND'}
-                                    </span>
+                        {simulationData?.services?.slice(0, 50).map((s, i) => {
+                            // DATA CORRECTION FOR DEMO
+                            const isCompleted = s.status === 'completed';
+                            const displayStatus = i < 5 ? 'EN RUTA' : (isCompleted ? 'FINALIZADO' : 'PENDIENTE');
+                            const statusColor = i < 5 ? '#39FF14' : (isCompleted ? '#64748b' : '#f59e0b');
+
+                            return (
+                                <div
+                                    key={i}
+                                    onMouseEnter={() => setHoveredOrder(s)}
+                                    onMouseLeave={() => setHoveredOrder(null)}
+                                    style={{
+                                        display: 'flex', flexDirection: 'column', padding: '12px',
+                                        background: 'rgba(255,255,255,0.03)',
+                                        borderLeft: `3px solid ${statusColor}`,
+                                        borderRadius: '6px', marginBottom: '8px', cursor: 'pointer',
+                                        transition: 'background 0.2s'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
+                                        <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
+                                            {s.company || s.client || s.paxName || s.clientId || 'Cliente Corporativo'}
+                                        </span>
+                                        <span style={{ color: '#bef264', fontSize: '0.75rem', fontWeight: 'bold', background: 'rgba(190, 242, 100, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                                            {s.time || 'PEND'}
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: '#94a3b8', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <span style={{ color: '#64748b' }}>#{s.id}</span>
+                                            <span>•</span>
+                                            <span>{s.route || 'Zona Metropolitana'}</span>
+                                        </span>
+                                        <span style={{ color: statusColor, fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                            {displayStatus}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ color: '#94a3b8', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        <span style={{ color: '#64748b' }}>#{s.id}</span>
-                                        <span>•</span>
-                                        <span>{s.route || 'Zona Metropolitana'}</span>
-                                    </span>
-                                    <span style={{ color: s.status === 'completed' ? '#39FF14' : '#f59e0b', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                                        {s.status === 'completed' ? 'FINALIZADO' : 'EN CURSO'}
-                                    </span>
+                            )
+                        })}
+                        {(!simulationData?.services || simulationData.services.length === 0) && <div style={{ color: '#64748b', padding: '20px', textAlign: 'center' }}>No hay ordenes activas.</div>}
+                    </div>
+                );
+            case 'VUELOS':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', borderBottom: '1px solid #333', marginBottom: '15px' }}>
+                            <button style={{ flex: 1, background: 'rgba(6, 182, 212, 0.1)', color: '#00F0FF', borderBottom: '2px solid #00F0FF', borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '10px', fontWeight: 'bold', cursor: 'pointer' }}>LLEGADAS</button>
+                            <button style={{ flex: 1, background: 'transparent', color: '#666', border: 'none', padding: '10px', cursor: 'pointer' }}>SALIDAS</button>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 10px 5px', color: '#666', fontSize: '0.65rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                            <span>Hora / Vuelo</span>
+                            <span>Origen</span>
+                            <span>Est</span>
+                        </div>
+                        {/* FLIGHT BOARD SIMULATION */}
+                        {[
+                            { time: '14:35', id: 'AA960', city: 'MIAMI', status: 'ATERRIZÓ', color: '#39FF14' },
+                            { time: '14:51', id: 'IB908', city: 'BOGOTA', status: 'ATERRIZÓ', color: '#39FF14' },
+                            { time: '15:07', id: 'LA219', city: 'LIMA', status: 'EN APROX', color: '#00F0FF', blink: true },
+                            { time: '15:23', id: 'NK101', city: 'NEW YORK', status: 'EN TIEMPO', color: '#00F0FF' },
+                            { time: '15:39', id: 'AA619', city: 'SANTIAGO', status: 'EN TIEMPO', color: '#00F0FF' },
+                            { time: '15:55', id: 'UA884', city: 'MIAMI', status: 'PROGRAMADO', color: '#94a3b8' },
+                            { time: '16:11', id: 'LA491', city: 'BOGOTA', status: 'PROGRAMADO', color: '#94a3b8' },
+                            { time: '16:27', id: 'NK302', city: 'LIMA', status: 'RETRASADO', color: '#ef4444' },
+                            { time: '16:43', id: 'AA896', city: 'NEW YORK', status: 'PROGRAMADO', color: '#94a3b8' },
+                        ].map((f, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 10px', borderBottom: '1px solid #222', alignItems: 'center', background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{f.time}</span>
+                                    <span style={{ color: '#00F0FF', fontSize: '0.75rem', fontWeight: 'bold' }}>{f.id}</span>
+                                </div>
+                                <span style={{ color: '#ccc', fontSize: '0.8rem' }}>{f.city}</span>
+                                <span style={{ color: f.color, fontWeight: 'bold', fontSize: '0.7rem', padding: '2px 6px', background: `${f.color}20`, borderRadius: '4px', border: `1px solid ${f.color}40` }}>
+                                    {f.status}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                );
+            case 'CLIENTES':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px' }}>CUENTAS CORPORATIVAS VIP</div>
+                        {[
+                            { name: 'BANCOLOMBIA', tier: 'BLACK', loc: 'Dirección General', active: 12 },
+                            { name: 'GRUPO ARGOS', tier: 'PLATINUM', loc: 'Santillana', active: 8 },
+                            { name: 'SURAMERICANA', tier: 'PLATINUM', loc: 'Otrabanda', active: 15 },
+                            { name: 'NUTRESA', tier: 'GOLD', loc: 'Calle 10', active: 5 },
+                            { name: 'ISA INTERCOLOMBIA', tier: 'GOLD', loc: 'Loma Los Balsos', active: 4 },
+                            { name: 'UNIVERSIDAD EAFIT', tier: 'INSTITUCIONAL', loc: 'Campus Principal', active: 20 },
+                        ].map((c, i) => (
+                            <div key={i} style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: `3px solid ${i < 3 ? '#00F0FF' : '#f59e0b'}` }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>{c.name}</span>
+                                    <span style={{ color: i < 3 ? '#00F0FF' : '#f59e0b', fontSize: '0.65rem', border: `1px solid ${i < 3 ? '#00F0FF' : '#f59e0b'}`, padding: '2px 4px', borderRadius: '4px' }}>{c.tier}</span>
+                                </div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px' }}>📍 {c.loc}</div>
+                                <div style={{ display: 'flex', gap: '10px', fontSize: '0.7rem' }}>
+                                    <span style={{ color: '#39FF14' }}>● Activos: {c.active}</span>
+                                    <span style={{ color: '#64748b' }}>Reservas: {c.active * 3}</span>
                                 </div>
                             </div>
-                        )) || <div style={{ color: '#64748b', padding: '20px', textAlign: 'center' }}>No hay ordenes activas en este momento.</div>}
+                        ))}
+                    </div>
+                );
+            case 'AGENDA':
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', marginBottom: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '20px', padding: '4px' }}>
+                            <button style={{ flex: 1, background: '#D946EF', color: '#fff', border: 'none', borderRadius: '16px', padding: '8px', fontWeight: 'bold', boxShadow: '0 0 10px rgba(217, 70, 239, 0.4)', cursor: 'pointer' }}>HOY</button>
+                            <button style={{ flex: 1, background: 'transparent', color: '#94a3b8', border: 'none', padding: '8px', cursor: 'pointer', fontWeight: 'bold' }}>SEMANA</button>
+                        </div>
+                        {[
+                            { time: '09:00 AM', title: 'Comité Operativo', type: 'INTERNAL', color: '#D946EF', icon: '👥' },
+                            { time: '11:30 AM', title: 'Reunión Alcaldía', type: 'GOBIERNO', color: '#00F0FF', icon: '🏛️' },
+                            { time: '02:00 PM', title: 'Demo EAFIT', type: 'PARTNER', color: '#39FF14', icon: '🎓' },
+                            { time: '04:00 PM', title: 'Onboarding Conductores', type: 'TRAINING', color: '#F59E0B', icon: '🚕' }
+                        ].map((ev, i) => (
+                            <div key={i} style={{ display: 'flex', gap: '15px', marginBottom: '15px', alignItems: 'center' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', width: '60px', textAlign: 'right', fontWeight: 'bold' }}>{ev.time}</div>
+                                <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px', borderLeft: `3px solid ${ev.color}`, position: 'relative', overflow: 'hidden' }}>
+                                    <div style={{ position: 'absolute', right: '10px', top: '10px', fontSize: '1.2rem', opacity: 0.2 }}>{ev.icon}</div>
+                                    <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{ev.title}</div>
+                                    <div style={{ color: ev.color, fontSize: '0.65rem', marginTop: '4px', fontWeight: 'bold', opacity: 0.9, letterSpacing: '0.5px' }}>{ev.type}</div>
+                                </div>
+                            </div>
+                        ))}
+                        <div style={{ marginTop: '20px', padding: '15px', background: 'rgba(6, 182, 212, 0.1)', borderRadius: '12px', border: '1px dashed #06b6d4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06b6d4', fontSize: '0.8rem', cursor: 'pointer' }}>
+                            + AGENDAR NUEVO EVENTO
+                        </div>
                     </div>
                 );
             case 'FLOTA':
@@ -245,7 +403,9 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                                     onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                                 >
                                     <div style={{ color: '#fff', fontSize: '0.8rem' }}>{u.plate || u.vehiclePlate || 'TSO-000'}</div>
-                                    <div style={{ color: '#39FF14', fontSize: '0.7rem' }}>{u.status}</div>
+                                    <div style={{ color: '#39FF14', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                        {u.status === 'completed' ? '✅ DISPONIBLE' : (u.status === 'ACTIVE' ? '🚖 EN SERVICIO' : '⚡ CONECTADO')}
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -352,10 +512,9 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
 
             {/* 1. MAP LAYER */}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
-                {activeTab !== 'ORDENES' && activeTab !== 'CLIENTES' && activeTab !== 'ARTEFACTO' && (
+                {activeTab !== 'ARTEFACTO' && (
                     <CoreOperativo command={internalCommand || opsCommand} simulationData={simulationData} activeLayers={activeLayers} planes={planes} />
                 )}
-                {activeTab === 'CLIENTES' && <ClientDashboard />}
                 {activeTab === 'ARTEFACTO' && (
                     <React.Suspense fallback={<div>Cargando...</div>}><GeminiConsultantArtifact onClose={() => setActiveTab('FLOTA')} /></React.Suspense>
                 )}
