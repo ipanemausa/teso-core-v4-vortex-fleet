@@ -31,7 +31,6 @@ const V6Dock = ({ activeLayers, onToggle }) => {
             ].map((item, i) => {
                 const isActive = activeLayers.includes(item.id);
                 return (
-                return (
                     <div key={i} onClick={() => handleDockClick(item)}
                         style={{
                             display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
