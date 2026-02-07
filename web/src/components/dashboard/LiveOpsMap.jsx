@@ -94,22 +94,33 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch, planes }) => {
     const renderContent = () => {
         switch (activeView) {
             case 'FINANZAS':
+                // DYNAMIC CALCULATION
+                const services = simulationData?.services || [];
+                const revenue = services.reduce((acc, curr) => acc + (curr.financials?.totalValue || 0), 0);
+                const costs = services.reduce((acc, curr) => acc + (curr.financials?.totalCost || (curr.financials?.totalValue || 0) * 0.8), 0);
+                const margin = revenue - costs;
+                const marginPercent = revenue > 0 ? ((margin / revenue) * 100).toFixed(1) : 0;
+
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         <div style={{ background: 'rgba(6, 182, 212, 0.1)', border: '1px solid #06b6d4', padding: '15px', borderRadius: '8px' }}>
-                            <div style={{ fontSize: '0.8rem', color: '#06b6d4', marginBottom: '5px' }}>INGRESOS HOY</div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>$12.5M</div>
-                            <div style={{ fontSize: '0.7rem', color: '#39FF14' }}>▲ 15% vs Ayer</div>
+                            <div style={{ fontSize: '0.8rem', color: '#06b6d4', marginBottom: '5px' }}>INGRESOS TOTALES</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>${(revenue / 1000000).toFixed(2)}M</div>
+                            <div style={{ fontSize: '0.7rem', color: '#39FF14' }}>▲ {services.length} Operaciones</div>
                         </div>
                         <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '15px', borderRadius: '8px' }}>
                             <div style={{ fontSize: '0.8rem', color: '#ef4444', marginBottom: '5px' }}>COSTOS OPERATIVOS</div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>$8.2M</div>
-                            <div style={{ fontSize: '0.7rem', color: '#ef4444' }}>▼ 5% Optimizado</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>${(costs / 1000000).toFixed(2)}M</div>
+                            <div style={{ fontSize: '0.7rem', color: '#ef4444' }}>▼ {marginPercent}% Margen Neto</div>
                         </div>
                         <div style={{ height: '150px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                            {[40, 60, 45, 80, 55, 70, 90].map((h, i) => (
-                                <div key={i} style={{ width: '10%', height: `${h}%`, background: i === 6 ? '#39FF14' : '#334155', borderRadius: '4px 4px 0 0' }}></div>
-                            ))}
+                            {/* MINI GRAPH from Services Data */}
+                            {services.slice(0, 7).map((s, i) => {
+                                const h = Math.min(100, Math.max(10, ((s.financials?.totalValue || 0) / 200000) * 100));
+                                return (
+                                    <div key={i} style={{ width: '10%', height: `${h}%`, background: i === 6 ? '#39FF14' : '#334155', borderRadius: '4px 4px 0 0' }}></div>
+                                )
+                            })}
                         </div>
                         <button style={{ background: '#06b6d4', border: 'none', padding: '10px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>DESCARGAR REPORTE</button>
                     </div>
@@ -200,6 +211,7 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch, planes }) => {
                                     }}
                                     onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
                                     onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                    onClick={() => onDispatch && onDispatch({ type: 'FLY_TO', payload: s })}
                                 >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', alignItems: 'center' }}>
                                         <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.95rem', letterSpacing: '0.5px' }}>
@@ -237,55 +249,80 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch, planes }) => {
                             <span>Origen</span>
                             <span>Est</span>
                         </div>
-                        {/* FLIGHT BOARD SIMULATION */}
-                        {[
+                        {/* FLIGHT BOARD SIMULATION - LINKED TO RADAR PLANES IF AVAILABLE */}
+                        {((planes && planes.length > 0) ? planes.slice(0, 10) : [
                             { time: '14:35', id: 'AA960', city: 'MIAMI', status: 'ATERRIZÓ', color: '#39FF14' },
                             { time: '14:51', id: 'IB908', city: 'BOGOTA', status: 'ATERRIZÓ', color: '#39FF14' },
-                            { time: '15:07', id: 'LA219', city: 'LIMA', status: 'EN APROX', color: '#00F0FF', blink: true },
-                            { time: '15:23', id: 'NK101', city: 'NEW YORK', status: 'EN TIEMPO', color: '#00F0FF' },
-                            { time: '15:39', id: 'AA619', city: 'SANTIAGO', status: 'EN TIEMPO', color: '#00F0FF' },
-                            { time: '15:55', id: 'UA884', city: 'MIAMI', status: 'PROGRAMADO', color: '#94a3b8' },
-                            { time: '16:11', id: 'LA491', city: 'BOGOTA', status: 'PROGRAMADO', color: '#94a3b8' },
-                            { time: '16:27', id: 'NK302', city: 'LIMA', status: 'RETRASADO', color: '#ef4444' },
-                            { time: '16:43', id: 'AA896', city: 'NEW YORK', status: 'PROGRAMADO', color: '#94a3b8' },
-                        ].map((f, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 10px', borderBottom: '1px solid #222', alignItems: 'center', background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{f.time}</span>
-                                    <span style={{ color: '#00F0FF', fontSize: '0.75rem', fontWeight: 'bold' }}>{f.id}</span>
+                            { time: '15:07', id: 'LA219', city: 'LIMA', status: 'EN APROX', color: '#00F0FF', blink: true }
+                        ]).map((f, i) => {
+                            // Adapter for Plane Object to Flight Board
+                            const isPlane = f.airline !== undefined; // Check if real plane obj
+                            const time = isPlane ? 'LIVE' : f.time;
+                            const fid = isPlane ? f.id : f.id;
+                            const city = isPlane ? f.from : f.city;
+                            const status = isPlane ? 'EN AIRE' : f.status;
+                            const color = isPlane ? '#00F0FF' : f.color;
+
+                            return (
+                                <div
+                                    key={i}
+                                    onClick={() => isPlane && onDispatch && onDispatch({ type: 'FLY_TO', payload: f })}
+                                    style={{
+                                        display: 'flex', justifyContent: 'space-between', padding: '12px 10px', borderBottom: '1px solid #222', alignItems: 'center',
+                                        background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                                        cursor: isPlane ? 'pointer' : 'default'
+                                    }}
+                                    onMouseOver={(e) => isPlane && (e.currentTarget.style.background = 'rgba(6, 182, 212, 0.1)')}
+                                    onMouseOut={(e) => isPlane && (e.currentTarget.style.background = i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent')}
+                                >
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>{time}</span>
+                                        <span style={{ color: '#00F0FF', fontSize: '0.75rem', fontWeight: 'bold' }}>{fid}</span>
+                                    </div>
+                                    <span style={{ color: '#ccc', fontSize: '0.8rem' }}>{city}</span>
+                                    <span style={{ color: color, fontWeight: 'bold', fontSize: '0.7rem', padding: '2px 6px', background: `${color}20`, borderRadius: '4px', border: `1px solid ${color}40` }}>
+                                        {status}
+                                    </span>
                                 </div>
-                                <span style={{ color: '#ccc', fontSize: '0.8rem' }}>{f.city}</span>
-                                <span style={{ color: f.color, fontWeight: 'bold', fontSize: '0.7rem', padding: '2px 6px', background: `${f.color}20`, borderRadius: '4px', border: `1px solid ${f.color}40` }}>
-                                    {f.status}
-                                </span>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 );
             case 'CLIENTES':
+                // DYNAMIC CLIENTS
+                const clientMap = {};
+                (simulationData?.services || []).forEach(s => {
+                    const name = s.company || s.client || 'PARTICULAR';
+                    if (!clientMap[name]) clientMap[name] = { count: 0, revenue: 0, active: 0 };
+                    clientMap[name].count++;
+                    clientMap[name].revenue += (s.financials?.totalValue || 0);
+                    if (s.status !== 'completed' && s.status !== 'cancelled') clientMap[name].active++;
+                });
+
+                const sortedClients = Object.entries(clientMap)
+                    .map(([name, data]) => ({ name, ...data }))
+                    .sort((a, b) => b.revenue - a.revenue)
+                    .slice(0, 10);
+
                 return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px' }}>CUENTAS CORPORATIVAS VIP</div>
-                        {[
-                            { name: 'BANCOLOMBIA', tier: 'BLACK', loc: 'Dirección General', active: 12 },
-                            { name: 'GRUPO ARGOS', tier: 'PLATINUM', loc: 'Santillana', active: 8 },
-                            { name: 'SURAMERICANA', tier: 'PLATINUM', loc: 'Otrabanda', active: 15 },
-                            { name: 'NUTRESA', tier: 'GOLD', loc: 'Calle 10', active: 5 },
-                            { name: 'ISA INTERCOLOMBIA', tier: 'GOLD', loc: 'Loma Los Balsos', active: 4 },
-                            { name: 'UNIVERSIDAD EAFIT', tier: 'INSTITUCIONAL', loc: 'Campus Principal', active: 20 },
-                        ].map((c, i) => (
+                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px' }}>CUENTAS CORPORATIVAS VIP ({sortedClients.length})</div>
+                        {sortedClients.map((c, i) => (
                             <div key={i} style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: `3px solid ${i < 3 ? '#00F0FF' : '#f59e0b'}` }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                                     <span style={{ color: '#fff', fontWeight: 'bold' }}>{c.name}</span>
-                                    <span style={{ color: i < 3 ? '#00F0FF' : '#f59e0b', fontSize: '0.65rem', border: `1px solid ${i < 3 ? '#00F0FF' : '#f59e0b'}`, padding: '2px 4px', borderRadius: '4px' }}>{c.tier}</span>
+                                    <span style={{ color: i < 3 ? '#00F0FF' : '#f59e0b', fontSize: '0.65rem', border: `1px solid ${i < 3 ? '#00F0FF' : '#f59e0b'}`, padding: '2px 4px', borderRadius: '4px' }}>{i < 3 ? 'PLATINUM' : 'GOLD'}</span>
                                 </div>
-                                <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px' }}>📍 {c.loc}</div>
+                                <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px' }}>
+                                    💰 ${new Intl.NumberFormat('es-CO').format(c.revenue)} Acumulado
+                                </div>
                                 <div style={{ display: 'flex', gap: '10px', fontSize: '0.7rem' }}>
                                     <span style={{ color: '#39FF14' }}>● Activos: {c.active}</span>
-                                    <span style={{ color: '#64748b' }}>Reservas: {c.active * 3}</span>
+                                    <span style={{ color: '#64748b' }}>Total Ops: {c.count}</span>
                                 </div>
                             </div>
                         ))}
+                        {sortedClients.length === 0 && <div style={{ color: '#666', fontStyle: 'italic' }}>No hay datos de clientes.</div>}
                     </div>
                 );
             case 'AGENDA':
@@ -317,6 +354,8 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch, planes }) => {
                 );
             case 'FLOTA':
             default:
+                const fleetList = simulationData?.vehicles || simulationData?.services?.slice(0, 15) || [];
+
                 return (
                     <>
                         {/* DISPATCH CONTROLS */}
@@ -387,22 +426,33 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch, planes }) => {
 
                         {/* UNITS LIST */}
                         <div style={{ flex: 1, overflowY: 'auto' }}>
-                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #334155', paddingBottom: '5px' }}>UNIDADES EN LÍNEA</div>
-                            {simulationData?.services?.slice(0, 10).map((u, i) => (
+                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #334155', paddingBottom: '5px' }}>UNIDADES EN LÍNEA ({fleetList.length})</div>
+                            {fleetList.map((u, i) => (
                                 <div
                                     key={i}
                                     onMouseEnter={() => setHoveredOrder(u)}
                                     onMouseLeave={() => setHoveredOrder(null)}
+                                    onClick={() => onDispatch && onDispatch({ type: 'FLY_TO', payload: u })} // Trigger FlyTo directly
                                     style={{
                                         background: 'rgba(255,255,255,0.03)', padding: '8px',
                                         marginBottom: '5px', borderRadius: '4px',
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                        cursor: 'pointer', transition: 'background 0.2s'
+                                        cursor: 'pointer', transition: 'background 0.2s',
+                                        border: '1px solid transparent'
                                     }}
-                                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-                                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                                        e.currentTarget.style.borderColor = '#06b6d4';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                                        e.currentTarget.style.borderColor = 'transparent';
+                                    }}
                                 >
-                                    <div style={{ color: '#fff', fontSize: '0.8rem' }}>{u.plate || u.vehiclePlate || 'TSO-000'}</div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 'bold' }}>{u.id || u.plate || u.vehiclePlate || 'TSO-000'}</div>
+                                        {u.driver && <div style={{ color: '#94a3b8', fontSize: '0.65rem' }}>{u.driver}</div>}
+                                    </div>
                                     <div style={{ color: '#39FF14', fontSize: '0.7rem', fontWeight: 'bold' }}>
                                         {u.status === 'completed' ? '✅ DISPONIBLE' : (u.status === 'ACTIVE' ? '🚖 EN SERVICIO' : '⚡ CONECTADO')}
                                     </div>
@@ -540,7 +590,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                     }}>{isPanelOpen ? '▶' : '◀'}</div>
 
                     <div style={{ width: '350px', height: '100%', transform: isPanelOpen ? 'translateX(0)' : 'translateX(350px)', transition: 'transform 0.3s' }}>
-                        <TesoOpsPanel simulationData={simulationData} activeView={activeTab} onDispatch={() => setInternalCommand({ type: 'DISPATCH_WAVE', ts: Date.now() })} />
+                        <TesoOpsPanel simulationData={simulationData} activeView={activeTab} planes={planes} onDispatch={(cmd) => setInternalCommand(cmd || { type: 'DISPATCH_WAVE', ts: Date.now() })} />
                     </div>
                 </div>
             )}
