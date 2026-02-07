@@ -25,7 +25,7 @@ if DATABASE_URL:
         print(f"--- 🔴 DATABASE CONNECTION FAILED: {e} ---")
         engine = None
 else:
-    print("--- 🟡 NO DATABASE_URL FOUND. RUNNING IN 'MEMORY-ONLY' MODE (LEGACY EXCEL). ---")
+    print("--- [WARN] NO DATABASE_URL FOUND. RUNNING IN 'MEMORY-ONLY' MODE (LEGACY EXCEL). ---")
 
 Base = declarative_base()
 

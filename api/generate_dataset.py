@@ -17,14 +17,20 @@ def main():
         drivers_count=15         # V4 Assumption: High Efficiency Fleet
     )
     
-    output_filename = "TESO_MASTER_DATASET_V4.xlsx"
+    # PATH CORRECTION: Save to seed_data so simulation_engine finds it
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    seed_dir = os.path.join(base_dir, "seed_data")
+    if not os.path.exists(seed_dir):
+        os.makedirs(seed_dir)
+        
+    output_filename = os.path.join(seed_dir, "TESO_MASTER_DATASET.xlsx")
     
     # Save buffer to file
     with open(output_filename, "wb") as f:
         f.write(excel_buffer.getvalue())
         
-    print(f"✅ ÉXITO: Archivo generado: {output_filename}")
-    print(f"📁 Ubicación: {os.path.abspath(output_filename)}")
+    print(f"[INFO] EXITO: Archivo Maestro generado: {output_filename}")
+    print(f"[INFO] Ubicacion Absoluta: {os.path.abspath(output_filename)}")
     print("------------------------------------------------------------")
 
 if __name__ == "__main__":

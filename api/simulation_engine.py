@@ -51,11 +51,11 @@ def seed_database_from_excel(db: Session, excel_path: str):
     ONE-TIME MIGRATION: Reads legacy Excel and populates Postgres Tables.
     """
     if not os.path.exists(excel_path):
-        print(f"⚠️ SEED FAILED: Excel file not found at {excel_path}")
+        print(f"[WARN] SEED FAILED: Excel file not found at {excel_path}")
         return False
 
     try:
-        print(f"🌱 SEEDING DATABASE FROM: {excel_path}")
+        print(f"[INFO] SEEDING DATABASE FROM: {excel_path}")
         df = pd.read_excel(excel_path, sheet_name=0)
         
         # 1. OPTIMIZED: Bulk Insert Companies to avoid duplicates
@@ -102,11 +102,11 @@ def seed_database_from_excel(db: Session, excel_path: str):
             db.add(svc)
         
         db.commit()
-        print("✅ SEEDING COMPLETE.")
+        print("[INFO] SEEDING COMPLETE.")
         return True
 
     except Exception as e:
-        print(f"❌ SEEDING ERROR: {e}")
+        print(f"[ERROR] SEEDING ERROR: {e}")
         db.rollback()
         return False
 
@@ -114,7 +114,7 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
     """
     HYBRID ENGINE: DB First -> Excel Fallback
     """
-    print("--- 🚀 STARTING CLOUD NATIVE ENGINE ---")
+    print("--- [INFO] STARTING CLOUD NATIVE ENGINE ---")
     
     # SETUP
     start_date = datetime.now()
@@ -132,14 +132,14 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
     real_data_path = SEED_PATH # Default safe fallback
     
     if os.path.exists(VIVO_PATH):
-        # Verificar integridad básica (tamaño > 1MB por ejemplo, o simplemente existencia por ahora)
-        print(f"📖 LEYENDO DATASET VIVO: {VIVO_PATH}")
+        # Verificar integridad basica
+        print(f"[INFO] LEYENDO DATASET VIVO: {VIVO_PATH}")
         real_data_path = VIVO_PATH
     elif os.path.exists(SEED_PATH):
-        print(f"🌱 LEYENDO SEMILLA ESTÁTICA (VIVO NO ENCONTRADO): {SEED_PATH}")
+        print(f"[INFO] LEYENDO SEMILLA ESTATICA (VIVO NO ENCONTRADO): {SEED_PATH}")
         real_data_path = SEED_PATH
     else:
-        print("⚠️ ALERTA CRÍTICA: NO SE ENCUENTRA NI EL VIVO NI LA SEMILLA.")
+        print("[WARN] ALERTA CRITICA: NO SE ENCUENTRA NI EL VIVO NI LA SEMILLA.")
         # Fallback de emergencia a generador (se mantiene lógica abajo)
 
     # OUTPUT CONTAINERS
@@ -171,11 +171,11 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
             
             svc_count = db.query(models.Service).count()
             if svc_count == 0:
-                print("⚡ DB EMPTY. ATTEMPTING SEED...")
+                print("[INFO] DB EMPTY. ATTEMPTING SEED...")
                 seed_success = seed_database_from_excel(db, real_data_path)
                 use_db = seed_success
             else:
-                print(f"⚡ DB CONNECTED. FOUND {svc_count} RECORDS.")
+                print(f"[INFO] DB CONNECTED. FOUND {svc_count} RECORDS.")
                 use_db = True
         except Exception as e:
             print(f"⚠️ DB INIT ERROR: {e}. FALLING BACK TO LEGACY.")
@@ -184,7 +184,7 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
     # --- PHASE 2: DATA FETCHING ---
     if use_db:
         # FETCH FROM POSTGRES
-        print("📥 FETCHING FROM CLOUD SQL...")
+        print("[INFO] FETCHING FROM CLOUD SQL...")
         services_models = db.query(models.Service).all() # Simple 'select *' for now
         
         for svc in services_models:
@@ -247,85 +247,100 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
             cxc_data[c_name] += fare
 
     else:
-        # V4 REDUCED GENERATION LOGIC (Synthetic)
-        print(f"⚡ GENERANDO DATASET V4 SINTÉTICO ({days} DÍAS, {base_daily_services} OPS/DIA)...")
+        # V4 REDUCED GENERATION LOGIC (Synthetic) OR EXCEL LOADING
+        df_real = pd.DataFrame()
         
-        # Generator Config
-        companies = [f"EMPRESA_{i}" for i in range(1, 21)] # 20 Corporates
-        drivers = [f"COND-{i:03d}" for i in range(1, drivers_count + 1)] # 45 Drivers
+        # TRY LOADING EXCEL MASTER FIRST
+        if os.path.exists(real_data_path):
+             print(f"[INFO] CARGANDO MASTER DATASET DE: {real_data_path}")
+             try:
+                 df_real = pd.read_excel(real_data_path)
+                 print(f"[INFO] EXCEL CARGADO: {len(df_real)} Registros Encontrados.")
+             except Exception as e:
+                 print(f"[WARN] ERROR LEYENDO EXCEL: {e}. USANDO GENERADOR SINTETICO.")
         
-        current_date = start_date - timedelta(days=days) # Start from past
-        
-        for d in range(days):
-            daily_date = current_date + timedelta(days=d)
-            # Daily variance +/- 20%
-            daily_ops = int(base_daily_services * (0.8 + 0.4 * random.random()))
+        if df_real.empty:
+            print(f"[INFO] GENERANDO DATASET V4 SINTETICO ({days} DIAS, {base_daily_services} OPS/DIA)...")
             
-            for _ in range(daily_ops):
-                # 90% Corporate, 10% On-Demand
-                is_corporate = random.random() < 0.90
-                client = random.choice(companies) if is_corporate else "PARTICULAR"
-                tipo = "VAN" if is_corporate else "AUTO"
+            # Generator Config
+            companies = [f"EMPRESA_{i}" for i in range(1, 21)] # 20 Corporates
+            drivers = [f"COND-{i:03d}" for i in range(1, drivers_count + 1)] # 45 Drivers
+            
+            current_date = start_date - timedelta(days=days) # Start from past
+            
+            for d in range(days):
+                daily_date = current_date + timedelta(days=d)
+                # Daily variance +/- 20%
+                daily_ops = int(base_daily_services * (0.8 + 0.4 * random.random()))
                 
-                # Logic: Fare
-                fare = 125000
-                toll = 18000
-                comm = fare * 0.20
-                driver_pay = fare - comm - toll
-                
-                svc = {
-                     "ID": random.randint(100000, 999999),
-                     "FECHA": daily_date.isoformat(),
-                     "CLIENTE": client,
-                     "CONDUCTOR": random.choice(drivers),
-                     "VEHICULO": f"TES-{random.randint(100,999)}",
-                     "ESTADO": "FINALIZADO",
-                     "TARIFA": fare,
-                     "TIPO": tipo,
-                     "NOTAS": "Simulated V4 Event",
-                     "RUTA": "Ruta Optimizada",
-                     "status": "COMPLETED",
-                     "financials": {
-                        "totalValue": fare,
-                        "driverPayment": driver_pay,
-                        "toll": toll,
-                        "netRevenue": comm
-                     }
-                }
-                
-                # Apply V4 Chaos Logic
-                svc = apply_chaos_logic(svc, stress_mode=stress_mode)
-                
-                # Sync Status back to Spanish for Excel
-                status_map = {"COMPLETED": "FINALIZADO", "CANCELLED": "CANCELADO", "DELAYED": "RETRASADO", "NO_SHOW": "NO_SHOW"}
-                svc["ESTADO"] = status_map.get(svc.get("status", "COMPLETED"), "FINALIZADO")
-                
-                services_data.append(svc)
-                
-                # Cash Flow Events
-                days_offset = 30 if is_corporate else 0
-                inflow_date = daily_date + timedelta(days=days_offset)
-                
-                cash_flow_events.append({
-                    "FECHA": inflow_date,
-                    "TIPO": "INGRESO_COMISION",
-                    "MONTO": comm,
-                    "DETALLE": f"Comisión - {client}"
-                })
-                
-                # CXC
-                if client not in cxc_data: cxc_data[client] = 0
-                cxc_data[client] += fare
-
-        print(f"✅ V4 GENERATION COMPLETE: {len(services_data)} Services Created.")
+                for _ in range(daily_ops):
+                    # 90% Corporate, 10% On-Demand
+                    is_corporate = random.random() < 0.90
+                    client = random.choice(companies) if is_corporate else "PARTICULAR"
+                    tipo = "VAN" if is_corporate else "AUTO"
+                    
+                    # Logic: Fare
+                    fare = 125000
+                    toll = 18000
+                    comm = fare * 0.20
+                    driver_pay = fare - comm - toll
+                    
+                    svc = {
+                         "ID": random.randint(100000, 999999),
+                         "FECHA": daily_date.isoformat(),
+                         "CLIENTE": client,
+                         "CONDUCTOR": random.choice(drivers),
+                         "VEHICULO": f"TES-{random.randint(100,999)}",
+                         "ESTADO": "FINALIZADO",
+                         "TARIFA": fare,
+                         "TIPO": tipo,
+                         "NOTAS": "Simulated V4 Event",
+                         "RUTA": "Ruta Optimizada",
+                         "status": "COMPLETED",
+                         "financials": {
+                            "totalValue": fare,
+                            "driverPayment": driver_pay,
+                            "toll": toll,
+                            "netRevenue": comm
+                         }
+                    }
+                    
+                    # Apply V4 Chaos Logic
+                    svc = apply_chaos_logic(svc, stress_mode=stress_mode)
+                    
+                    # Sync Status back to Spanish for Excel
+                    status_map = {"COMPLETED": "FINALIZADO", "CANCELLED": "CANCELADO", "DELAYED": "RETRASADO", "NO_SHOW": "NO_SHOW"}
+                    svc["ESTADO"] = status_map.get(svc.get("status", "COMPLETED"), "FINALIZADO")
+                    
+                    services_data.append(svc)
+                    
+                    # Cash Flow Events
+                    days_offset = 30 if is_corporate else 0
+                    inflow_date = daily_date + timedelta(days=days_offset)
+                    
+                    cash_flow_events.append({
+                        "FECHA": inflow_date,
+                        "TIPO": "INGRESO_COMISION",
+                        "MONTO": comm,
+                        "DETALLE": f"Comisión - {client}"
+                    })
+                    
+                    # CXC
+                    if client not in cxc_data: cxc_data[client] = 0
+                    cxc_data[client] += fare
+    
+            print(f"[INFO] V4 GENERATION COMPLETE: {len(services_data)} Services Created.")
+            
         
-        # Skip legacy reading (Ensure df_real is not defined or empty so the loop below is skipped)
-        # df_real = pd.DataFrame(services_data) <-- REMOVED
-
+        # Fallback Check (For Excel Loading Logic)
+        # If df_real was loaded, we process it here. If it was empty, we skipped this block implicitly?
+        # WAIT: The code below processes df_real. If we generated synthetic data above, df_real is empty, so we skip the block below.
+        # But we ALREADY populated services_data in the block above!
+        # So we only need to populate services_data from df_real IF df_real is NOT empty AND services_data IS empty.
         
-        # Fallback Check
-        if 'df_real' in locals() and not df_real.empty:
-            print(f"🔄 PROCESSING {len(df_real)} ROWS FROM EXCEL...")
+        if not df_real.empty and not services_data: 
+
+            print(f"[INFO] PROCESSING {len(df_real)} ROWS FROM EXCEL...")
             try:
                 # To keep it functional, we replicate the basic loop:
                 skipped_count = 0
@@ -341,7 +356,7 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
                              continue
                         r_date = pd.to_datetime(raw_date).to_pydatetime()
                      except Exception as date_err:
-                        print(f"⚠️ Date Parse Error Row {idx}: {raw_date} -> {date_err}")
+                        print(f"[WARN] Date Parse Error Row {idx}: {raw_date} -> {date_err}")
                         skipped_count += 1
                         continue
                         
@@ -384,9 +399,9 @@ def generate_financial_simulation(days: int = 360, traffic_growth: float = 1.0, 
                      if str(comp_val) not in cxc_data: cxc_data[str(comp_val)] = 0
                      cxc_data[str(comp_val)] += svc["TARIFA"]
                 
-                print(f"✅ EXCEL PROCESSED: {processed_count} OK, {skipped_count} SKIPPED.")
+                print(f"[INFO] EXCEL PROCESSED: {processed_count} OK, {skipped_count} SKIPPED.")
             except Exception as e:
-                print(f"❌ FALLBACK CRITICAL ERROR: {e}")
+                print(f"[ERROR] FALLBACK CRITICAL ERROR: {e}")
                 import traceback
                 traceback.print_exc()
 
