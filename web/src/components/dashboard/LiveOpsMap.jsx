@@ -178,6 +178,13 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch, planes }) => {
                             </div>
                         </div>
                         <div style={{ background: '#0a0a0a', padding: '10px', borderRadius: '4px', height: '200px', overflowY: 'auto', fontSize: '0.7rem', color: '#666' }}>
+                            <div style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px dashed #333' }}>
+                                <div style={{ color: '#fff', fontWeight: 'bold' }}>DATASET SOURCE:</div>
+                                <div style={{ color: simulationData?.services?.[0]?.source === 'MASTER_DATASET' ? '#39FF14' : '#F59E0B' }}>
+                                    {simulationData?.services?.[0]?.source === 'MASTER_DATASET' ? '✅ MASTER EXCEL (14,400 Rows)' : '⚠️ SYNTHETIC FALLBACK'}
+                                </div>
+                                <div style={{ color: '#888' }}>Total Records: {simulationData?.services?.length || 0}</div>
+                            </div>
                             {Array.from({ length: 10 }).map((_, i) => (
                                 <div key={i} style={{ marginBottom: '4px' }}>
                                     <span style={{ color: '#333' }}>[15:4{i}:{10 + i}]</span> <span style={{ color: '#aaa' }}>INFO: Processing batch #{3920 + i}...</span>

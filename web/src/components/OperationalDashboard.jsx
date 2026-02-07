@@ -206,64 +206,85 @@ const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'L
 
         const loadBackendData = async () => {
             // ... existing data fetch logic ...
-            console.log("📡 CONNECTING TO TESO OPS V4...");
+            console.log("📡 CONNECTING TO TESO OPS V4 (MASTER DATA CLOUD)...");
             setLoading(true);
             try {
                 const apiUrl = ''; // Relative path for unified deployment (Hugging Face / Docker)
 
-                // 1. GET V4 STATS
-                const res = await fetch(`${apiUrl}/api/simulate/core-v4`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cars: 15, avg_trips_per_day: 40, days: 360 })
-                });
+                // 1. GET REAL MASTER DATA (From Python Backend)
+                // Use GET /api/simulation/data which returns the Global Cache (Excel/DB data)
+                const res = await fetch(`${apiUrl}/api/simulation/data`);
 
                 if (!res.ok) throw new Error("Ops Engine Offline");
                 const v4Result = await res.json();
                 console.log("✅ OPS CONNECTED:", v4Result);
 
-                // 2. GENERATE CLIENT-SIDE DATASET (For Map & Graphs)
-                // 40 trips * 360 days = 14,400 rows (Manageable in memory)
-                const totalTrips = v4Result.operational?.annual_trips || 14400;
-                const cars = v4Result.operational?.cars || 15;
+                let services = [];
+                let bankTransactions = [];
 
-                // Generate fast
-                const services = new Array(totalTrips);
-                const baseDate = new Date();
-                baseDate.setDate(baseDate.getDate() - 360);
+                // 2. CHECK IF BACKEND RETURNED REAL SERVICES (Master Dataset)
+                if (v4Result.services && v4Result.services.length > 0) {
+                    console.log(`⚡ HYBRID ENGINE: Loading ${v4Result.services.length} rows from Backend...`);
 
-                for (let i = 0; i < totalTrips; i++) {
-                    const carId = (i % cars) + 1;
-                    // Distribute dates over 360 days
-                    const dayOffset = Math.floor(i / 40);
-                    const tripDate = new Date(baseDate);
-                    tripDate.setDate(tripDate.getDate() + dayOffset);
-
-                    services[i] = {
-                        id: `TRIP-${i}`,
-                        date: tripDate.toISOString(),
-                        lat: 6.24 + (Math.random() * 0.08 - 0.04), // Medellín
+                    // ADAPTER: Backend (Spanish/Excel) -> Frontend (English/React)
+                    services = v4Result.services.map((s, i) => ({
+                        id: s.ID || `TRIP-${i}`,
+                        date: s.FECHA || s.date, // Tries both
+                        // Chaos Coords (Medellin Center + Noise)
+                        lat: 6.24 + (Math.random() * 0.08 - 0.04),
                         lng: -75.58 + (Math.random() * 0.08 - 0.04),
-                        status: 'COMPLETED',
-                        financials: {
-                            totalValue: 125000,
-                            driverPayment: 82000,
-                            netRevenue: 25000
+                        status: s.status || s.ESTADO || 'COMPLETED',
+                        financials: s.financials || {
+                            totalValue: s.TARIFA || 0,
+                            driverPayment: (s.TARIFA || 0) * 0.7, // Approx
+                            netRevenue: (s.TARIFA || 0) * 0.2 // Approx
                         },
-                        plate: `TES-${100 + carId}`,
-                        driver_name: `Cond. ${carId}`
-                    };
+                        plate: s.VEHICULO || s.plate || 'TBA',
+                        driver_name: s.CONDUCTOR || s.driver_name || 'Desconocido',
+                        company: s.CLIENTE || s.company || 'PARTICULAR',
+                        source: 'MASTER_DATASET' // Flag for UI
+                    }));
+
+                    // Map Bank Tx
+                    if (v4Result.detailed_cash_flow) {
+                        bankTransactions = v4Result.detailed_cash_flow.map(tx => ({
+                            date: tx.FECHA,
+                            amount: tx.MONTO,
+                            type: tx.MONTO > 0 ? 'INCOME' : 'EXPENSE',
+                            description: tx.DETALLE || tx.TIPO
+                        }));
+                    }
+
+                } else {
+                    // FALLBACK: CLIENT SIDE GENERATION (Legacy)
+                    console.warn("⚠️ BACKEND EMPTY. GENERATING SYNTHETIC FALLBACK.");
+                    const totalTrips = 14400;
+                    const cars = 15;
+                    const baseDate = new Date();
+                    baseDate.setDate(baseDate.getDate() - 360);
+
+                    services = new Array(totalTrips);
+                    for (let i = 0; i < totalTrips; i++) {
+                        const carId = (i % cars) + 1;
+                        const dayOffset = Math.floor(i / 40);
+                        const tripDate = new Date(baseDate);
+                        tripDate.setDate(tripDate.getDate() + dayOffset);
+
+                        services[i] = {
+                            id: `TRIP-${i}`,
+                            date: tripDate.toISOString(),
+                            lat: 6.24 + (Math.random() * 0.08 - 0.04),
+                            lng: -75.58 + (Math.random() * 0.08 - 0.04),
+                            status: 'COMPLETED',
+                            financials: { totalValue: 125000, driverPayment: 82000, netRevenue: 25000 },
+                            plate: `TES-${100 + carId}`,
+                            driver_name: `Cond. ${carId}`,
+                            source: 'SYNTHETIC_FALLBACK'
+                        };
+                    }
                 }
 
-                // 3. STUB BANK TRANSACTIONS (For Graph Consistency)
-                const bankTransactions = services.filter((_, i) => i % 10 === 0).map(s => ({
-                    date: s.date,
-                    amount: 25000, // Net Revenue
-                    type: 'INCOME',
-                    description: 'Comisión Teso Ops'
-                }));
-
-                // 4. GENERATE LIVE PLANES (LAYER 2 ASSETS)
+                // 3. GENERATE LIVE PLANES (LAYER 2 ASSETS) - Always Synthetic for now
                 const planes = Array.from({ length: 8 }).map((_, i) => ({
                     id: `FL-${500 + i}`,
                     lat: 6.24 + (Math.random() * 0.1 - 0.05),
