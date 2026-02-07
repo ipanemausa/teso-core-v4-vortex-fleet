@@ -68,9 +68,10 @@ const createPlane = (bounds, center) => {
     const latSpan = north - south;
     const lngSpan = east - west;
 
-    // SPAWN FAR OUTSIDE (1.2x - 1.5x distance)
-    const PADDING_LAT = latSpan * 0.8;
-    const PADDING_LNG = lngSpan * 0.8;
+    // SPAWN JUST OUTSIDE (Immediate Entry)
+    // 10-20% margin outside the screen is enough to be invisible but enter quickly
+    const PADDING_LAT = latSpan * 0.15;
+    const PADDING_LNG = lngSpan * 0.15;
 
     const edge = Math.floor(Math.random() * 4);
     let lat, lng;
@@ -83,8 +84,9 @@ const createPlane = (bounds, center) => {
     const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.3);
     const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.3);
     const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
-    // SPEED: Increased for Dynamic Visuals (User Request: Escalar Movimiento)
-    const speed = ((latSpan * 0.0015) + (Math.random() * (latSpan * 0.0010)));
+
+    // SPEED: Adjusted for visual flow
+    const speed = ((latSpan * 0.002) + (Math.random() * (latSpan * 0.0010)));
 
     return {
         id: `${airlines[Math.floor(Math.random() * airlines.length)]}${Math.floor(100 + Math.random() * 900)}`,
@@ -109,25 +111,28 @@ const RadarController = ({ setPlanes }) => {
                 if (!map || !map._leaflet_id) return;
                 const bounds = map.getBounds();
                 const center = map.getCenter();
-                const deathBounds = bounds.pad(2.0); // Die if very far
+                // Tight Death Bounds: Die as soon as they are partially off-screen (0.2 padding)
+                // This ensures we don't simulate invisible planes for long
+                const deathBounds = bounds.pad(0.2);
 
                 setPlanes(prevPlanes => {
-                    // Initialize or Replenish to 15 (SCALED UP)
+                    // Initialize or Replenish to 8 (User requested ~6 constant)
+                    // We generate 8 to ensure coverage even if 1-2 are transitioning
                     let currentPlanes = [...prevPlanes];
-                    if (currentPlanes.length < 15) {
-                        while (currentPlanes.length < 15) {
-                            console.log("✈️ Spawning New Plane...");
+                    if (currentPlanes.length < 8) {
+                        while (currentPlanes.length < 8) {
+                            // console.log("✈️ Spawning New Plane...");
                             currentPlanes.push(createPlane(bounds, center));
                         }
                     }
 
-                    // Move & Despawn
+                    // Move & Despawn Logic
                     return currentPlanes.map(p => {
                         const nextLat = p.lat + (Math.cos(p.heading * Math.PI / 180) * p.speed);
                         const nextLng = p.lng + (Math.sin(p.heading * Math.PI / 180) * p.speed);
 
+                        // If outside death bounds, respawn IMMEDIATELY
                         if (!deathBounds.contains([nextLat, nextLng])) {
-                            // Respawn new one immediately
                             return createPlane(bounds, center);
                         }
                         return { ...p, lat: nextLat, lng: nextLng };
@@ -135,7 +140,7 @@ const RadarController = ({ setPlanes }) => {
                 });
             } catch (err) { /* silent */ }
         };
-        const interval = setInterval(safeUpdate, 80); // Slightly faster tick for smoothness
+        const interval = setInterval(safeUpdate, 50); // Faster tick (50ms = 20fps) for smoother 'immediate' entry
         return () => clearInterval(interval);
     }, [map, setPlanes]);
 
