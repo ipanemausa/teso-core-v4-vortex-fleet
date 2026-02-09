@@ -168,6 +168,7 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                         {/* ACTIONS LIST */}
                         <div style={{ marginBottom: '20px' }}>
                             <button
+                                style={{
                                     width: '100%', padding: '14px', borderRadius: '40px', // Capsule Shape
                                     border: `1px solid ${theme.neonCyan}`,
                                     background: 'rgba(0, 240, 255, 0.05)',
@@ -176,19 +177,19 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                                     marginBottom: '10px', transition: 'all 0.2s', textShadow: `0 0 5px ${theme.neonCyan}`
                                 }}
-                                onMouseOver={e => { 
-                                    e.currentTarget.style.background = 'rgba(0, 240, 255, 0.15)'; 
+                                onMouseOver={e => {
+                                    e.currentTarget.style.background = 'rgba(0, 240, 255, 0.15)';
                                     e.currentTarget.style.boxShadow = `0 0 20px ${theme.neonCyan}60, inset 0 0 10px ${theme.neonCyan}20`;
                                     e.currentTarget.style.transform = 'scale(1.02)';
                                 }}
-                                onMouseOut={e => { 
-                                    e.currentTarget.style.background = 'rgba(0, 240, 255, 0.05)'; 
+                                onMouseOut={e => {
+                                    e.currentTarget.style.background = 'rgba(0, 240, 255, 0.05)';
                                     e.currentTarget.style.boxShadow = `0 0 10px ${theme.neonCyan}40, inset 0 0 5px ${theme.neonCyan}10`;
                                     e.currentTarget.style.transform = 'scale(1)';
                                 }}
                                 onClick={() => onDispatch && onDispatch({ type: 'KICKOFF' })}
                             >
-                                <span style={{fontSize: '1.2rem'}}>▶</span> INICIAR SIMULACIÓN V4
+                                <span style={{ fontSize: '1.2rem' }}>▶</span> INICIAR SIMULACIÓN V4
                             </button>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -197,8 +198,8 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                                     background: 'transparent', color: theme.neonYellow, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
                                     boxShadow: `0 0 5px ${theme.neonYellow}20`, transition: 'all 0.2s'
                                 }}
-                                onMouseOver={e => { e.currentTarget.style.boxShadow = `0 0 15px ${theme.neonYellow}50`; }}
-                                onMouseOut={e => { e.currentTarget.style.boxShadow = `0 0 5px ${theme.neonYellow}20`; }}
+                                    onMouseOver={e => { e.currentTarget.style.boxShadow = `0 0 15px ${theme.neonYellow}50`; }}
+                                    onMouseOut={e => { e.currentTarget.style.boxShadow = `0 0 5px ${theme.neonYellow}20`; }}
                                 >
                                     📡 RADAR SCAN
                                 </button>
@@ -207,8 +208,8 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                                     background: 'transparent', color: theme.neonGreen, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
                                     boxShadow: `0 0 5px ${theme.neonGreen}20`, transition: 'all 0.2s'
                                 }}
-                                onMouseOver={e => { e.currentTarget.style.boxShadow = `0 0 15px ${theme.neonGreen}50`; }}
-                                onMouseOut={e => { e.currentTarget.style.boxShadow = `0 0 5px ${theme.neonGreen}20`; }}
+                                    onMouseOver={e => { e.currentTarget.style.boxShadow = `0 0 15px ${theme.neonGreen}50`; }}
+                                    onMouseOut={e => { e.currentTarget.style.boxShadow = `0 0 5px ${theme.neonGreen}20`; }}
                                 >
                                     📊 EXPORTAR
                                 </button>
