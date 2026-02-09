@@ -19,6 +19,32 @@ const theme = {
     neonYellow: '#FNEE38',
     neonGreen: '#39FF14'
 };
+// --- REALISTIC DATA SIMULATION (HYDRATION) ---
+const FLIGHT_SCHEDULE = [
+    { code: 'AV9314', route: 'MIA-MDE', time: '14:30', gate: 'D5', status: 'A TIEMPO' },
+    { code: 'LA4050', route: 'BOG-MDE', time: '16:45', gate: 'N2', status: 'BOARDING' },
+    { code: 'CM0420', route: 'PTY-MDE', time: '18:10', gate: 'I1', status: 'DELAYED' },
+    { code: 'AA1123', route: 'JFK-MDE', time: '19:20', gate: 'D8', status: 'PROGRAMADO' },
+    { code: 'IB6500', route: 'MAD-MDE', time: '20:05', gate: 'I3', status: 'PROGRAMADO' },
+    { code: 'DL980', route: 'ATL-MDE', time: '21:15', gate: 'D4', status: 'PROGRAMADO' },
+    { code: 'AM660', route: 'MEX-MDE', time: '22:30', gate: 'I2', status: 'PROGRAMADO' },
+    { code: 'AV202', route: 'CLO-MDE', time: '23:05', gate: 'N5', status: 'PROGRAMADO' }
+];
+
+const FLIGHT_DEPARTURES = [
+    { code: 'AV8540', route: 'MDE-BOG', time: '06:00', gate: 'N1', status: 'DESPEGÓ' },
+    { code: 'AA1124', route: 'MDE-MIA', time: '07:30', gate: 'D6', status: 'DESPEGÓ' },
+    { code: 'CM0421', route: 'MDE-PTY', time: '08:45', gate: 'I4', status: 'DESPEGÓ' },
+    { code: 'IB6501', route: 'MDE-MAD', time: '18:30', gate: 'I3', status: 'CHECK-IN' },
+];
+
+const CORPORATE_CLIENTS = [
+    { name: 'BANCOLOMBIA', type: 'PLATINUM', users: 1205 },
+    { name: 'GRUPO ARGOS', type: 'GOLD', users: 450 },
+    { name: 'NUTRESA', type: 'GOLD', users: 890 },
+    { name: 'SURAMERICANA', type: 'PLATINUM', users: 2100 },
+    { name: 'EPM', type: 'CORPORATE', users: 3200 }
+];
 
 // --- ANIMATIONS ---
 const keyframes = `
@@ -54,8 +80,10 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
         }
     }, [simulationData]);
 
-    // LOGIC: Map activeView (from NeonNavbar) to Content
-    // 'FLOTA', 'ORDENES', 'VUELOS', 'CLIENTES', 'AGENDA', 'FINANZAS', 'MERCADO', 'CORE_V4'
+    const displayFlights = flightTab === 'ARRIVALS' ? FLIGHT_SCHEDULE : FLIGHT_DEPARTURES;
+
+    // Logic for Clients Search
+    const filteredClients = CORPORATE_CLIENTS.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     // Stats Logic
     const totalUnits = simulationData?.services?.length || 0;
@@ -122,6 +150,7 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                             <input
                                 type="text"
                                 placeholder="Buscar Vuelo, Ciudad..."
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
                                     width: '100%', background: 'rgba(30, 41, 59, 0.3)', border: `1px solid ${theme.border}`,
                                     borderRadius: '8px', padding: '10px 10px 10px 35px', color: theme.textMain, fontSize: '0.8rem',
@@ -138,7 +167,6 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                                 style={{
                                     flex: 1, padding: '10px', borderRadius: '6px', border: 'none', cursor: 'pointer',
                                     fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    // ACTIVE STATE:
                                     background: flightTab === 'ARRIVALS' ? `rgba(0, 240, 255, 0.15)` : 'transparent',
                                     color: flightTab === 'ARRIVALS' ? theme.neonCyan : theme.textDim,
                                     border: flightTab === 'ARRIVALS' ? `1px solid ${theme.neonCyan}` : '1px solid transparent',
@@ -155,10 +183,9 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                                 style={{
                                     flex: 1, padding: '10px', borderRadius: '6px', border: 'none', cursor: 'pointer',
                                     fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    // ACTIVE STATE:
-                                    background: flightTab === 'DEPARTURES' ? `rgba(240, 240, 255, 0.15)` : 'transparent', // Slightly distinct? Or keep Cyan?
+                                    background: flightTab === 'DEPARTURES' ? `rgba(0, 240, 255, 0.15)` : 'transparent',
                                     color: flightTab === 'DEPARTURES' ? theme.neonCyan : theme.textDim,
-                                    border: flightTab === 'DEPARTURES' ? `1px solid ${theme.neonCyan}` : '1px solid transparent', // Consistent Neon Cyan
+                                    border: flightTab === 'DEPARTURES' ? `1px solid ${theme.neonCyan}` : '1px solid transparent',
                                     boxShadow: flightTab === 'DEPARTURES' ? `0 0 10px ${theme.neonCyan}40, inset 0 0 5px ${theme.neonCyan}20` : 'none',
                                     transition: 'all 0.3s'
                                 }}
@@ -167,39 +194,79 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                             </button>
                         </div>
 
-                        {/* FLIGHT LIST (MOCK/SIM DATA) */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 1fr', fontSize: '0.65rem', color: theme.textDim, fontWeight: 700, padding: '0 10px', marginBottom: '5px' }}>
-                                <div>HORA</div>
-                                <div>VUELO</div>
-                                <div>PUERTA</div>
-                                <div style={{ textAlign: 'right' }}>ESTADO</div>
-                            </div>
+                        {/* FLIGHT LIST header */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 2fr', fontSize: '0.65rem', color: theme.textDim, fontWeight: 700, padding: '0 10px', marginBottom: '5px' }}>
+                            <div>HORA</div>
+                            <div>VUELO</div>
+                            <div>DESTINO</div>
+                            <div style={{ textAlign: 'right' }}>ESTADO</div>
+                        </div>
 
-                            {/* DYNAMIC LIST */}
-                            {[1, 2, 3, 4, 5, 6].map((_, i) => (
+                        {/* DYNAMIC LIST */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {displayFlights.filter(f => !searchTerm || f.code.includes(searchTerm.toUpperCase()) || f.route.includes(searchTerm.toUpperCase())).map((flight, i) => (
                                 <div key={i} style={{
-                                    display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 1fr',
+                                    display: 'grid', gridTemplateColumns: '1fr 2fr 1fr 2fr',
                                     background: 'rgba(255,255,255,0.02)', padding: '12px 10px', borderRadius: '6px',
                                     alignItems: 'center', borderBottom: `1px solid ${theme.border}`,
-                                    fontSize: '0.8rem', color: theme.textMain
-                                }}>
-                                    <div style={{ fontFamily: theme.fontMono }}>{14 + i}:30</div>
+                                    fontSize: '0.8rem', color: theme.textMain, transition: 'background 0.2s'
+                                }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                                >
+                                    <div style={{ fontFamily: theme.fontMono }}>{flight.time}</div>
                                     <div style={{ fontWeight: 700, color: theme.accent }}>
-                                        {flightTab === 'ARRIVALS' ? 'AV' : 'LA'}9{300 + i * 10}
-                                        <div style={{ fontSize: '0.65rem', color: theme.textDim, fontWeight: 400 }}>
-                                            {flightTab === 'ARRIVALS' ? 'MIA -> MDE' : 'MDE -> BOG'}
-                                        </div>
+                                        {flight.code}
                                     </div>
-                                    <div>{Math.floor(Math.random() * 10) + 1}</div>
-                                    <div style={{ textAlign: 'right', fontWeight: 700, color: i % 3 === 0 ? theme.warning : theme.success, fontSize: '0.7rem' }}>
-                                        {i % 3 === 0 ? 'RETRASADO' : 'A TIEMPO'}
+                                    <div style={{ fontSize: '0.7rem', color: theme.textDim }}>{flight.route.split('-')[1] === 'MDE' ? flight.route.split('-')[0] : flight.route.split('-')[1]}</div>
+                                    <div style={{ textAlign: 'right', fontWeight: 700, color: flight.status === 'DELAYED' ? theme.warning : flight.status === 'A TIEMPO' || flight.status === 'DESPEGÓ' ? theme.success : theme.textDim, fontSize: '0.7rem' }}>
+                                        {flight.status.toUpperCase()}
+                                        {flight.status === 'DELAYED' && <div style={{ fontSize: '0.6rem', background: theme.warning, color: '#000', padding: '1px 4px', borderRadius: '4px', display: 'inline-block', marginLeft: '5px' }}>+1h</div>}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
+
+                {/* --- VIEW: CLIENTES --- */}
+                {activeView === 'CLIENTES' && (
+                    <div style={{ padding: '20px', animation: 'slideIn 0.3s ease-out' }}>
+                        <div style={{ position: 'relative', marginBottom: '20px' }}>
+                            <div style={{ position: 'absolute', left: '12px', top: '10px', fontSize: '0.8rem', opacity: 0.5 }}>🔍</div>
+                            <input
+                                type="text"
+                                placeholder="Buscar Cliente Corporativo..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    width: '100%', background: 'rgba(30, 41, 59, 0.3)', border: `1px solid ${theme.border}`,
+                                    borderRadius: '8px', padding: '10px 10px 10px 35px', color: theme.textMain, fontSize: '0.8rem',
+                                    outline: 'none', fontFamily: theme.fontSans
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {filteredClients.map((client, i) => (
+                                <div key={i} style={{
+                                    padding: '15px', border: `1px solid ${theme.border}`, borderRadius: '8px',
+                                    background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                }}>
+                                    <div>
+                                        <div style={{ fontWeight: 800, color: theme.textMain }}>{client.name}</div>
+                                        <div style={{ fontSize: '0.7rem', color: client.type === 'PLATINUM' ? theme.neonCyan : theme.textDim }}>{client.type} TIER</div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{client.users}</div>
+                                        <div style={{ fontSize: '0.6rem', color: theme.textDim }}>USUARIOS</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
 
                 {/* --- VIEW: ORDENES / OPS (DEFAULT) --- */}
                 {(activeView === 'ORDENES' || activeView === 'FLOTA' || !activeView || activeView === 'OPS') && (
@@ -225,8 +292,8 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                             </div>
                         </div>
 
-                        {/* ACTIONS LIST */}
-                        <div style={{ marginBottom: '20px' }}>
+                        {/* ACTIONS LIST - RESTORED FULL OPS MENU */}
+                        <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <button
                                 style={{
                                     width: '100%', padding: '14px', borderRadius: '40px', // Capsule
@@ -235,11 +302,35 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                                     boxShadow: `0 0 10px ${theme.error}40, inset 0 0 5px ${theme.error}10`,
                                     color: theme.error, fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                                    marginBottom: '10px', transition: 'all 0.2s', textShadow: `0 0 5px ${theme.error}80`
+                                    transition: 'all 0.2s', textShadow: `0 0 5px ${theme.error}80`
                                 }}
                                 onClick={() => onDispatch && onDispatch({ type: 'KICKOFF' })}
                             >
                                 <span style={{ fontSize: '1.2rem' }}>🚨</span> SIMULACRO: DÍA CRÍTICO (60 OPS)
+                            </button>
+
+                            <button style={{
+                                width: '100%', padding: '12px', borderRadius: '30px',
+                                border: `1px solid ${theme.neonYellow}`,
+                                background: 'transparent',
+                                color: theme.neonYellow, fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
+                            }}
+                                onClick={() => onDispatch && onDispatch({ type: 'SCAN_RADAR' })}
+                            >
+                                📡 ESCANEAR RADAR (FORCE)
+                            </button>
+
+                            <button style={{
+                                width: '100%', padding: '12px', borderRadius: '30px',
+                                border: `1px solid ${theme.neonGreen}`,
+                                background: 'transparent',
+                                color: theme.neonGreen, fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
+                            }}
+                                onClick={() => onDispatch && onDispatch({ type: 'EXPORT_EXCEL' })}
+                            >
+                                📊 EXPORTAR REPORTE (EXCEL)
                             </button>
                         </div>
 
@@ -267,7 +358,7 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                 )}
 
                 {/* --- FALLBACK FOR OTHER VIEWS --- */}
-                {['CLIENTES', 'AGENDA', 'FINANZAS', 'MERCADO', 'CORE_V4'].includes(activeView) && (
+                {['AGENDA', 'FINANZAS', 'MERCADO', 'CORE_V4'].includes(activeView) && (
                     <div style={{ padding: '40px', textAlign: 'center', animation: 'slideIn 0.3s ease-out', color: theme.textDim }}>
                         <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🚧</div>
                         <h3>MÓDULO {activeView}</h3>
