@@ -21,6 +21,7 @@ import StatusBadge from './ui/StatusBadge';
 import { CoreOperativo } from '../views/CoreOperativo';
 import { NeonNavbar } from './NeonNavbar';
 import LiveOpsMap from './dashboard/LiveOpsMap'; // NEW IMPORT
+import GeminiConsultantArtifact from './dashboard/GeminiConsultantArtifact';
 import { voiceSystem, VOICE_TAGS } from '../services/VoiceSystem';
 
 // HELPER: Date Parser
@@ -1104,7 +1105,12 @@ const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'L
                             </div>
                         )}
 
-                        {/* D. CLIENTS & OTHERS (Placeholder) */}
+                        {/* E. GEMINI ARTIFACT */}
+                        {activeSheet === 'ARTEFACTO' && (
+                            <GeminiConsultantArtifact onClose={() => setActiveSheet('PROGRAMACION')} />
+                        )}
+
+                        {/* F. CLIENTS & OTHERS (Placeholder) */}
                         {['CLIENTS', 'MARKETING'].includes(activeSheet) && (
                             <div style={{ textAlign: 'center', padding: '50px', color: '#666' }}>
                                 <h1>MÓDULO {activeSheet}</h1>

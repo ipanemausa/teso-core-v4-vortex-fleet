@@ -13,6 +13,11 @@ const theme = {
     error: '#ef4444', // Red 500
     fontMono: '"JetBrains Mono", "Fira Code", monospace',
     fontSans: '"Inter", system-ui, sans-serif',
+    // NEON PALETTE
+    neonCyan: '#00F0FF',
+    neonPink: '#FF003C',
+    neonYellow: '#FNEE38',
+    neonGreen: '#39FF14'
 };
 
 // --- ANIMATIONS ---
@@ -163,31 +168,48 @@ const TesoOpsPanel = ({ simulationData, activeView, onDispatch }) => {
                         {/* ACTIONS LIST */}
                         <div style={{ marginBottom: '20px' }}>
                             <button
-                                style={{
-                                    width: '100%', padding: '14px', borderRadius: '8px', border: `1px solid ${theme.accent}40`,
-                                    background: `linear-gradient(90deg, ${theme.accent}10 0%, transparent 100%)`,
-                                    color: theme.accent, fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                                    width: '100%', padding: '14px', borderRadius: '40px', // Capsule Shape
+                                    border: `1px solid ${theme.neonCyan}`,
+                                    background: 'rgba(0, 240, 255, 0.05)',
+                                    boxShadow: `0 0 10px ${theme.neonCyan}40, inset 0 0 5px ${theme.neonCyan}10`,
+                                    color: theme.neonCyan, fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                                    marginBottom: '10px', transition: 'all 0.2s'
+                                    marginBottom: '10px', transition: 'all 0.2s', textShadow: `0 0 5px ${theme.neonCyan}`
                                 }}
-                                onMouseOver={e => { e.currentTarget.style.background = `${theme.accent}20`; }}
-                                onMouseOut={e => { e.currentTarget.style.background = `linear-gradient(90deg, ${theme.accent}10 0%, transparent 100%)`; }}
+                                onMouseOver={e => { 
+                                    e.currentTarget.style.background = 'rgba(0, 240, 255, 0.15)'; 
+                                    e.currentTarget.style.boxShadow = `0 0 20px ${theme.neonCyan}60, inset 0 0 10px ${theme.neonCyan}20`;
+                                    e.currentTarget.style.transform = 'scale(1.02)';
+                                }}
+                                onMouseOut={e => { 
+                                    e.currentTarget.style.background = 'rgba(0, 240, 255, 0.05)'; 
+                                    e.currentTarget.style.boxShadow = `0 0 10px ${theme.neonCyan}40, inset 0 0 5px ${theme.neonCyan}10`;
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                }}
                                 onClick={() => onDispatch && onDispatch({ type: 'KICKOFF' })}
                             >
-                                <span>▶</span> INICIAR SIMULACIÓN V4
+                                <span style={{fontSize: '1.2rem'}}>▶</span> INICIAR SIMULACIÓN V4
                             </button>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                                 <button style={{
-                                    padding: '12px', borderRadius: '8px', border: `1px solid ${theme.border}`,
-                                    background: 'rgba(255,255,255,0.03)', color: theme.textDim, fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer'
-                                }}>
+                                    padding: '12px', borderRadius: '30px', border: `1px solid ${theme.neonYellow}`,
+                                    background: 'transparent', color: theme.neonYellow, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
+                                    boxShadow: `0 0 5px ${theme.neonYellow}20`, transition: 'all 0.2s'
+                                }}
+                                onMouseOver={e => { e.currentTarget.style.boxShadow = `0 0 15px ${theme.neonYellow}50`; }}
+                                onMouseOut={e => { e.currentTarget.style.boxShadow = `0 0 5px ${theme.neonYellow}20`; }}
+                                >
                                     📡 RADAR SCAN
                                 </button>
                                 <button style={{
-                                    padding: '12px', borderRadius: '8px', border: `1px solid ${theme.border}`,
-                                    background: 'rgba(255,255,255,0.03)', color: theme.textDim, fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer'
-                                }}>
+                                    padding: '12px', borderRadius: '30px', border: `1px solid ${theme.neonGreen}`,
+                                    background: 'transparent', color: theme.neonGreen, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
+                                    boxShadow: `0 0 5px ${theme.neonGreen}20`, transition: 'all 0.2s'
+                                }}
+                                onMouseOver={e => { e.currentTarget.style.boxShadow = `0 0 15px ${theme.neonGreen}50`; }}
+                                onMouseOut={e => { e.currentTarget.style.boxShadow = `0 0 5px ${theme.neonGreen}20`; }}
+                                >
                                     📊 EXPORTAR
                                 </button>
                             </div>
