@@ -129,7 +129,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                 </div>
             )}
 
-            {/* 4. AI AGENT BUTTON */}
+            {/* 4. AI AGENT BUTTON - HIDDEN FOR STABILITY PHASE
             <div onClick={() => setShowQueryMenu(!showQueryMenu)} style={{
                 position: 'absolute', bottom: '20px', left: '20px', zIndex: 1000, display: 'flex', alignItems: 'center', gap: '10px',
                 background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #06b6d4', borderRadius: '50px', padding: '10px 25px', cursor: 'pointer'
@@ -137,8 +137,9 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                 <div style={{ fontSize: '1.5rem' }}>🤖</div>
                 {showQueryMenu && <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 'bold' }}>CONSULTOR IA</div>}
             </div>
+            */}
 
-            {/* AI MENU */}
+            {/* AI MENU - HIDDEN FOR STABILITY PHASE
             {showQueryMenu && (
                 <div style={{
                     position: 'absolute', bottom: '80px', left: '20px', width: '350px',
@@ -162,6 +163,7 @@ const LiveOpsMap = ({ opsCommand, simulationData, planes }) => {
                     ))}
                 </div>
             )}
+            */}
         </div>
     );
 };
