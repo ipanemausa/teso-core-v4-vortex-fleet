@@ -182,13 +182,13 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                             <button style={{
                                 padding: '10px', borderRadius: '8px', border: `1px solid ${theme.border}`,
                                 background: 'transparent', color: theme.textDim, fontSize: '0.7rem', cursor: 'pointer'
-                            }}>
+                            }} onClick={() => onDispatch && onDispatch({ type: 'SCAN_RADAR' })}>
                                 📡 ESCANEAR
                             </button>
                             <button style={{
                                 padding: '10px', borderRadius: '8px', border: `1px solid ${theme.border}`,
                                 background: 'transparent', color: theme.textDim, fontSize: '0.7rem', cursor: 'pointer'
-                            }}>
+                            }} onClick={() => onDispatch && onDispatch({ type: 'EXPORT_EXCEL' })}>
                                 📊 EXPORTAR
                             </button>
                         </div>
@@ -217,6 +217,10 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
                                         e.currentTarget.style.transform = 'translateX(0)';
                                         e.currentTarget.style.background = 'rgba(30, 41, 59, 0.4)';
                                     }}
+                                    onClick={() => onDispatch && onDispatch({
+                                        type: 'FLY_TO_ORDER',
+                                        payload: { ...op, lat: 6.1 + Math.random() * 0.2, lng: -75.5 + Math.random() * 0.1 } // Simulated Coords for Demo
+                                    })}
                                 >
                                     {/* Header: ID + Time */}
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
