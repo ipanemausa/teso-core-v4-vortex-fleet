@@ -85,11 +85,24 @@ const TesoOpsPanel = ({ simulationData, activeView, planes, onDispatch }) => {
     const displayFlights = flightTab === 'ARRIVALS' ? FLIGHT_SCHEDULE : FLIGHT_DEPARTURES;
     const filteredClients = CORPORATE_CLIENTS.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // Use Mock Data if simulationData is generic, otherwise mix
-    // We prioritize the Mock to ensure "Professional Look" over "Broken Repetitive Data"
-    const displayOrders = MASTER_DATASET_MOCK.filter(o =>
-        !searchTerm || o.client.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm)
-    );
+    // Use Real Data if available, otherwise fallback to Mock
+    const rawData = (simulationData && simulationData.length > 0) ? simulationData : MASTER_DATASET_MOCK;
+
+    const displayOrders = rawData
+        .filter(o => !searchTerm ||
+            (o.client && o.client.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (o.id && o.id.includes(searchTerm))
+        )
+        // Map backend format to frontend if needed (safety check)
+        .map(o => ({
+            id: o.id || o.order_id || 'Unknown',
+            client: o.client || 'Cliente General',
+            route: o.route || 'Ruta Estándar',
+            status: o.status || 'PENDIENTE',
+            driver: o.driver || 'Por Asignar',
+            type: o.type || 'ESTÁNDAR',
+            time: o.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }));
 
     // Stats Logic
     const totalUnits = 14400; // Hardcoded visual for User Confidence
