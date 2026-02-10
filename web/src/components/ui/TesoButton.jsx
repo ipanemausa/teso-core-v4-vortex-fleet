@@ -58,12 +58,11 @@ const TesoButton = ({
             boxShadow: 'var(--shadow-glow-red)'
         },
         glass: {
-            background: 'rgba(15, 23, 42, 0.6)', // Darker backing for visibility
+            background: 'rgba(255, 255, 255, 0.05)',
             border: '1px solid var(--color-border-subtle)',
-            color: '#ffffff', // Force White
+            color: 'var(--color-text-primary)',
             borderRadius: 'var(--radius-md)',
-            backdropFilter: 'blur(4px)',
-            textShadow: '0 2px 4px #000000' // Ensure legibility
+            backdropFilter: 'blur(4px)'
         },
         ghost: {
             background: 'transparent',

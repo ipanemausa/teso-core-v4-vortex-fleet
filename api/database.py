@@ -1,3 +1,4 @@
+
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -25,7 +26,7 @@ if DATABASE_URL:
         print(f"--- 🔴 DATABASE CONNECTION FAILED: {e} ---")
         engine = None
 else:
-    print("--- [WARN] NO DATABASE_URL FOUND. RUNNING IN 'MEMORY-ONLY' MODE (LEGACY EXCEL). ---")
+    print("--- 🟡 NO DATABASE_URL FOUND. RUNNING IN 'MEMORY-ONLY' MODE (LEGACY EXCEL). ---")
 
 Base = declarative_base()
 

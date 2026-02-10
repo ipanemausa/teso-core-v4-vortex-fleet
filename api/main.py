@@ -45,13 +45,8 @@ GLOBAL_CACHE = {
 # PERSISTENCE LAYER
 PERSISTENCE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "persistence")
 DATA_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-import asyncio # Auto-Import for Background Loops
-
 os.makedirs(PERSISTENCE_DIR, exist_ok=True)
 os.makedirs(DATA_ROOT, exist_ok=True)
-
-# --- GLOBAL ALERTS (AUTONOMOUS MEMORY) ---
-GLOBAL_ALERTS = []
 
 SIM_JSON_PATH = os.path.join(PERSISTENCE_DIR, "latest_simulation.json")
 # STRICT MASTER PROTOCOL: Excel persistence is the VIVO dataset
@@ -168,54 +163,19 @@ def get_simulation_data():
         
     return GLOBAL_CACHE["json_data"]
 
-# --- BACKGROUND MONITORING (AUTONOMY) ---
-async def monitoring_loop():
-    """
-    INDUSTRIAL MONITORING SYSTEM:
-    Runs continuously in the background to detect deviations in real-time (Lead Time = 60s).
-    """
-    print("⚙️ MONITOR: Inicializando ciclo de control autónomo...")
-    while True:
-        try:
-            await asyncio.sleep(60) # Intervalo de Control (1 min)
-            
-            if GLOBAL_CACHE["json_data"]:
-                # Silent check
-                triggers = orchestrator.check_triggers(GLOBAL_CACHE["json_data"])
-                
-                if triggers:
-                    for t in triggers:
-                        timestamp = datetime.now().isoformat()
-                        t['timestamp'] = timestamp
-                        GLOBAL_ALERTS.insert(0, t) # Newest first
-                        if len(GLOBAL_ALERTS) > 50: GLOBAL_ALERTS.pop()
-                            
-                    print(f"🚨 MONITOR: {len(triggers)} Alertas generadas.")
-        except Exception as e:
-            print(f"❌ MONITOR ERROR: {e}")
-            await asyncio.sleep(10)
-
 @app.on_event("startup")
-async def load_cache_on_startup():
-    """
-    AUTO-BOOTSTRAP PROTOCOL & AUTONOMOUS LOOP START
-    """
+def load_cache_on_startup():
+    """Try to load disk persistence into memory on startup"""
     j_data, x_bytes = load_simulation_state()
-
     if j_data and x_bytes:
         GLOBAL_CACHE["json_data"] = j_data
         GLOBAL_CACHE["excel_bytes"] = x_bytes
         GLOBAL_CACHE["last_updated"] = "RESTORED_FROM_DISK"
-        print("✅ SYSTEM RESTORED: Previous context loaded from disk.")
+        print("✅ SYSTEM RESTORED: Previous simulation loaded.")
     else:
-        print("⚠️ SYSTEM EMPTY: No previous context found on disk.")
-        print("🤖 AGENT ACTIVATION: Generating autonomous dataset (360 Days)...")
-        # RUN AUTONOMOUS GENERATION
-        run_simulation(days=360)
-        print("🚀 VORTEX ENGINE: System Bootstrapped & Ready.")
-        
-    # START AUTONOMOUS LOOP
-    asyncio.create_task(monitoring_loop())
+        print("ℹ️ SYSTEM CLEAN: No previous simulation found. 🔥 IGNITING VORTEX ENGINE...")
+        run_simulation(days=360) # Force initial generation
+        print("🚀 VORTEX ENGINE: Initial Simulation Complete.")
 
 @app.get("/api/simulation/export")
 def download_excel():
@@ -365,121 +325,36 @@ def optimize_routes_decision():
         "timestamp": datetime.now().isoformat()
     }
 
-# --- IMPORT AGENTS ---
-from agents.financial_agent import FinancialAgent
-from agents.logistics_agent import LogisticsAgent
-from agents.gemini_business import GeminiBusinessAgent
-# from agents.orchestrator import OrchestratorAgent (DEPRECATED V1)
-from agents.orchestrator_v2 import StrategicOrchestrator
-
-# Initialize Agents
-fin_agent = FinancialAgent()
-log_agent = LogisticsAgent()
-biz_agent = GeminiBusinessAgent()
-orchestrator = StrategicOrchestrator() # V2 CEO AGENT
-
-@app.post("/api/strategic-cycle")
-async def run_strategic_cycle():
-    """
-    EXECUTIVE ENDPOINT: CEO BRAIN ACTIVATION
-    Triggers the full Fayol Administrative Cycle (Plan, Organize, Direct, Control).
-    """
-    print(f"👔 CEO AGENT ACTIVATION: {orchestrator.role}...")
-    
-    simulation_state = GLOBAL_CACHE.get("json_data", {})
-    if not simulation_state:
-        return {"status": "WAITING_FOR_DATA", "message": "System initializing..."}
-        
-    executive_summary = await orchestrator.execute_strategic_cycle(simulation_state)
-    
-    return executive_summary
-
-@app.post("/api/agently/command")
-def unified_agent_command(command_payload: dict):
-    """
-    PERPLEXITY-STYLE ORCHESTRATOR ENDPOINT
-    Unified entry point for all agent interactions.
-    Payload: { "intent": "AUDIT_ALL" | "CHECK_CASH", "context": {} }
-    """
-    intent = command_payload.get("intent", "GLOBAL_AUDIT")
-    print(f"🧠 ORCHESTRATOR: Processing intent '{intent}'...")
-    
-    simulation_state = GLOBAL_CACHE.get("json_data", {})
-    
-    # Delegate to the Orchestrator Brain
-    response = orchestrator.route_request(intent, simulation_state)
-    
-    # Check for autonomous triggers while we are at it
-    triggers = orchestrator.check_triggers(simulation_state)
-    if triggers:
-        response["autonomous_triggers"] = triggers
-        
-    return response
-
-@app.post("/api/agently/business/gemini")
-def gemini_business_consult(query_payload: dict):
-    """
-    AGENTIC ENDPOINT: VORTEX_BUSINESS_STRATEGIST
-    Direct line to Gemini Pro (via GeminiBusinessAgent).
-    Payload: { "query": "Should we buy more cars?", "context_override": {} }
-    """
-    query = query_payload.get("query", "Estado General")
-    print(f"👔 AGENT ACTIVATION: {biz_agent.identity['rol']} answering '{query}'...")
-    
-    simulation_state = GLOBAL_CACHE.get("json_data", {})
-    response = biz_agent.consult(query, simulation_state)
-    
-    return response
-
-@app.get("/api/agently/alerts")
-def get_autonomous_alerts():
-    """
-    Endpoint for Frontend to poll mostly recent autonomous alerts.
-    """
-    return GLOBAL_ALERTS[:5]
-
-@app.post("/api/decisions/financial-audit")
+@app.post("/api/decisions/financial-audit", response_model=DecisionResponse)
 def financial_audit_decision():
     """
-    AGENTIC ENDPOINT: VORTEX_FINANCIAL_AUDITOR
-    Uses the FinancialAgent (Learning Heroes Framework) to analyze the live simulation state.
+    Real-time Financial Health Check.
+    Analyzes current simulation cache for insolvency risks.
     """
-    print(f"🤖 AGENT ACTIVATION: {fin_agent.identity['rol']}...")
+    json_data = GLOBAL_CACHE["json_data"]
+    balance = 0
+    if json_data and "banks" in json_data and len(json_data["banks"]) > 0:
+        balance = json_data["banks"][0].get("SALDO_ACTUAL", 0)
+        
+    health_score = 100.0
+    verdict = "HEALTHY"
     
-    # 1. Get Live Data (Context)
-    simulation_state = GLOBAL_CACHE.get("json_data", {})
-    
-    # 2. Agent Reasoning (The 5-Step Process)
-    audit_result = fin_agent.run_audit(simulation_state)
-    
-    # 3. Adaptation for Frontend
+    if balance < 0:
+        health_score = 10.0
+        verdict = "CRITICAL_INSOLVENCY"
+    elif balance < 5000000:
+        health_score = 45.0
+        verdict = "LOW_LIQUIDITY"
+        
     return {
-        "decision_id": audit_result["meta"]["decision_id"],
-        "score": audit_result["executive_summary"]["score"],
-        "verdict": audit_result["executive_summary"]["headline"], 
+        "decision_id": f"AUD-{hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]}",
+        "score": health_score,
+        "verdict": verdict,
         "details": {
-            "current_balance": audit_result["financial_context"]["current_cash_cop"],
-            "action_required": audit_result["strategic_advice"]["action_item"],
-            "agent_analysis": audit_result
+            "current_balance": balance,
+            "action_required": "IMMEDIATE_FUNDING" if balance < 0 else "NONE"
         },
-        "timestamp": audit_result["meta"]["timestamp"]
-    }
-
-@app.post("/api/decisions/logistics-dispatch")
-def logistics_dispatch_decision():
-    """
-    AGENTIC ENDPOINT: VORTEX_LOGISTICS_DISPATCHER
-    Uses the LogisticsAgent to optimize fleet operations.
-    """
-    print(f"🚚 AGENT ACTIVATION: {log_agent.identity['rol']}...")
-    
-    simulation_state = GLOBAL_CACHE.get("json_data", {})
-    dispatch_result = log_agent.run_dispatch_analysis(simulation_state)
-    
-    return {
-        "decision_id": dispatch_result["meta"]["decision_id"],
-        "status": "OK",
-        "analysis": dispatch_result
+        "timestamp": datetime.now().isoformat()
     }
 
 @app.post("/api/decisions/security-scan", response_model=DecisionResponse)
@@ -543,12 +418,6 @@ async def serve_frontend(path: str):
     Catch-all route to serve the React Single Page Application (SPA).
     If the file exists in static, serve it. Otherwise, serve index.html.
     """
-    # 0. EXPLICIT VERSION CHECK (Bypass Frontend)
-    if path == "version.json":
-        v_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "version.json")
-        if os.path.exists(v_path):
-            return FileResponse(v_path)
-
     # 1. API routes are already handled above.
     if path.startswith("api/"):
         raise HTTPException(status_code=404, detail="API Endpoint Not Found")

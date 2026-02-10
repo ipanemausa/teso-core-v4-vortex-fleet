@@ -93,26 +93,7 @@ const AgenticCommandBar = ({ onCommand }) => {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSend();
-                        if (e.key === 'Tab') {
-                            e.preventDefault(); // Stop focus change
-
-                            // 1. Find the BEST match (StartsWith first, then Includes)
-                            let match = suggestions.find(s => s.label.toLowerCase().startsWith(input.toLowerCase()));
-                            if (!match) {
-                                match = suggestions.find(s => s.label.toLowerCase().includes(input.toLowerCase()));
-                            }
-
-                            // 2. If valid match found, FILL IT
-                            if (match) {
-                                setInput(match.label);
-                            } else if (suggestions.length > 0) {
-                                // Default fallback: Fill the "first" suggestion if input is empty or no match
-                                setInput(suggestions[0].label);
-                            }
-                        }
-                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder={isThinking ? "Agent processing..." : "Ask Teso Operations AI..."}
                     style={{
                         background: 'transparent',

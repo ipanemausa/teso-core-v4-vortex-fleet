@@ -1,28 +1,10 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import UserRegistration from './onboarding/UserRegistration';
-import DriverRegistration from './onboarding/DriverRegistration';
+import React, { useState, useEffect } from 'react';
 
-// import landingBg from '../assets/landing_bg.png'; // REMOVED: Using CSS Gradient for stability
+import landingBg from '../assets/landing_bg.png';
 
 export default function LandingPage({ onEnter }) {
     const [isEntering, setIsEntering] = useState(false);
     const [mounted, setMounted] = useState(false);
-    const [registrationMode, setRegistrationMode] = useState(null); // 'user' | 'driver' | null
-
-    const handleRegistrationComplete = (data) => {
-        setRegistrationMode(null);
-        // Auto-login after registration
-        // Pass user data up to App.jsx via onEnter if supported, or just enter for now
-        // For demo purposes, we treat it as valid entry
-        const roleParam = data.role === 'driver' ? 'driver' : 'client';
-
-        // Update URL to reflect role without reload (simulated navigation)
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set('role', roleParam);
-        window.history.pushState({}, '', newUrl);
-
-        handleEnter();
-    };
 
     // Automatic entry effect (The "Wow" factor)
     useEffect(() => {
@@ -46,8 +28,7 @@ export default function LandingPage({ onEnter }) {
         <div style={{
             width: '100vw',
             minHeight: '100vh', // Ensuring full height but allowing scroll
-            // backgroundImage: `url(${landingBg})`, // REMOVED
-            background: 'radial-gradient(circle at center, #1a2a3a 0%, #000000 100%)', // CYBERPUNK CSS FALLBACK
+            backgroundImage: `url(${landingBg})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed', // Fix background during scroll
@@ -62,24 +43,6 @@ export default function LandingPage({ onEnter }) {
             overflowY: 'auto', // Allow vertical scrolling if content overflows
             overflowX: 'hidden'
         }}>
-
-            {/* --- VERSION INDICATOR (FIXED TOP RIGHT) --- */}
-            <div style={{
-                position: 'fixed',
-                top: '10px',
-                right: '10px',
-                zIndex: 9999,
-                background: 'rgba(0,0,0,0.7)',
-                padding: '5px 10px',
-                borderRadius: '4px',
-                border: '1px solid #39FF14',
-                color: '#39FF14',
-                fontSize: '0.8rem',
-                fontWeight: 'bold',
-                fontFamily: 'monospace'
-            }}>
-                v4.8 LIVE (STABLE UI)
-            </div>
 
             {/* --- GLOBAL STYLES --- */}
             <style>{`
@@ -114,50 +77,51 @@ export default function LandingPage({ onEnter }) {
                 }
             `}</style>
 
-            {/* --- CYBERPUNK DYNAMIC BACKGROUND (CODE ONLY - NO IMAGES) --- */}
+            {/* --- BACKGROUND LAYERS --- */}
 
-            {/* 1. Deep Space Base */}
+            {/* Dark Overlay */}
             <div style={{
                 position: 'absolute', inset: 0,
-                background: 'radial-gradient(circle at center top, #1a0b2e 0%, #000000 80%)',
-                zIndex: 0
-            }} />
-
-            {/* 2. Moving 3D Grid (The "Runway" Feel) */}
-            <div style={{
-                position: 'absolute', inset: 0,
-                perspective: '1000px',
-                overflow: 'hidden',
-                zIndex: 0
-            }}>
-                <div style={{
-                    position: 'absolute',
-                    top: '0', left: '-50%', right: '-50%', bottom: '0',
-                    background: `
-                        linear-gradient(rgba(0, 242, 255, 0.3) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(0, 242, 255, 0.3) 1px, transparent 1px)
-                    `,
-                    backgroundSize: '100px 100px, 100px 100px',
-                    transform: 'rotateX(60deg)',
-                    transformOrigin: 'top center',
-                    animation: 'gridMove 10s linear infinite',
-                    boxShadow: '0 0 100px rgba(0, 242, 255, 0.2) inset'
-                }} />
-            </div>
-
-            {/* 3. Horizon Glow */}
-            <div style={{
-                position: 'absolute', top: '0', left: '0', right: '0', height: '60%',
-                background: 'linear-gradient(to bottom, #000000 0%, transparent 100%)',
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%)',
                 zIndex: 1
             }} />
 
-            <style>{`
-                @keyframes gridMove {
-                    0% { background-position: 0 0; }
-                    100% { background-position: 0 100px; }
-                }
-            `}</style>
+            {/* Scanline Effect */}
+            <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.05), transparent)',
+                zIndex: 2,
+                animation: 'scanline 8s linear infinite',
+                pointerEvents: 'none'
+            }} />
+
+            {/* City Lights Glitter Layer - Enhanced with Flicker and Height */}
+            <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}>
+                {[...Array(40)].map((_, i) => (
+                    <div key={i} style={{
+                        position: 'absolute',
+                        left: `${Math.random() * 100}%`,
+                        // Allow some lights to go higher (30%+) to simulate tall buildings
+                        top: `${30 + Math.random() * 70}%`,
+                        width: `${Math.random() * 4}px`,
+                        height: `${Math.random() * 4}px`,
+                        background: i % 4 === 0 ? '#ffffff' : i % 3 === 0 ? '#ff00ff' : i % 3 === 1 ? '#00f2ff' : '#ffd700',
+                        borderRadius: '50%',
+                        boxShadow: `0 0 ${Math.random() * 5 + 2}px ${i % 4 === 0 ? '#ffffff' : i % 3 === 0 ? '#ff00ff' : i % 3 === 1 ? '#00f2ff' : '#ffd700'}`,
+                        // Mix 'twinkle' and 'flicker' for variety
+                        animation: `${i % 2 === 0 ? 'twinkle' : 'flicker'} ${1 + Math.random() * 4}s infinite ${Math.random() * 5}s`
+                    }} />
+                ))}
+            </div>
+
+            {/* Spinning Background Grid */}
+            <div style={{
+                position: 'absolute',
+                top: '-50%', left: '-50%', width: '200%', height: '200%',
+                background: 'radial-gradient(circle, rgba(0,242,255,0.03) 0%, transparent 60%)',
+                animation: 'spin 120s linear infinite',
+                zIndex: 1
+            }} />
 
             {/* --- LEFT NAVIGATION BAR (The "Barra que permite navegar") --- */}
             <div style={{
@@ -402,12 +366,11 @@ export default function LandingPage({ onEnter }) {
                 transition: 'all 1s ease-out 0.6s'
             }}>
 
-                {/* MAIN LOGIN (ADMIN/EXISTING) */}
                 <button
                     onClick={handleEnter}
                     disabled={isEntering}
                     style={{
-                        background: isEntering ? 'transparent' : 'rgba(0, 0, 0, 0.5)',
+                        background: isEntering ? 'transparent' : 'rgba(0, 0, 0, 0.3)', // Darker backing
                         border: '1px solid #00f2ff',
                         color: isEntering ? 'transparent' : '#00f2ff',
                         padding: '18px 60px',
@@ -433,7 +396,7 @@ export default function LandingPage({ onEnter }) {
                     }}
                     onMouseLeave={(e) => {
                         if (!isEntering) {
-                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.5)';
+                            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.3)';
                             e.currentTarget.style.color = '#00f2ff';
                             e.currentTarget.style.boxShadow = 'none';
                         }
@@ -451,103 +414,10 @@ export default function LandingPage({ onEnter }) {
                     )}
                 </button>
 
-                {/* REGISTRATION OPTIONS */}
-                {!isEntering && (
-                    <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
-                        <button
-                            onClick={() => setRegistrationMode('user')}
-                            style={{
-                                background: 'transparent', border: '1px solid #ffd700', color: '#ffd700',
-                                padding: '10px 20px', cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '1px',
-                                fontSize: '0.8rem', transition: 'all 0.3s'
-                            }}
-                            onMouseEnter={(e) => e.target.style.boxShadow = '0 0 10px #ffd700'}
-                            onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
-                        >
-                            Soy Pasajero
-                        </button>
-                        <button
-                            onClick={() => setRegistrationMode('driver')}
-                            style={{
-                                background: 'transparent', border: '1px solid #39FF14', color: '#39FF14',
-                                padding: '10px 20px', cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '1px',
-                                fontSize: '0.8rem', transition: 'all 0.3s'
-                            }}
-                            onMouseEnter={(e) => e.target.style.boxShadow = '0 0 10px #39FF14'}
-                            onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
-                        >
-                            Soy Conductor
-                        </button>
-                        <button
-                            onClick={() => setRegistrationMode('admin')}
-                            style={{
-                                background: 'transparent', border: '1px solid #00f2ff', color: '#00f2ff',
-                                padding: '10px 20px', cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '1px',
-                                fontSize: '0.8rem', transition: 'all 0.3s'
-                            }}
-                            onMouseEnter={(e) => e.target.style.boxShadow = '0 0 10px #00f2ff'}
-                            onMouseLeave={(e) => e.target.style.boxShadow = 'none'}
-                        >
-                            Admin
-                        </button>
-                    </div>
-                )}
-
                 <div style={{ fontSize: '0.7rem', color: '#555', letterSpacing: '1px' }}>
-                    SECURE CONNECTION v4.2 (ORCHESTRA) | MEDELLÍN
+                    SECURE CONNECTION v4.1.5 | MEDELLÍN
                 </div>
             </div>
-
-            {/* --- MODALS --- */}
-            {registrationMode === 'admin' && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.9)', zIndex: 1000,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <div style={{
-                        background: '#111', border: '1px solid #00f2ff', padding: '30px',
-                        display: 'flex', flexDirection: 'column', gap: '15px', width: '300px'
-                    }}>
-                        <h3 style={{ color: '#00f2ff', margin: 0 }}>ACCESO CLASIFICADO</h3>
-                        <input
-                            type="password"
-                            placeholder="CÓDIGO DE ACCESO"
-                            style={{
-                                background: '#222', border: '1px solid #333', color: '#fff',
-                                padding: '10px', outline: 'none'
-                            }}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    if (e.target.value === 'TESO2026') {
-                                        handleRegistrationComplete({ role: 'admin' });
-                                    } else {
-                                        alert('ACCESO DENEGADO');
-                                    }
-                                }
-                            }}
-                        />
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button
-                                onClick={() => setRegistrationMode(null)}
-                                style={{ flex: 1, padding: '10px', background: '#333', color: '#fff', border: 'none', cursor: 'pointer' }}
-                            >CANCELAR</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {registrationMode === 'user' && (
-                <UserRegistration
-                    onComplete={handleRegistrationComplete}
-                    onCancel={() => setRegistrationMode(null)}
-                />
-            )}
-            {registrationMode === 'driver' && (
-                <DriverRegistration
-                    onComplete={handleRegistrationComplete}
-                    onCancel={() => setRegistrationMode(null)}
-                />
-            )}
 
             {/* --- KEYFRAMES --- */}
             <style>{`

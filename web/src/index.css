@@ -22,12 +22,9 @@ body,
 .leaflet-container {
     width: 100%;
     height: 100%;
-    background: rgb(10, 15, 26);
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: 0;
-    outline-style: none;
+    z-index: 1;
+    background: #0a0f1a;
+    /* Match theme background to prevent white flicker */
 }
 
 /* Make the map look Cyberpunk using CSS filters on standard tiles */
@@ -198,11 +195,11 @@ body {
 }
 
 .btn-neon:hover {
-    background: rgba(0, 240, 255, 0.25);
+    background: rgba(0, 240, 255, 0.15);
     color: #fff;
     border-color: var(--neon-blue);
-    box-shadow: 0 0 25px rgba(0, 240, 255, 0.6), 0 0 10px rgba(0, 240, 255, 0.4) inset;
-    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    transform: translateY(-2px);
 }
 
 .btn-neon.active {
@@ -264,14 +261,12 @@ body {
 }
 
 /* --- MOBILE RESPONSIVE LAYOUT --- */
-/* --- MOBILE RESPONSIVE LAYOUT --- */
 .app-container {
-    display: block;
-    /* CHANGED from grid to block for Fullscreen Map */
+    display: grid;
+    grid-template-columns: 70% 30%;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    position: relative;
 }
 
 /* UI UTILITY CLASSES (Replaces inline styles for responsiveness) */

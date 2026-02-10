@@ -1,5 +1,4 @@
 import { startTransition, Suspense, lazy, useState, useEffect, useRef } from 'react'; // Added Suspense, lazy, hooks
-import { jsPDF } from "jspdf";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, Polyline, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -7,18 +6,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 // FORCE REBUILD: 2026-01-29 15:35 v2 - FIX DUPLICATES
 
 
-
-// --- HELPER FOR ROBUST LAZY LOADING (Auto-Reload on Version Mismatch) ---
-const lazyWithReload = (importFn) => lazy(() =>
-  importFn().catch(error => {
-    console.warn("Version mismatch detected (Chunk Load Error). Reloading app...", error);
-    // Only reload if it's likely a network/chunk error (not a logic error) to avoid infinite loops
-    if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('Importing a module script failed'))) {
-      window.location.reload();
-    }
-    throw error;
-  })
-);
 
 // --- DYNAMIC IMPORTS (Fix for Circular Dependencies / ReferenceError) ---
 const LandingPage = lazy(() => import('./components/LandingPage'));
@@ -28,10 +15,8 @@ const Presentation = lazy(() => import('./components/Presentation'));
 // const WebcamOverlay = lazy(() => import('./components/WebcamOverlay'));
 // const AgenticCommandBar = lazy(() => import('./components/AgenticCommandBar'));
 // const GastroDashboard = lazy(() => import('./components/GastroDashboard'));
-const OperationalDashboard = lazyWithReload(() => import('./components/OperationalDashboard'));
+const OperationalDashboard = lazy(() => import('./components/OperationalDashboard'));
 // const LogisticsDashboard = lazy(() => import('./components/LogisticsDashboard'));
-const ClientDashboard = lazy(() => import('./components/ClientDashboard'));
-const DriverDashboard = lazy(() => import('./components/DriverDashboard'));
 // import { CoreOperativo } from './views/CoreOperativo'; // Removed to prevent conflict, handled in child
 
 
@@ -216,66 +201,45 @@ const FLIGHT_DATA = [
 
 
 // --- RESPONSIVE RADAR CONTROLLER (SAFE IMPLEMENTATION) ---
-// --- RESPONSIVE RADAR CONTROLLER (SAFE IMPLEMENTATION) ---
 const createPlane = (bounds, center) => {
   const airlines = ['AA', 'AV', 'LA', 'CM', 'NK', 'IB', 'DL', 'AM'];
   const markets = ['MIA', 'MAD', 'BOG', 'PTY', 'JFK', 'SCL', 'LIM', 'MEX'];
 
-  let south, north, west, east;
-
-  // SAFETY: Fallback bounds if map not ready or invalid
-  if (!bounds || !bounds.getSouth || !bounds.isValid()) {
-    // Default JMC Area (Medellin)
-    south = 6.00; north = 6.40; west = -75.70; east = -75.30;
-  } else {
-    south = bounds.getSouth();
-    north = bounds.getNorth();
-    west = bounds.getWest();
-    east = bounds.getEast();
-  }
-
-  // Ensure Center is valid
-  const safeCenter = (center && typeof center.lat === 'number') ? center : { lat: 6.2442, lng: -75.5812 };
-
+  const airline = airlines[Math.floor(Math.random() * airlines.length)];
+  const south = bounds.getSouth();
+  const north = bounds.getNorth();
+  const west = bounds.getWest();
+  const east = bounds.getEast();
   const latSpan = north - south;
   const lngSpan = east - west;
 
-  // SPAWN LOGIC: SPAWN FAR OUTSIDE (1.2x - 1.5x distance)
-  // This ensures they appear "coming from outside"
-  const PADDING_LAT = latSpan * 0.8;
-  const PADDING_LNG = lngSpan * 0.8;
-
+  // SPAWN LOGIC: 
+  const PADDING = latSpan * 0.1;
   const edge = Math.floor(Math.random() * 4);
   let lat, lng;
 
-  if (edge === 0) { // From North (Top)
-    lat = north + PADDING_LAT;
-    lng = west + (Math.random() * lngSpan); // Random horizontal
-  } else if (edge === 1) { // From South (Bottom)
-    lat = south - PADDING_LAT;
-    lng = west + (Math.random() * lngSpan);
-  } else if (edge === 2) { // From West (Left)
-    lat = south + (Math.random() * latSpan);
-    lng = west - PADDING_LNG;
-  } else { // From East (Right)
-    lat = south + (Math.random() * latSpan);
-    lng = east + PADDING_LNG;
+  if (edge === 0) { // Top
+    lat = north + PADDING;
+    lng = west + Math.random() * lngSpan;
+  } else if (edge === 1) { // Bottom
+    lat = south - PADDING;
+    lng = west + Math.random() * lngSpan;
+  } else if (edge === 2) { // Left
+    lat = south + Math.random() * latSpan;
+    lng = west - PADDING;
+  } else { // Right
+    lat = south + Math.random() * latSpan;
+    lng = east + PADDING;
   }
 
-  // HEADING LOGIC: AIM FOR CENTER (plus/minus random jitter)
-  // atan2(deltaLon, deltaLat) aligns 0 with North
-  const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.3); // Aim near center
-  const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.3);
-
+  const targetLat = center.lat + (Math.random() - 0.5) * (latSpan * 0.5);
+  const targetLng = center.lng + (Math.random() - 0.5) * (lngSpan * 0.5);
   const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
-
-  // SPEED: Traversing the map should take ~20-30 seconds
-  // Speed needs to be proportional to span
-  const speed = (latSpan * 0.002) + (Math.random() * (latSpan * 0.001));
+  const speed = (latSpan * 0.005) + (Math.random() * (latSpan * 0.005));
 
   return {
-    id: `${airlines[Math.floor(Math.random() * airlines.length)]}${Math.floor(100 + Math.random() * 900)}`,
-    airline: airlines[Math.floor(Math.random() * airlines.length)],
+    id: `${airline}${Math.floor(100 + Math.random() * 900)}`,
+    airline,
     from: markets[Math.floor(Math.random() * markets.length)],
     lat, lng,
     heading: angleToCenter,
@@ -293,66 +257,41 @@ const RadarController = ({ setPlanes }) => {
 
     const safeUpdate = () => {
       try {
+        // STRICT SAFETY CHECK: Core fix for the crash
         if (!map || !map._leaflet_id || !map.getContainer()) return;
 
         const bounds = map.getBounds();
         const center = map.getCenter();
-        // DEATH BOUNDS: When to despawn?
-        // Must be slightly LARGER than current view, but smaller than spawn point
-        // Pad 0.5 means 50% larger view. Spawn is at 0.8 padding.
-        // So plane spawns at 0.8, enters 0.5 (death), enters 0.0 (view), exits 0.0, exits 0.5 -> Despawn
-        const deathBounds = bounds.pad(0.6);
+        const deathBounds = bounds.pad(0.2);
 
         setPlanes(prevPlanes => {
-          // Initialize filling
+          // Initialize if empty
           if (prevPlanes.length === 0) {
             return Array.from({ length: 6 }).map(() => createPlane(bounds, center));
           }
 
-          // Maintain Count (Replenish if low)
+          // Update existing
           let currentPlanes = [...prevPlanes];
           while (currentPlanes.length < 6) {
-            // "Sale uno, entra otro" logic handled here implicitly by array length
             currentPlanes.push(createPlane(bounds, center));
           }
 
-          // MOVE PLANES
           return currentPlanes.map(p => {
-            // Trig for North=0 system
             const nextLat = p.lat + (Math.cos(p.heading * Math.PI / 180) * p.speed);
             const nextLng = p.lng + (Math.sin(p.heading * Math.PI / 180) * p.speed);
 
-            // CHECK DESPAWN: If it flies OUT of death bounds (after passing through?)
-            // We need a simple check: allow them to exist for a while? 
-            // Better: If they are moving AWAY from center and are Far away.
-            // Simplified: If outside deathbounds, respawn NEW ONE.
-            // Since they spawn OUTSIDE deathbounds (0.8 > 0.6), we need to ensure they don't die instantly.
-            // FIX: Only kill if moving AWAY? Or just ensure spawn is inside death bounds?
-            // User wants "Appear outside, move in".
-            // So spawn MUST be visible or just on edge? "Desde afuera hacia adentro".
-            // Let's spawn at Pad 0.6 (Edge of Life) and Death at Pad 0.7?
-            // Actually, if we spawn at Pad 0.8, and Death is Pad 0.6, they die instantly.
-            // We should Set Death at Pad 1.0 (Huge). Spawn at Pad 1.1?
-
-            // NEW STRATEGY: 
-            // Death boundary is HUGE (Pad 2.0).
-            // Spawn boundary is Pad 1.2.
-            // They fly to center. Once they pass center and exit Pad 2.0, they die.
-            const lifeBounds = bounds.pad(2.0);
-
-            if (!lifeBounds.contains([nextLat, nextLng])) {
-              // It traveled all the way across and left. Respawn new incoming.
+            if (!deathBounds.contains([nextLat, nextLng])) {
               return createPlane(bounds, center);
             }
             return { ...p, lat: nextLat, lng: nextLng };
           });
         });
       } catch (err) {
-        // Silent fail
+        // Silent fail to prevent crash loop
       }
     };
 
-    const interval = setInterval(safeUpdate, 100); // Smoother animation (100ms)
+    const interval = setInterval(safeUpdate, 800);
     return () => clearInterval(interval);
   }, [map, setPlanes]);
 
@@ -392,13 +331,6 @@ function App() {
     return () => window.removeEventListener('error', handler);
   }, []);
 
-  // EVENT LISTENER FOR REMOTE ACTIONS (Fix for prop drilling)
-  useEffect(() => {
-    const handlePitch = () => setShowPresentation(true);
-    window.addEventListener('SHOW_PITCH', handlePitch);
-    return () => window.removeEventListener('SHOW_PITCH', handlePitch);
-  }, []);
-
   const [showLanding, setShowLanding] = useState(true);
   const autoAssignRef = useRef(null);
   const [showPresentation, setShowPresentation] = useState(false); // NEW: Investor Pitch Mode
@@ -431,17 +363,7 @@ function App() {
   const [clients, setClients] = useState([]);
   const [futureBookings, setFutureBookings] = useState([]);
 
-  // FIX: Pre-populate simulationContext with structure to avoid "Screen in 0"
-  const [simulationContext, setSimulationContext] = useState({
-    kpis: {
-      total_income: 0,
-      trips_24h: 0,
-      active_drivers: 0,
-      efficiency_index: 0
-    },
-    cash_flow: [],
-    banks: []
-  });
+  const [simulationContext, setSimulationContext] = useState(null); // FIX: Init to NULL to force Dashboard Loading State
 
   // --- ROLE DETECTION (NEW) ---
   const [userRole, setUserRole] = useState('admin'); // 'admin', 'client', 'driver'
@@ -511,8 +433,6 @@ function App() {
     { name: 'SIER SERVICE', pdf: null, last: 'FAC-001' },
     { name: 'PERSONAL SOFT', pdf: null, last: 'FAC-003' }
   ];
-  const [financeTab, setFinanceTab] = useState('DASHBOARD'); // NEW: Sub-tabs for Finance
-
 
   const [isAutoDemo, setIsAutoDemo] = useState(false); // NEW: DIRECTOR MODE
   const [demoSlide, setDemoSlide] = useState(0); // CONTROLLED SLIDE STATE
@@ -763,47 +683,7 @@ function App() {
   if (showLanding) {
     return (
       <Suspense fallback={<div style={{ height: '100vh', width: '100vw', background: '#000', color: '#39FF14', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace' }}><h1>TESO OS v3.0 (VORTEX)</h1><p>INITIALIZING NEURAL CORE...</p></div>}>
-        <LandingPage onEnter={(role) => {
-          if (role) setUserRole(role);
-          setShowOperationalDashboard(false);
-          setShowLanding(false);
-        }} />
-      </Suspense>
-    );
-  }
-
-  // --- SECURITY: ROLE BASED ROUTING ---
-  // If we passed the Landing Page, strict routing applies.
-  if (!showLanding) {
-    if (userRole === 'driver') {
-      return (
-        <Suspense fallback={<div style={{ color: '#39FF14' }}>Cargando Panel de Conductor...</div>}>
-          <DriverDashboard onBack={() => { setShowLanding(true); setUserRole(null); }} />
-        </Suspense>
-      );
-    }
-
-    if (userRole === 'client') {
-      return (
-        <Suspense fallback={<div style={{ color: 'gold' }}>Cargando Servicio VIP...</div>}>
-          <ClientDashboard onBack={() => { setShowLanding(true); setUserRole(null); }} />
-        </Suspense>
-      );
-    }
-
-    // Default Fallback: ADMIN / CONTROLLER (OperationalDashboard)
-    return (
-      <Suspense fallback={<div style={{ color: '#00f2ff' }}>Cargando Centro de Operaciones...</div>}>
-        <OperationalDashboard
-          planes={planes}
-          vehicles={vehicles}
-          requests={requests}
-          isHeatmap={isHeatmap}
-          activeTab={activeTab}
-          isScanning={isScanning}
-          activeRequestId={activeRequestId}
-          setRequests={setRequests} // Pass setter for interactions
-        />
+        <LandingPage onEnter={() => { setShowOperationalDashboard(false); setShowLanding(false); }} />
       </Suspense>
     );
   }
@@ -2756,246 +2636,6 @@ function App() {
             )}
 
             {activeTab === 'FINANZAS' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', height: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
-                  <h3 style={{ color: '#00F0FF', margin: 0 }}>CONTROL FINANCIERO ERP</h3>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      className="btn-neon"
-                      style={{ fontSize: '0.8rem', padding: '5px 15px', borderColor: '#00F0FF', color: '#00F0FF' }}
-                      onClick={() => {
-                        const doc = new jsPDF();
-                        doc.setFontSize(22);
-                        doc.setTextColor(0, 0, 0);
-                        doc.text("TESO - FACTURA ELECTRÓNICA", 10, 20);
-
-                        doc.setFontSize(12);
-                        doc.text(`Fecha Emisión: ${new Date().toLocaleDateString()}`, 10, 35);
-                        doc.text(`Hora: ${new Date().toLocaleTimeString()}`, 10, 42);
-                        doc.text("Cliente: DEMO CORPORATIVO S.A.S", 10, 55);
-                        doc.text("NIT: 900.123.456-1", 10, 62);
-                        doc.text("Dirección: CR 43A # 1-50, Medellín", 10, 69);
-
-                        // Table Header
-                        doc.setFillColor(200, 200, 200);
-                        doc.rect(10, 80, 190, 10, 'F');
-                        doc.setFont("helvetica", "bold");
-                        doc.text("DESCRIPCIÓN", 12, 87);
-                        doc.text("VALOR", 150, 87);
-
-                        // Items
-                        doc.setFont("helvetica", "normal");
-                        doc.text("Servicio de Transporte Especial (Van)", 12, 100);
-                        doc.text("$ 245,000", 150, 100);
-
-                        doc.text("Espera en Aeropuerto (60 min)", 12, 110);
-                        doc.text("$ 45,000", 150, 110);
-
-                        doc.text("Peajes & Tasa Aeroportuaria", 12, 120);
-                        doc.text("$ 28,000", 150, 120);
-
-                        // Total
-                        doc.setFont("helvetica", "bold");
-                        doc.text("SUBTOTAL:", 120, 140);
-                        doc.text("$ 318,000", 150, 140);
-
-                        doc.text("IVA (19%):", 120, 150);
-                        doc.text("$ 60,420", 150, 150);
-
-                        doc.setTextColor(0, 0, 150);
-                        doc.setFontSize(14);
-                        doc.text("TOTAL A PAGAR:", 110, 165);
-                        doc.text("$ 378,420 COP", 150, 165);
-
-                        // Footer
-                        doc.setFontSize(10);
-                        doc.setTextColor(100);
-                        doc.text("Resolución DIAN No. 18760000001 (Vigencia 24 Meses)", 10, 280);
-                        doc.text("Esta factura se asimila a letra de cambio (Art 774 C.Co)", 10, 285);
-
-                        // Save
-                        doc.save("TESO_FACTURA_FE-9923.pdf");
-                        addLog("📄 FACTURA PDF GENERADA Y DESCARGADA.");
-                        speak("Factura descargada exitosamente.");
-                      }}
-                    >
-                      📄 VER FACTURA (PDF)
-                    </button>
-                    <button
-                      className="btn-neon"
-                      style={{ fontSize: '0.8rem', padding: '5px 15px', borderColor: 'gold', color: 'gold' }}
-                      onClick={() => {
-                        const csvHeader = "TIPO,DATA_A,DATA_B,VALOR\n";
-                        const csvRows = `DEMO_EXPORT,${new Date().toISOString()},TESO_ERP,0`;
-                        const csvContent = "data:text/csv;charset=utf-8," + encodeURI(csvHeader + csvRows);
-                        const link = document.createElement("a");
-                        link.setAttribute("href", csvContent);
-                        link.setAttribute("download", `TESO_FINANZAS_${financeTab}_${new Date().toISOString().slice(0, 10)}.csv`);
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        addLog(`💾 EXPORTANDO DATA: ${financeTab}`);
-                      }}
-                    >
-                      📥 EXPORTAR EXCEL
-                    </button>
-                  </div>
-                </div>
-
-                {/* SUB-NAVIGATION TABS */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '5px' }}>
-                  {['DASHBOARD', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'PAGOS'].map(tab => (
-                    <button
-                      key={tab}
-                      onClick={() => setFinanceTab(tab)}
-                      style={{
-                        background: financeTab === tab ? '#00F0FF' : 'rgba(255,255,255,0.05)',
-                        color: financeTab === tab ? '#000' : '#888',
-                        border: 'none', padding: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem',
-                        borderBottom: financeTab === tab ? '2px solid #fff' : 'none'
-                      }}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-
-                {/* CONTENT SWITCH */}
-                <div style={{ flex: 1, overflowY: 'auto' }}>
-                  {financeTab === 'DASHBOARD' && (
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                      <div style={{ fontSize: '2.5rem', color: '#39FF14' }}>$1,450M</div>
-                      <div style={{ color: '#aaa' }}>FACTURACIÓN TOTAL</div>
-                      <hr style={{ borderColor: '#333', margin: '20px 0' }} />
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <div style={{ background: '#111', padding: '15px' }}>
-                          <div style={{ color: '#00F0FF' }}>CXC (COBRAR)</div>
-                          <div style={{ fontSize: '1.2rem' }}>$280M</div>
-                        </div>
-                        <div style={{ background: '#111', padding: '15px' }}>
-                          <div style={{ color: 'orange' }}>CXP (PAGAR)</div>
-                          <div style={{ fontSize: '1.2rem' }}>$112M</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {financeTab === 'CXC' && (
-                    <div>
-                      <h4 style={{ color: '#00F0FF', margin: '10px 0' }}>CLIENTES (CUENTAS POR COBRAR)</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        {['ALCALDÍA DE MEDELLÍN', 'GRUPO EXITO S.A.', 'BANCOLOMBIA', 'SURA ARL', 'EPM ESP', 'ARGOS', 'PROTECCION', 'NUTRESA'].map((name, i) => (
-                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', borderBottom: '1px solid #222', background: '#111' }}>
-                            <div>
-                              <div style={{ fontWeight: 'bold' }}>{name}</div>
-                              <div style={{ fontSize: '0.6rem', color: '#666' }}>NIT: 890.900.{100 + i}</div>
-                            </div>
-                            <span style={{ color: i < 3 ? 'red' : '#39FF14' }}>${(Math.random() * 200 + 50).toFixed(0)}M</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {financeTab === 'CXP' && (
-                    <div>
-                      <h4 style={{ color: 'orange', margin: '10px 0' }}>PROVEEDORES (CUENTAS POR PAGAR)</h4>
-                      <div style={{ padding: '10px', background: '#111', marginBottom: '5px' }}>TERPEL (GASOLINA) - <span style={{ color: 'orange' }}>$45M</span></div>
-                      <div style={{ padding: '10px', background: '#111', marginBottom: '5px' }}>LANTIN (SEGUROS) - <span style={{ color: 'orange' }}>$12M</span></div>
-                      <div style={{ padding: '10px', background: '#111', marginBottom: '5px' }}>NOMINA CONDUCTORES - <span style={{ color: 'red' }}>$210M</span></div>
-                      <div style={{ padding: '10px', background: '#111', marginBottom: '5px' }}>CLARO (DATOS) - <span style={{ color: '#39FF14' }}>$5M</span></div>
-                    </div>
-                  )}
-
-                  {financeTab === 'BANCOS' && (
-                    <div>
-                      <h4 style={{ color: '#39FF14', margin: '10px 0' }}>SALDOS BANCARIOS</h4>
-                      <div style={{ padding: '15px', background: 'rgba(57, 255, 20, 0.05)', borderLeft: '4px solid #39FF14', marginBottom: '10px' }}>
-                        <strong>BANCOLOMBIA (PRINCIPAL)</strong>
-                        <div style={{ fontSize: '1.5rem' }}>$142,500,000</div>
-                        <div style={{ fontSize: '0.7rem', color: '#888' }}>CUENTA CORRIENTE ****9923</div>
-                      </div>
-                      <div style={{ padding: '15px', background: 'rgba(0, 240, 255, 0.05)', borderLeft: '4px solid #00F0FF', marginBottom: '10px' }}>
-                        <strong>DAVIVIENDA (NOMINA)</strong>
-                        <div style={{ fontSize: '1.5rem' }}>$35,100,000</div>
-                        <div style={{ fontSize: '0.7rem', color: '#888' }}>CUENTA AHORROS ****1102</div>
-                      </div>
-                      <div style={{ padding: '15px', background: 'rgba(255, 165, 0, 0.05)', borderLeft: '4px solid orange', marginBottom: '10px' }}>
-                        <strong>CAJA MENOR (EFECTIVO)</strong>
-                        <div style={{ fontSize: '1.5rem' }}>$4,200,000</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {financeTab === 'EGRESOS' && (
-                    <div>
-                      <h4 style={{ color: 'red', margin: '10px 0' }}>DISTRIBUCIÓN DE GASTOS</h4>
-                      {/* Placeholder chart bar */}
-                      <div style={{ height: '30px', width: '100%', background: '#333', marginBottom: '5px', display: 'flex' }}>
-                        <div style={{ width: '65%', height: '100%', background: 'red' }}></div>
-                        <div style={{ width: '20%', height: '100%', background: 'orange' }}></div>
-                        <div style={{ width: '15%', height: '100%', background: 'yellow' }}></div>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#aaa', marginTop: '5px' }}>
-                        <span style={{ color: 'red' }}>● NOMINA (65%)</span>
-                        <span style={{ color: 'orange' }}>● COMBUSTIBLE (20%)</span>
-                        <span style={{ color: 'yellow' }}>● OTROS (15%)</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {financeTab === 'PAGOS' && (
-                    <div style={{ animation: 'fadeIn 0.5s' }}>
-                      <h4 style={{ color: '#39FF14', margin: '10px 0' }}>PASARELA DE PAGOS & TRANSFERENCIAS</h4>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-                        <div
-                          style={{ background: '#111', padding: '15px', borderRadius: '8px', border: '1px solid #333', cursor: 'pointer', textAlign: 'center' }}
-                          className="hover-card"
-                          onClick={() => addLog('💳 INICIANDO PAGO NÓMINA: CONECTANDO API BANCOLOMBIA...')}
-                        >
-                          <div style={{ fontSize: '2rem' }}>👥</div>
-                          <h4 style={{ margin: '10px 0' }}>PAGO NÓMINA</h4>
-                          <p style={{ fontSize: '0.8rem', color: '#888' }}>Dispersión masiva a 145 cuentas.</p>
-                          <button className="btn-neon" style={{ marginTop: '10px', width: '100%' }}>INICIAR</button>
-                        </div>
-
-                        <div
-                          style={{ background: '#111', padding: '15px', borderRadius: '8px', border: '1px solid #333', cursor: 'pointer', textAlign: 'center' }}
-                          className="hover-card"
-                          onClick={() => addLog('⛽ INICIANDO PAGO PROVEEDORES: GASOLINA (TERPEL)...')}
-                        >
-                          <div style={{ fontSize: '2rem' }}>⛽</div>
-                          <h4 style={{ margin: '10px 0' }}>PAGO PROVEEDORES</h4>
-                          <p style={{ fontSize: '0.8rem', color: '#888' }}>Facturas vencidas: 2</p>
-                          <button className="btn-neon" style={{ marginTop: '10px', width: '100%', borderColor: 'orange', color: 'orange' }}>PAGAR ($57M)</button>
-                        </div>
-                      </div>
-
-                      <div style={{ background: '#050a10', padding: '10px', borderRadius: '5px' }}>
-                        <h5 style={{ color: '#aaa', margin: '0 0 10px 0' }}>ÚLTIMAS TRANSACCIONES (WOMPI / PSE)</h5>
-                        <div style={{ fontSize: '0.75rem', color: '#666' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px', borderBottom: '1px solid #222' }}>
-                            <span>TX-992381 (Uber Wompi)</span>
-                            <span style={{ color: '#39FF14' }}>APROBADO</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px', borderBottom: '1px solid #222' }}>
-                            <span>TX-992382 (Pago PSE)</span>
-                            <span style={{ color: '#39FF14' }}>APROBADO</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px', borderBottom: '1px solid #222' }}>
-                            <span>TX-992383 (Tarjeta Crédito)</span>
-                            <span style={{ color: 'red' }}>RECHAZADO (FONDOS)</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* OLD FINANCE DISABLED */ false && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <h3 style={{ color: '#00F0FF', borderBottom: '1px solid #333', paddingBottom: '5px' }}>CONTROL FINANCIERO ERP</h3>
 
@@ -3813,12 +3453,15 @@ function App() {
         }}>
           {[
             { label: 'RADAR JMC', icon: '📡', action: () => setActiveModule('RADAR'), color: '#39FF14' },
-            { label: 'VISIÓN IA', icon: '🧠', action: () => { setIsHeatmap(prev => !prev); if (!isHeatmap) speak('Activando capas de visión artificial.'); }, color: '#A020F0' },
-            { label: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE'), color: 'orange' },
-            { label: 'SIMULACRO', icon: '🔥', action: () => setActiveModule('SIMULATION'), color: 'red' },
+            { label: 'VISIÓN IA', icon: '🧠', action: () => setActiveModule('VISION'), color: '#A020F0' },
+            { label: 'CONECTAR MÓVIL', icon: '📱', action: () => setShowWebcam(prev => !prev), color: '#3b82f6' },
+            { label: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core-v4-vortex-fleet', '_blank'), color: '#aaa' },
+            { label: 'TEST BOOKING', icon: '🎫', action: () => setShowTripPreferences(true), color: 'gold' },
             { label: 'PITCH DECK', icon: '📢', action: () => startTransition(() => setShowPresentation(true)), color: '#ff0055' },
-            { label: 'WHATSAPP', icon: '💬', action: () => window.open('https://wa.me/?text=Hola%20TESO', '_blank'), color: '#25D366' },
-            { label: 'SOURCE GIT', icon: '👾', action: () => window.open('https://github.com/ipanemausa/teso-core-v4-vortex-fleet', '_blank'), color: '#aaa' }
+            { label: 'OPTIMIZE', icon: '✨', action: () => setActiveModule('OPTIMIZE'), color: 'orange' },
+            { label: 'AUDIT', icon: '📊', action: () => setActiveModule('AUDIT'), color: '#00F0FF' },
+            { label: 'SIMULACRO', icon: '🔥', action: () => setActiveModule('SIMULATION'), color: 'red' },
+            { label: 'SECURITY', icon: '🛡️', action: () => setActiveModule('SECURITY'), color: '#00F0FF' }
           ].map((item, i) => (
             <button
               key={i}
@@ -3826,16 +3469,11 @@ function App() {
               onClick={item.action}
               style={{
                 display: 'flex', alignItems: 'center', gap: '10px',
-                // Updated to Smokey Glass Gradient for High Contrast
-                background: 'linear-gradient(180deg, rgba(71, 85, 105, 0.6) 0%, rgba(15, 23, 42, 0.9) 100%)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.03)', border: 'none',
                 padding: '10px 15px', borderRadius: '12px', color: '#fff',
                 cursor: 'pointer', transition: 'all 0.2s',
                 textAlign: 'left', minWidth: '160px',
-                borderLeft: `3px solid ${item.color}`,
-                boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-                textShadow: '0 2px 4px rgba(0,0,0,1)' // Maximum Readability
+                borderLeft: `3px solid ${item.color}`
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
@@ -3891,28 +3529,6 @@ function App() {
         </Suspense>
       )}
 
-      {/* WEBCAM / MOBILE CONNECT MODAL */}
-      {showWebcam && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-          background: 'rgba(0,0,0,0.8)', zIndex: 12000,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)'
-        }} onClick={() => setShowWebcam(false)}>
-          <div style={{
-            background: '#111', padding: '40px', borderRadius: '20px',
-            border: '1px solid #00F0FF', textAlign: 'center',
-            boxShadow: '0 0 50px rgba(0, 240, 255, 0.2)'
-          }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ color: '#00F0FF', marginBottom: '20px' }}>CONECTAR DISPOSITIVO</h2>
-            <div style={{ background: '#fff', padding: '10px', display: 'inline-block', borderRadius: '10px' }}>
-              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TESO-CONNECT-${Math.floor(Math.random() * 1000)}`} alt="QR Code" />
-            </div>
-            <p style={{ color: '#aaa', marginTop: '20px' }}>Escanea para vincular tu móvil como Dashcam.</p>
-            <button className="btn-neon" onClick={() => setShowWebcam(false)} style={{ marginTop: '20px', width: '100%' }}>CANCELAR</button>
-          </div>
-        </div>
-      )}
-
     </main >
   );
 }
@@ -3950,13 +3566,15 @@ const FullScreenModule = ({ view, onClose, systemData }) => {
         );
       case 'SECURITY':
         return (
-          <div style={{ textAlign: 'center', marginTop: '100px' }}>
-            <div style={{ fontSize: '4rem', color: '#39FF14', marginBottom: '20px' }}>🛡️</div>
-            <h2>SISTEMA DE SEGURIDAD ACTIVO</h2>
-            <p style={{ color: '#aaa', maxWidth: '600px', margin: '0 auto' }}>
-              Monitoreo en tiempo real de 15 unidades. Enlace con Policía Nacional activo.
-              Sin alertas críticas reportadas en las últimas 24 horas.
-            </p>
+          <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <div style={{ fontSize: '4rem' }}>🛡️</div>
+            <h2>SISTEMA DE MONITOREO ACTIVO</h2>
+            <p>Todas las unidades están reportando telemetría segura.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '30px' }}>
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} style={{ background: '#000', height: '100px', border: '1px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>CAM FEED {i} (OFFLINE)</div>
+              ))}
+            </div>
           </div>
         );
       case 'VISION':
@@ -3982,48 +3600,21 @@ const FullScreenModule = ({ view, onClose, systemData }) => {
         );
       case 'SIMULATION':
         return (
-          <div style={{ textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
             <div style={{ border: '1px solid red', padding: '20px', background: 'rgba(255,0,0,0.1)', marginBottom: '30px' }}>
-              <h2 style={{ color: 'red', margin: 0 }}>⚠️ ESCENARIOS DE CRISIS & FRICCIÓN</h2>
-              <p style={{ color: '#aaa' }}>Simulación de eventos adversos para probar la resiliencia del algoritmo.</p>
+              <h2 style={{ color: 'red', margin: 0 }}>⚠️ ZONA DE CONTROL DE CATÁSTROFES</h2>
+              <p style={{ color: '#aaa' }}>Este módulo permite simular escenarios de alta demanda y fallos operativos para entrenar al sistema.</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-              <button className="btn-neon" onClick={() => { onClose(); systemData.onSimulate?.(); }} style={{ height: '120px', fontSize: '1.2rem', borderColor: 'red', color: 'red' }}>
-                🔥 SIMULAR COLAPSO (60 OPS)
-                <div style={{ fontSize: '0.8rem', marginTop: '10px', color: '#fff' }}>Test de Saturación de Flota</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <button className="btn-neon" onClick={() => { onClose(); systemData.onSimulate?.(); }} style={{ height: '150px', fontSize: '1.5rem', borderColor: 'red', color: 'red' }}>
+                🔥 SIMULAR DÍA CRÍTICO
+                <div style={{ fontSize: '0.8rem', marginTop: '10px' }}>(Lluvias + Alta Demanda)</div>
               </button>
-              <button className="btn-neon" style={{ height: '120px', fontSize: '1.2rem', borderColor: 'orange', color: 'orange' }}>
-                🌧️ CLIMA SEVERO
-                <div style={{ fontSize: '0.8rem', marginTop: '10px', color: '#fff' }}>Retrasos en Vuelos (ETA +45m)</div>
+              <button className="btn-neon" style={{ height: '150px', fontSize: '1.5rem', borderColor: 'orange', color: 'orange' }}>
+                🌧️ SIMULAR CLIMA SEVERO
+                <div style={{ fontSize: '0.8rem', marginTop: '10px' }}>(Retrasos en Vuelos)</div>
               </button>
-            </div>
-
-            {/* REALISTIC METRICS PANEL */}
-            <div className="glass-panel" style={{ padding: '20px', textAlign: 'left' }}>
-              <h3 style={{ borderBottom: '1px solid #333', paddingBottom: '10px', marginBottom: '15px' }}>📊 REPORTE DE INCIDENCIAS (TIEMPO REAL)</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
-                <div>
-                  <div style={{ color: '#aaa', fontSize: '0.8rem' }}>TASA CANCELACIÓN</div>
-                  <div style={{ color: 'red', fontSize: '1.5rem', fontWeight: 'bold' }}>4.2%</div>
-                  <small style={{ color: '#666' }}>Usuario final</small>
-                </div>
-                <div>
-                  <div style={{ color: '#aaa', fontSize: '0.8rem' }}>REASIGNACIONES</div>
-                  <div style={{ color: 'orange', fontSize: '1.5rem', fontWeight: 'bold' }}>12</div>
-                  <small style={{ color: '#666' }}>Por tráfico/retraso</small>
-                </div>
-                <div>
-                  <div style={{ color: '#aaa', fontSize: '0.8rem' }}>NO SHOW (CONDUCTOR)</div>
-                  <div style={{ color: 'yellow', fontSize: '1.5rem', fontWeight: 'bold' }}>1.5%</div>
-                  <small style={{ color: '#666' }}>Falla humana</small>
-                </div>
-                <div>
-                  <div style={{ color: '#aaa', fontSize: '0.8rem' }}>TIEMPO PROMEDIO</div>
-                  <div style={{ color: '#39FF14', fontSize: '1.5rem', fontWeight: 'bold' }}>28m</div>
-                  <small style={{ color: '#666' }}>En operación</small>
-                </div>
-              </div>
             </div>
           </div>
         );
@@ -4053,48 +3644,13 @@ const FullScreenModule = ({ view, onClose, systemData }) => {
       case 'OPTIMIZE':
         return (
           <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <h2>✨ OPTIMIZADOR DE FLOTA (IA)</h2>
-            <p style={{ color: '#aaa', marginBottom: '30px' }}>Impacto financiero calculado en tiempo real (vs. Operación Manual)</p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-
-              {/* METRIC 1: FUEL */}
-              <div className="glass-panel" style={{ padding: '25px', textAlign: 'center', border: '1px solid #00F0FF' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⛽</div>
-                <h3 style={{ color: '#00F0FF', fontSize: '1.2rem' }}>AHORRO COMBUSTIBLE</h3>
-                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff', margin: '10px 0' }}>14.2%</div>
-                <div style={{ color: '#39FF14', background: 'rgba(57, 255, 20, 0.1)', padding: '5px', borderRadius: '10px', fontSize: '0.9rem' }}>
-                  + $4.2M COP / MES
-                </div>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px' }}>Rutas más cortas y velocidad constante.</p>
-              </div>
-
-              {/* METRIC 2: MAINTENANCE */}
-              <div className="glass-panel" style={{ padding: '25px', textAlign: 'center', border: '1px solid gold' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🔧</div>
-                <h3 style={{ color: 'gold', fontSize: '1.2rem' }}>MANTENIMIENTO</h3>
-                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff', margin: '10px 0' }}>- 22%</div>
-                <div style={{ color: 'gold', background: 'rgba(255, 215, 0, 0.1)', padding: '5px', borderRadius: '10px', fontSize: '0.9rem' }}>
-                  MENOS DESGASTE
-                </div>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px' }}>Alerta temprana de frenos y aceite.</p>
-              </div>
-
-              {/* METRIC 3: IDLE TIME */}
-              <div className="glass-panel" style={{ padding: '25px', textAlign: 'center', border: '1px solid orange' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⏳</div>
-                <h3 style={{ color: 'orange', fontSize: '1.2rem' }}>TIEMPO MUERTO</h3>
-                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff', margin: '10px 0' }}>35 Min</div>
-                <div style={{ color: 'orange', background: 'rgba(255, 165, 0, 0.1)', padding: '5px', borderRadius: '10px', fontSize: '0.9rem' }}>
-                  GANADOS / DÍA
-                </div>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '10px' }}>Reducción de ralentí y esperas.</p>
-              </div>
+            <div style={{ fontSize: '3rem', marginBottom: '20px' }}>✨</div>
+            <h2>OPTIMIZADOR DE FLOTA (AI)</h2>
+            <p>Analizando patrones de ruta y consumo de combustible...</p>
+            <div style={{ width: '100%', height: '10px', background: '#333', borderRadius: '5px', marginTop: '20px', overflow: 'hidden' }}>
+              <div style={{ width: '60%', height: '100%', background: '#00F0FF' }}></div>
             </div>
-
-            <div style={{ marginTop: '40px', padding: '20px', background: 'rgba(0, 240, 255, 0.05)', borderRadius: '10px', border: '1px dashed #00F0FF', display: 'inline-block' }}>
-              <strong style={{ color: '#39FF14' }}>TOTAL AHORRO PROYECTADO (ANUAL):</strong> <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>$52,000,000 COP</span>
-            </div>
+            <p style={{ color: '#00F0FF', marginTop: '10px' }}>EFICIENCIA ACTUAL: 87%</p>
           </div>
         );
       default:

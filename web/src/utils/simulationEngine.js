@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-// --- CONFIGURACIÓN DE LA SIMULACIÓN - ACTIVO VIVO v4 ---
+// --- CONFIGURACIÓN DE LA SIMULACIÓN - ACTIVO VIVO v3 ---
 const DEFAULT_CONFIG = {
     DAYS_TO_SIMULATE: 180,         // Regla: 180 Días
     TOTAL_DRIVERS: 300,            // Regla: 300 Carros (Flota)

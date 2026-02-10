@@ -19,10 +19,6 @@ import ExplainableTooltip from './ExplainableTooltip';
 import TesoButton from './ui/TesoButton';
 import StatusBadge from './ui/StatusBadge';
 import { CoreOperativo } from '../views/CoreOperativo';
-import { NeonNavbar } from './NeonNavbar';
-import LiveOpsMap from './dashboard/LiveOpsMap'; // NEW IMPORT
-import GeminiConsultantArtifact from './dashboard/GeminiConsultantArtifact';
-import { voiceSystem, VOICE_TAGS } from '../services/VoiceSystem';
 
 // HELPER: Date Parser
 const parseItemDate = (dateStr) => {
@@ -41,90 +37,12 @@ const formatCurrency = (amount) => {
     }).format(amount);
 };
 
-const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'LIVE_OPS', onRowClick, simulationData: propSimulationData, onClose, onHome, onRegenerate, onSimulateStress, onRunMacro }) => {
+const OperationalDashboard = ({ vehicles, requests, initialViewMode = 'ANALYTICS', onRowClick, simulationData: propSimulationData, onClose, onHome, onRegenerate, onSimulateStress, onRunMacro }) => {
 
     // --- STATE ---
     const [simulationData, setSimulationData] = useState(propSimulationData || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [voiceEnabled, setVoiceEnabled] = useState(true); // Default ON for demo
-    const [opsCommand, setOpsCommand] = useState(null); // Command channel for CoreOperativo
-
-
-    // --- VOICE SYNTHESIS (Unified System) ---
-    const speakAgentMessage = (text, emotion = 'professional') => {
-        if (!voiceEnabled) return;
-
-        // SMART FORMATTING: If text already has tags (from Backend Agent), respect them.
-        // Otherwise, apply the requested UI emotion.
-        const hasExistingTags = /^\s*\[.*\]/.test(text);
-        const styledText = hasExistingTags ? text : voiceSystem.formatText(text, emotion);
-
-        // Detect urgency for Native Fallback (Simple heuristic)
-        const isUrgent = text.includes('[urgent]') || text.includes('[angry]') || emotion === 'urgent';
-        const urgency = isUrgent ? 'CRITICAL' : 'INFO';
-
-        voiceSystem.speak(styledText, urgency);
-    };
-
-    // --- AUTO-SPEAK AGENT ALERTS ---
-    useEffect(() => {
-        // Prevent speaking if data is just the initialization skeleton
-        if (!propSimulationData || !propSimulationData.details) return;
-
-        let script = null;
-
-        // 1. Check for Financial Agent Script
-        if (propSimulationData.details?.agent_analysis?.voice_script) {
-            script = propSimulationData.details.agent_analysis.voice_script;
-        }
-        // 2. Check for Logistics Agent Script
-        else if (propSimulationData.analysis?.voice_script) {
-            script = propSimulationData.analysis.voice_script;
-        }
-
-        if (script) {
-            console.log("🗣️ AGENT SPEAKING:", script);
-            speakAgentMessage(script);
-        }
-    }, [propSimulationData]);
-
-    // --- AUTONOMOUS MONITOR POLLING (INDUSTRIAL EFFICIENCY) ---
-    useEffect(() => {
-        const lastAlertRef = { current: null }; // volatile memory for last alert time
-
-        const pollAlerts = async () => {
-            try {
-                // Poll backend for background alerts
-                const res = await fetch('https://teso-api-dev.fly.dev/api/agently/alerts');
-                if (!res.ok) return;
-
-                const alerts = await res.json();
-                if (alerts.length > 0) {
-                    const latest = alerts[0]; // Newest first
-
-                    // Check if it's new
-                    if (latest.timestamp !== lastAlertRef.current) {
-                        lastAlertRef.current = latest.timestamp;
-                        console.log("🚨 NEW AUTONOMOUS ALERT:", latest);
-
-                        // Extract voice script from the alert payload
-                        // Structure depends on how trigger stored it. 
-                        // Trigger puts the full 'audit' object in data.
-                        if (latest.data && latest.data.analysis) {
-                            const script = `Alerta Autónoma. ${latest.data.analysis.message}`;
-                            speakAgentMessage(script);
-                        }
-                    }
-                }
-            } catch (e) {
-                // Silent fail on polling to not spam console
-            }
-        };
-
-        const interval = setInterval(pollAlerts, 30000); // Check every 30s
-        return () => clearInterval(interval);
-    }, []);
 
     // FIX: Sync Prop to State (React Pattern for Derived State)
     useEffect(() => {
@@ -136,171 +54,71 @@ const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'L
 
 
 
-    // --- CEO AGENT INTEGRATION ---
-    const [ceoReport, setCeoReport] = useState(null);
-    const [isCeoThinking, setIsCeoThinking] = useState(false);
-
-    const triggerStrategicCycle = async () => {
-        setIsCeoThinking(true);
-        try {
-            const resp = await fetch('/api/strategic-cycle', { method: 'POST' });
-            if (resp.ok) {
-                const data = await resp.json();
-                setCeoReport(data);
-                // Speak the CEO's directive
-                if (data.voice_broadcast) {
-                    speakAgentMessage(data.voice_broadcast.text);
-                }
-            }
-        } catch (e) {
-            console.error("CEO Brain Offline:", e);
-        } finally {
-            setIsCeoThinking(false);
-        }
-    };
-
-    // --- BUTTON HANDLERS (BACKEND CONNECTED) ---
-    const handleAuditClick = async () => {
-        speakAgentMessage("Iniciando Auditoría Profunda con Agente Financiero...");
-        try {
-            // Robust endpoint call
-            const res = await fetch('/api/decisions/financial-audit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error(`Server Error (${res.status}): ${errText}`);
-            }
-
-            const data = await await res.json();
-            console.log("AUDIT RESULT:", data);
-
-            // Speak the result
-            const score = data.score || 0;
-            const verdict = data.verdict || "Desconocido";
-            speakAgentMessage(`Auditoría Finalizada. Score: ${score}. Veredicto: ${verdict}`);
-
-            // Optional: Show visual feedback
-            alert(`✅ AUDITORÍA COMPLETADA\n\nScore: ${score}/100\nVeredicto: ${verdict}\n\n(Vea el log para más detalles)`);
-
-        } catch (e) {
-            console.error("Audit Failed", e);
-            speakAgentMessage("Error crítico conectando con el Agente Financiero.");
-            alert(`❌ ERROR DE CONEXIÓN:\n${e.message}\n\nVerifique que el Backend Python esté corriendo.`);
-        }
-    };
-
-    // Auto-trigger CEO on first load (Simulated Proactivity)
-    useEffect(() => {
-        if (simulationData && !ceoReport) {
-            // Wait 2s then trigger
-            const t = setTimeout(triggerStrategicCycle, 2000);
-            return () => clearTimeout(t);
-        }
-    }, [simulationData]);
-
     // --- FETCH DATA FROM BACKEND (V4 ENGINE) ---
     useEffect(() => {
         if (simulationData) return; // If passed as prop, use it
 
         const loadBackendData = async () => {
-            // ... existing data fetch logic ...
-            console.log("📡 CONNECTING TO TESO OPS V4 (MASTER DATA CLOUD)...");
+            console.log("📡 CONNECTING TO TESO OPS V4...");
             setLoading(true);
             try {
-                const apiUrl = ''; // Relative path for unified deployment (Hugging Face / Docker)
+                const apiUrl = 'https://teso-api-dev.fly.dev'; // Force Production URL
 
-                // 1. GET REAL MASTER DATA (From Python Backend)
-                // Use GET /api/simulation/data which returns the Global Cache (Excel/DB data)
-                const res = await fetch(`${apiUrl}/api/simulation/data`);
+                // 1. GET V4 STATS
+                const res = await fetch(`${apiUrl}/api/simulate/core-v4`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cars: 15, avg_trips_per_day: 40, days: 360 })
+                });
 
                 if (!res.ok) throw new Error("Ops Engine Offline");
                 const v4Result = await res.json();
                 console.log("✅ OPS CONNECTED:", v4Result);
 
-                let services = [];
-                let bankTransactions = [];
+                // 2. GENERATE CLIENT-SIDE DATASET (For Map & Graphs)
+                // 40 trips * 360 days = 14,400 rows (Manageable in memory)
+                const totalTrips = v4Result.operational?.annual_trips || 14400;
+                const cars = v4Result.operational?.cars || 15;
 
-                // 2. CHECK IF BACKEND RETURNED REAL SERVICES (Master Dataset)
-                if (v4Result.services && v4Result.services.length > 0) {
-                    console.log(`⚡ HYBRID ENGINE: Loading ${v4Result.services.length} rows from Backend...`);
+                // Generate fast
+                const services = new Array(totalTrips);
+                const baseDate = new Date();
+                baseDate.setDate(baseDate.getDate() - 360);
 
-                    // ADAPTER: Backend (Spanish/Excel) -> Frontend (English/React)
-                    services = v4Result.services.map((s, i) => ({
-                        id: s.ID || `TRIP-${i}`,
-                        date: s.FECHA || s.date, // Tries both
-                        // Chaos Coords (Medellin Center + Noise)
-                        lat: 6.24 + (Math.random() * 0.08 - 0.04),
+                for (let i = 0; i < totalTrips; i++) {
+                    const carId = (i % cars) + 1;
+                    // Distribute dates over 360 days
+                    const dayOffset = Math.floor(i / 40);
+                    const tripDate = new Date(baseDate);
+                    tripDate.setDate(tripDate.getDate() + dayOffset);
+
+                    services[i] = {
+                        id: `TRIP-${i}`,
+                        date: tripDate.toISOString(),
+                        lat: 6.24 + (Math.random() * 0.08 - 0.04), // Medellín
                         lng: -75.58 + (Math.random() * 0.08 - 0.04),
-                        status: s.status || s.ESTADO || 'COMPLETED',
-                        financials: s.financials || {
-                            totalValue: s.TARIFA || 0,
-                            driverPayment: (s.TARIFA || 0) * 0.7, // Approx
-                            netRevenue: (s.TARIFA || 0) * 0.2 // Approx
+                        status: 'COMPLETED',
+                        financials: {
+                            totalValue: 125000,
+                            driverPayment: 82000,
+                            netRevenue: 25000
                         },
-                        plate: s.VEHICULO || s.plate || 'TBA',
-                        driver_name: s.CONDUCTOR || s.driver_name || 'Desconocido',
-                        company: s.CLIENTE || s.company || 'PARTICULAR',
-                        source: 'MASTER_DATASET' // Flag for UI
-                    }));
-
-                    // Map Bank Tx
-                    if (v4Result.detailed_cash_flow) {
-                        bankTransactions = v4Result.detailed_cash_flow.map(tx => ({
-                            date: tx.FECHA,
-                            amount: tx.MONTO,
-                            type: tx.MONTO > 0 ? 'INCOME' : 'EXPENSE',
-                            description: tx.DETALLE || tx.TIPO
-                        }));
-                    }
-
-                } else {
-                    // FALLBACK: CLIENT SIDE GENERATION (Legacy)
-                    console.warn("⚠️ BACKEND EMPTY. GENERATING SYNTHETIC FALLBACK.");
-                    const totalTrips = 14400;
-                    const cars = 15;
-                    const baseDate = new Date();
-                    baseDate.setDate(baseDate.getDate() - 360);
-
-                    services = new Array(totalTrips);
-                    for (let i = 0; i < totalTrips; i++) {
-                        const carId = (i % cars) + 1;
-                        const dayOffset = Math.floor(i / 40);
-                        const tripDate = new Date(baseDate);
-                        tripDate.setDate(tripDate.getDate() + dayOffset);
-
-                        services[i] = {
-                            id: `TRIP-${i}`,
-                            date: tripDate.toISOString(),
-                            lat: 6.24 + (Math.random() * 0.08 - 0.04),
-                            lng: -75.58 + (Math.random() * 0.08 - 0.04),
-                            status: 'COMPLETED',
-                            financials: { totalValue: 125000, driverPayment: 82000, netRevenue: 25000 },
-                            plate: `TES-${100 + carId}`,
-                            driver_name: `Cond. ${carId}`,
-                            source: 'SYNTHETIC_FALLBACK'
-                        };
-                    }
+                        plate: `TES-${100 + carId}`,
+                        driver_name: `Cond. ${carId}`
+                    };
                 }
 
-                // 3. GENERATE LIVE PLANES (LAYER 2 ASSETS) - Always Synthetic for now
-                const planes = Array.from({ length: 8 }).map((_, i) => ({
-                    id: `FL-${500 + i}`,
-                    lat: 6.24 + (Math.random() * 0.1 - 0.05),
-                    lng: -75.58 + (Math.random() * 0.1 - 0.05),
-                    heading: Math.floor(Math.random() * 360),
-                    alt: 8000 + Math.floor(Math.random() * 5000),
-                    spd: 240 + Math.floor(Math.random() * 40),
-                    status: Math.random() > 0.3 ? 'AIRBORNE' : 'LANDED',
-                    from: ['MIA', 'BOG', 'CLO', 'JFK', 'MAD'][Math.floor(Math.random() * 5)]
+                // 3. STUB BANK TRANSACTIONS (For Graph Consistency)
+                const bankTransactions = services.filter((_, i) => i % 10 === 0).map(s => ({
+                    date: s.date,
+                    amount: 25000, // Net Revenue
+                    type: 'INCOME',
+                    description: 'Comisión Teso Ops'
                 }));
 
                 setSimulationData({
                     ...v4Result,
                     services: services, // Populates Map & Table
-                    planes: planes,     // Populates Map (Layer 2)
                     bankTransactions: bankTransactions
                 });
 
@@ -695,81 +513,6 @@ const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'L
 
     // PDF Preview State
     const [previewPdf, setPreviewPdf] = useState(null);
-    // --- CEO VISUAL PANEL ---
-    const CeoPanel = () => {
-        if (!ceoReport && !isCeoThinking) return null;
-
-        return (
-            <div style={{
-                margin: '20px',
-                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-                border: '1px solid #6366f1',
-                borderRadius: '8px',
-                padding: '20px',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)'
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div style={{
-                            fontSize: '2rem',
-                            background: '#fff',
-                            borderRadius: '50%',
-                            width: '50px', height: '50px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>👔</div>
-                        <div>
-                            <div style={{ fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 'bold' }}>VORTEX STRATEGIC ORCHESTRATOR</div>
-                            <div style={{ fontSize: '1.2rem', color: '#fff', fontWeight: '900' }}>
-                                {isCeoThinking ? 'ANALIZANDO ESTRATEGIA GLOBAL...' : 'DIRECTIVA EJECUTIVA VIGENTE'}
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <button
-                            onClick={triggerStrategicCycle}
-                            disabled={isCeoThinking}
-                            style={{
-                                background: isCeoThinking ? '#4338ca' : '#4f46e5',
-                                color: '#fff',
-                                border: 'none',
-                                padding: '10px 20px',
-                                borderRadius: '6px',
-                                fontWeight: 'bold',
-                                cursor: isCeoThinking ? 'wait' : 'pointer'
-                            }}>
-                            {isCeoThinking ? '⏳ CALCULANDO...' : '🔄 RE-EVALUAR ESTRATEGIA'}
-                        </button>
-                    </div>
-                </div>
-
-                {ceoReport && !isCeoThinking && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '6px' }}>
-                            <div style={{ color: '#818cf8', fontSize: '0.75rem', marginBottom: '5px' }}>DECISIÓN DEL CEO</div>
-                            <div style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '10px' }}>
-                                {ceoReport.strategic_alignment.directive.replace(/_/g, ' ')}
-                            </div>
-                            <div style={{ color: '#c7d2fe', fontSize: '0.9rem', fontStyle: 'italic' }}>
-                                "{ceoReport.strategic_alignment.reasoning}"
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '4px', borderLeft: '3px solid #34d399' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>CFO (FINANZAS)</div>
-                                <div style={{ fontWeight: 'bold', color: '#fff' }}>Score: {ceoReport.department_reports?.finance?.executive_summary?.score || 0}/100</div>
-                            </div>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '4px', borderLeft: '3px solid #fbbf24' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>COO (LOGÍSTICA)</div>
-                                <div style={{ fontWeight: 'bold', color: '#fff' }}>Status: {ceoReport.department_reports?.operations?.dispatch_summary?.status || 'N/A'}</div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    };
-
     // --- MACRO STRUCTURE: AI WORKFORCE ORCHESTRATOR ---
     const [workforce, setWorkforce] = useState({
         activeOrderId: null,
@@ -891,237 +634,1098 @@ const OperationalDashboard = ({ vehicles, requests, planes, initialViewMode = 'L
             left: 0,
             width: '100%',
             height: '100%',
-            // FIX: Transparency for Map Visibility (No Glass Overlay)
-            background: viewMode === 'LIVE_OPS' ? 'transparent' : 'var(--color-bg-app)',
-            backdropFilter: viewMode === 'LIVE_OPS' ? 'none' : 'blur(20px)',
-            boxShadow: viewMode === 'LIVE_OPS' ? 'none' : '0 0 50px rgba(0,0,0,0.5)',
-            border: viewMode === 'LIVE_OPS' ? 'none' : '1px solid var(--color-border-subtle)',
-            // Enable interaction in both modes now, relying on z-index
-            pointerEvents: 'auto',
+            background: 'var(--color-bg-app)', // Tokenized
             color: 'var(--color-text-primary)', // Tokenized
             zIndex: 100,
-            padding: viewMode === 'LIVE_OPS' ? 0 : 'var(--spacing-xl)', // REMOVED PADDING FOR FULLSCREEN MAP
+            padding: 'var(--spacing-xl)', // Tokenized
             display: 'flex',
             flexDirection: 'column',
             fontFamily: "var(--font-main)" // Tokenized
         }}>
-
-
-            {/* MODULAR ARCHITECTURE (v4) */}
-            {viewMode === 'LIVE_OPS' ? (
-                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                    <LiveOpsMap
-                        opsCommand={opsCommand}
-                        simulationData={{
-                            ...simulationData,
-                            // MERGE PROPS: Use App.jsx real-time state if available, fallback to simulationData
-                            services: requests || simulationData?.services,
-                            vehicles: vehicles || simulationData?.vehicles
-                        }}
-                        // PASS PLANES DIRECTLY (Bypass simulationData for Radar)
-                        planes={planes}
-                    />
+            {/* VIEW MODE: CORE OPERATIVO */}
+            {viewMode === 'CORE' && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 200, overflowY: 'auto' }}>
+                    <CoreOperativo onClose={onClose} onHome={onHome} />
                 </div>
-            ) : (
-                <>
-                    {/* --- ANALYTICS & STRATEGY VIEW --- */}
+            )}
 
-                    {/* 1. HEADER & NAVIGATION */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', pointerEvents: 'auto' }}>
-                        <NeonNavbar
-                            activeTab={activeSheet}
-                            onTabChange={setActiveSheet}
-                            tabs={[
-                                { id: 'PROGRAMACION', label: 'AGENDA', icon: '📅' },
-                                { id: 'FINANCE', label: 'FINANZAS', icon: '💰' },
-                                { id: 'CLIENTS', label: 'CLIENTES', icon: '🏢' },
-                                { id: 'MARKETING', label: 'MERCADO', icon: '📢' },
-                                { id: 'WAR_ROOM', label: 'WAR ROOM', icon: '⚔️' }
-                            ]}
-                        />
+            {/* PDF PREVIEW MODAL */}
+            {previewPdf && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <div style={{ width: '90%', height: '90%', background: '#222', borderRadius: '15px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ padding: '15px', background: '#333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, color: 'gold' }}>📄 VISOR DE DOCUMENTOS (SECURE)</h3>
+                            <button
+                                onClick={() => setPreviewPdf(null)}
+                                style={{
+                                    background: 'red', color: 'white', border: 'none', padding: '10px 20px',
+                                    borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer'
+                                }}>
+                                CERRAR X
+                            </button>
+                        </div>
+                        <iframe src={previewPdf} style={{ width: '100%', height: '100%', border: 'none' }} title="PDF Invoice"></iframe>
+                    </div>
+                </div>
+            )}
 
-                        <div style={{ display: 'flex', gap: '10px' }}>
+            {/* UNIFIED HEADER (Replaces Legacy V3) */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid #333', paddingBottom: '5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', letterSpacing: '1px' }}>MAP HUB</h1>
+                        <StatusBadge status="active">● LIVE TRACKING</StatusBadge>
+                    </div>
+                    {/* MODE SWITCHER */}
+                    <div style={{ display: 'flex', background: '#222', borderRadius: '4px', padding: '3px' }}>
+                        <TesoButton
+                            variant={viewMode === 'ANALYTICS' ? 'active' : 'ghost'}
+                            size="sm"
+                            style={viewMode === 'ANALYTICS' ? { background: '#FFD700', color: '#000', fontWeight: 'bold' } : {}}
+                            onClick={() => setViewMode('ANALYTICS')}
+                        >
+                            MAP EXPLORER
+                        </TesoButton>
+                        <TesoButton
+                            variant={viewMode === 'CORE' ? 'active' : 'ghost'}
+                            size="sm" // Smaller
+                            style={viewMode === 'CORE' ? { background: '#00f2ff', color: '#000', fontWeight: 'bold' } : {}}
+                            onClick={() => setViewMode('CORE')}
+                        >
+                            CORE DATA
+                        </TesoButton>
+                        <TesoButton
+                            variant={viewMode === 'LIVE_OPS' ? 'active' : 'ghost'}
+                            size="sm"
+                            onClick={() => setViewMode('LIVE_OPS')}
+                        >
+                            AI TASK FORCE
+                        </TesoButton>
+                    </div>
+                </div>
+
+                {/* COMPACT CONTROL BAR */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+
+                    {/* AUDIT TOGGLE (RESTORED) */}
+                    <TesoButton
+                        variant={isAuditMode ? 'active' : 'glass'}
+                        size="sm"
+                        onClick={() => setIsAuditMode(!isAuditMode)}
+                    >
+                        {isAuditMode ? '● AUDIT ON' : '○ AUDIT OFF'}
+                    </TesoButton>
+
+                    {/* TIME FILTER */}
+                    <div style={{ display: 'flex', gap: '2px', background: 'rgba(255,255,255,0.05)', padding: '2px', borderRadius: '6px', alignItems: 'center' }}>
+                        {['Today', '30D', '90D', '180D', '360D', 'ALL'].map(period => (
                             <TesoButton
-                                label={isAuditMode ? "🔓 EXIT AUDIT" : "🔒 AUDIT MODE"}
-                                active={isAuditMode}
-                                onClick={() => setIsAuditMode(!isAuditMode)}
-                                variant="secondary"
-                            />
-                            <TesoButton label="✖ CLOSE" onClick={onClose} variant="danger" />
+                                key={period}
+                                variant={timeFilter === period ? 'active' : 'ghost'}
+                                size="sm"
+                                style={{ padding: '2px 6px', fontSize: '0.65rem' }} // Micro override
+                                onClick={() => setTimeFilter(period)}
+                            >
+                                {period === 'Today' ? 'Día (Hoy)' : period}
+                            </TesoButton>
+                        ))}
+                    </div>
+
+                    {/* WAR ROOM TOGGLE */}
+                    <TesoButton
+                        variant={showWarRoom ? 'dangerSolid' : 'danger'} // Using dangerSolid for active state if preferred, or custom style
+                        style={showWarRoom ? { background: '#FF5722', color: '#fff', border: '1px solid #FF5722' } : {}}
+                        size="sm"
+                        onClick={() => setShowWarRoom(!showWarRoom)}
+                    >
+                        ⚡ WAR ROOM
+                    </TesoButton>
+
+                    {/* SIMULATION CONTROLS */}
+                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center', marginLeft: '10px' }}>
+                        <div style={{ display: 'flex', gap: '2px' }}>
+                            <TesoButton
+                                variant="ghost"
+                                size="sm"
+                                style={{ background: '#333', color: '#fff' }}
+                                onClick={() => onRegenerate && onRegenerate({ DAYS_TO_SIMULATE: 90, TOTAL_DRIVERS: 300, TOTAL_CLIENTS: 200 })}
+                            >
+                                90D
+                            </TesoButton>
+                            <TesoButton
+                                variant="ghost"
+                                size="sm"
+                                style={{ background: '#333', color: '#fff' }}
+                                onClick={() => onRegenerate && onRegenerate({ DAYS_TO_SIMULATE: 180, TOTAL_DRIVERS: 300, TOTAL_CLIENTS: 250 })}
+                            >
+                                180D
+                            </TesoButton>
+                            <TesoButton
+                                variant="danger" // Using danger for high impact or custom override
+                                size="sm"
+                                style={{ background: '#FF5722', color: '#fff', border: 'none' }}
+                                onClick={() => onRegenerate && onRegenerate({ DAYS_TO_SIMULATE: 360, TOTAL_DRIVERS: 500, TOTAL_CLIENTS: 400 })}
+                            >
+                                360D
+                            </TesoButton>
+                        </div>
+
+                        {/* EVENTS / MACROS */}
+                        <TesoButton
+                            variant="dangerSolid"
+                            size="sm"
+                            style={{ background: '#ef4444' }}
+                            onClick={onSimulateStress}
+                            title="Simular Día Crítico (Caos)"
+                        >
+                            💥 STRESS
+                        </TesoButton>
+
+                        <TesoButton
+                            variant="primary"
+                            size="sm"
+                            style={{ background: 'linear-gradient(45deg, purple, blue)', color: '#fff', border: 'none' }}
+                            onClick={onRunMacro}
+                            title="Ejecutar Macro de Presentación"
+                        >
+                            🤖 MACRO
+                        </TesoButton>
+                    </div>
+
+                    {/* NAVIGATION BUTTONS */}
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <TesoButton
+                            variant="secondary"
+                            size="sm"
+                            onClick={onHome}
+                            title="Ir al Inicio (Landing)"
+                        >
+                            🏠 INICIO
+                        </TesoButton>
+                        <TesoButton
+                            variant="danger"
+                            size="sm"
+                            onClick={onClose}
+                            title="Volver al Mapa (Capa 2)"
+                        >
+                            🗺️ MAPA
+                        </TesoButton>
+                    </div>
+
+
+                </div>
+            </div>
+
+            {/* --- WAR ROOM (SCENARIO BUILDER) PANEL --- */}
+            {showWarRoom && (
+                <div style={{
+                    background: '#1a1a1a',
+                    border: stressResult.status === 'INSOLVENT' ? '2px solid var(--color-kpi-danger)' : '2px solid var(--color-kpi-positive)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: 'var(--spacing-lg)',
+                    marginBottom: 'var(--spacing-lg)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--spacing-md)',
+                    boxShadow: stressResult.status === 'INSOLVENT' ? 'var(--shadow-glow-red)' : '0 0 30px rgba(5, 150, 105, 0.3)'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, color: '#fff', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            🎮 SIMULADOR DE ESTRÉS FINANCIERO
+                            <StatusBadge status={stressResult.status === 'INSOLVENT' ? 'critical' : 'active'}>
+                                {stressResult.status === 'INSOLVENT' ? '🚨 RIESGO DE QUIEBRA' : '✅ MODELO SOSTENIBLE'}
+                            </StatusBadge>
+                        </h3>
+                        <div style={{ textAlign: 'right' }}>
+                            <ExplainableTooltip
+                                title="Días de Caja (Runway)"
+                                explanation="Días restantes antes de la quiebra. Fórmula: (Saldo Actual + Ingresos Proyectados) / Gastos Fijos Diarios. Fuente: Motor de Simulación Python."
+                            >
+                                <div style={{ fontSize: '0.8rem', color: '#aaa', cursor: 'help', textDecoration: 'underline dotted' }}>CASH RUNWAY ℹ</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: stressResult.status === 'INSOLVENT' ? '#ef4444' : '#059669' }}>
+                                    {stressResult.runway}
+                                </div>
+                            </ExplainableTooltip>
                         </div>
                     </div>
 
-                    {/* 2. CEO INTELLIGENCE PANEL */}
-                    <div style={{ pointerEvents: 'auto' }}>
-                        <CeoPanel />
+                    {/* DOWNLOAD BUTTON */}
+                    <div style={{ textAlign: 'right', marginTop: '-10px' }}>
+                        <button
+                            onClick={handleDownloadReport}
+                            style={{
+                                background: 'transparent',
+                                color: '#fff',
+                                border: '1px solid #fff',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                fontSize: '0.7rem',
+                                fontWeight: 'bold',
+                                opacity: 0.7
+                            }}
+                            onMouseOver={(e) => e.target.style.opacity = 1}
+                            onMouseOut={(e) => e.target.style.opacity = 0.7}
+                        >
+                            📄 DESCARGAR CERTIFICADO OFICIAL
+                        </button>
                     </div>
 
-                    {/* 3. SUB-VIEW ROUTER */}
-                    <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px', pointerEvents: 'auto' }}>
+                    <div style={{ display: 'flex', gap: '40px' }}>
+                        {/* CONTROLS */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                            <div>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', marginBottom: '5px' }}>
+                                    <span>📆 Días Cartera (CxC)</span>
+                                    <span style={{ color: 'var(--color-primary)' }}>{scenario.cxcDays} días</span>
+                                </label>
+                                <input
+                                    type="range" min="0" max="90" step="5"
+                                    value={scenario.cxcDays}
+                                    onChange={(e) => setScenario({ ...scenario, cxcDays: e.target.value })}
+                                    style={{ width: '100%', accentColor: 'var(--color-primary)' }}
+                                />
+                                <small style={{ color: 'var(--color-text-muted)' }}>Tiempo promedio de cobro a clientes.</small>
+                            </div>
 
-                        {/* A. AGENDA (PROGRAMACION) */}
-                        {activeSheet === 'PROGRAMACION' && (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                                {/* KPIS */}
-                                <div className="glass-panel" style={{ padding: '20px' }}>
-                                    <h3>METRICAS OPERATIVAS</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                        <div>
-                                            <div className="label">Eficiencia</div>
-                                            <div className="value-lg" style={{ color: 'var(--color-kpi-positive)' }}>{metrics.efficiency}%</div>
-                                        </div>
-                                        <div>
-                                            <div className="label">Conflictos</div>
-                                            <div className="value-lg" style={{ color: metrics.errorRate > 0 ? 'var(--color-kpi-danger)' : 'var(--color-text-secondary)' }}>
-                                                {simulationData?.conflicts?.cancellations || 0}
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', marginBottom: '5px' }}>
+                                    <span>💸 Frecuencia Pagos (CxP)</span>
+                                    <span style={{ color: 'var(--color-kpi-warning)' }}>{scenario.cxpFreq} días</span>
+                                </label>
+                                <input
+                                    type="range" min="1" max="30" step="1"
+                                    value={scenario.cxpFreq}
+                                    onChange={(e) => setScenario({ ...scenario, cxpFreq: e.target.value })}
+                                    style={{ width: '100%', accentColor: 'var(--color-kpi-warning)' }}
+                                />
+                                <small style={{ color: 'var(--color-text-muted)' }}>Ciclo de pago a conductores (Nómina).</small>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', fontSize: '0.9rem', marginBottom: '5px' }}>
+                                    <span>🚀 Factor Crecimiento</span>
+                                    <span style={{ color: 'gold' }}>{scenario.growth}x</span>
+                                </label>
+                                <input
+                                    type="range" min="0.5" max="5.0" step="0.5"
+                                    value={scenario.growth}
+                                    onChange={(e) => setScenario({ ...scenario, growth: e.target.value })}
+                                    style={{ width: '100%', accentColor: 'gold' }}
+                                />
+                                <small style={{ color: '#666' }}>Multiplicador de volumen de operación.</small>
+                            </div>
+
+                            {/* AI AUTO-SOLVE BUTTON */}
+                            <TesoButton
+                                id="ai-btn"
+                                variant="primary"
+                                style={{
+                                    marginTop: '10px',
+                                    background: 'linear-gradient(90deg, var(--color-primary) 0%, #0077ff 100%)',
+                                    width: '100%'
+                                }}
+                                onClick={async () => {
+                                    // DEEP AGENT VERIFICATION TRIGGER
+                                    const btn = document.getElementById('ai-btn');
+                                    if (btn) btn.innerText = "🧠 THINKING...";
+
+                                    try {
+                                        const params = `days=90&cxc_days=${scenario.cxcDays}&cxp_freq=${scenario.cxpFreq}&traffic_growth=${scenario.growth}`;
+                                        const res = await fetch(`http://localhost:8000/api/simulation/verify?${params}`);
+                                        const analysis = await res.json();
+
+                                        console.log("🦾 DEEP AGENT ANALYSIS:", analysis);
+
+                                        // Update UI with Agent Findings
+                                        setStressResult(prev => ({
+                                            ...prev,
+                                            status: analysis.status === 'CRITICAL' ? 'INSOLVENT' : 'SUSTAINABLE',
+                                            minCash: analysis.metrics.min_cash_position,
+                                            runway: analysis.score + '/100 SCORE', // Reuse runway field for Score
+                                            analysis: analysis // Store full object
+                                        }));
+
+                                        if (analysis.score < 80) {
+                                            alert(`⚠ WARNING: Low Solvency Score (${analysis.score}).\nFlags:\n- ${analysis.flags.join('\n- ')}`);
+                                        } else {
+                                            alert(`✅ SCENARIO VERIFIED. Score: ${analysis.score}/100.\nStrategy is Sound.`);
+                                        }
+
+                                    } catch (e) {
+                                        console.error(e);
+                                        alert("Agent Connection Failed.");
+                                    } finally {
+                                        if (btn) btn.innerText = "🤖 AI SCENARIO AUDIT";
+                                    }
+                                }}
+
+                                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                🤖 AI SCENARIO AUDIT (DEEP AGENT)
+                            </TesoButton>
+
+                            {/* CLOUD EXPORT BUTTON */}
+                            <TesoButton
+                                onClick={() => {
+                                    setIsExporting(true);
+                                    const params = `days=${simulationData?.simulationMetadata?.config?.DAYS_TO_SIMULATE || 90}&cxc=${scenario.cxcDays}&cxp=${scenario.cxpFreq}&growth=${scenario.growth}`;
+                                    window.open(`http://localhost:8000/api/simulate-export?${params}`, '_blank');
+                                    setTimeout(() => setIsExporting(false), 2000);
+                                }}
+                                disabled={isExporting}
+                                variant="dangerSolid"
+                                style={{
+                                    marginTop: '10px',
+                                    background: isExporting ? '#333' : 'linear-gradient(90deg, #FF5722 0%, #ff8c00 100%)',
+                                    width: '100%',
+                                    opacity: isExporting ? 0.7 : 1,
+                                    cursor: isExporting ? 'wait' : 'pointer',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                {isExporting ? '☁️ GENERANDO EXCEL...' : '📥 EXPORTAR SIMULACIÓN (XLSX)'}
+                            </TesoButton>
+                        </div>
+
+                        {/* VISUALIZATION (REAL Dynamic Graph) */}
+                        <div style={{ flex: 1, background: '#000', borderRadius: '10px', padding: '15px', position: 'relative', overflow: 'hidden' }}>
+                            <div style={{ position: 'absolute', top: '10px', left: '10px', color: '#aaa', fontSize: '0.8rem' }}>
+                                PROYECCIÓN SALDO ({timeFilter === 'ALL' ? (simulationData?.simulationMetadata?.config?.DAYS_TO_SIMULATE || 360) + ' DÍAS' : timeFilter})
+                            </div>
+
+                            {/* SVG Sparkline */}
+                            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                {/* Zero Line (Dynamic?? No, keeping centered relative to mapping for now, but drawing specific zero line) */}
+                                {/* Actually, the zero line is dynamic based on range. Let's just draw the trend line for now. */}
+
+                                {/* Trend Curve (REAL DATA) */}
+                                <path
+                                    d={stressResult.graphPath || ""}
+                                    fill="none"
+                                    stroke={stressResult.status === 'INSOLVENT' ? '#ef4444' : '#059669'}
+                                    strokeWidth="2"
+                                    vectorEffect="non-scaling-stroke"
+                                />
+                                {/* Area Under Curve (Simplified for now - just the line is clearer for accuracy) */}
+                            </svg>
+
+                            {stressResult.status === 'INSOLVENT' && (
+                                <div style={{ position: 'absolute', bottom: '10px', right: '10px', background: '#ef4444', color: '#fff', padding: '5px 10px', borderRadius: '5px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                    💀 QUIEBRA: {(stressResult.insolvencyDay && typeof stressResult.insolvencyDay === 'string') ? stressResult.insolvencyDay.split('/')[1] : '???'} Note
                                 </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )
+            }
 
-                                {/* WORKFORCE VISUALIZER */}
-                                <div className="glass-panel" style={{ padding: '20px', gridColumn: 'span 2' }}>
-                                    <h3>ORQUESTADOR DE IA (WORKFORCE)</h3>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                                        {workforce.nodes.map((node, i) => (
-                                            <div key={node.id} style={{ textAlign: 'center', opacity: node.status === 'IDLE' ? 0.4 : 1, width: '18%' }}>
-                                                <div style={{ fontSize: '2rem', marginBottom: '10px', filter: node.status === 'WORKING' ? 'drop-shadow(0 0 8px cyan)' : 'none' }}>
+
+            {/* CONTENT AREA */}
+            {
+                viewMode === 'LIVE_OPS' ? (
+                    // --- LIVE OPS VIEW (Previous Layout) ---
+                    <div style={{ display: 'flex', gap: '30px', flex: 1, overflow: 'hidden' }}>
+
+                        {/* COL 1: AGENT HIVE */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+                            <div style={{ background: 'var(--color-bg-panel)', border: 'var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-lg)', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                                <h3 style={{ marginTop: 0, color: 'var(--color-primary)', fontSize: 'var(--text-lg)', borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: '10px' }}>
+                                    🧠 AI TASK FORCE <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>( MACRO ORCHESTRATION )</span>
+                                </h3>
+
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginTop: 'var(--spacing-md)', position: 'relative' }}>
+                                    {/* PIPELINE VISUALIZER */}
+                                    {workforce.nodes.map((node, i) => {
+                                        const isActive = node.status === 'WORKING' || node.status === 'PROCESSING';
+                                        const isDone = node.status === 'DONE';
+
+                                        return (
+                                            <div key={node.id} style={{ display: 'flex', gap: 'var(--spacing-md)', position: 'relative' }}>
+                                                {/* CONNECTOR LINE */}
+                                                {i < workforce.nodes.length - 1 && (
+                                                    <div style={{
+                                                        position: 'absolute', left: '24px', top: '40px', width: '2px', height: '30px',
+                                                        background: isDone ? 'var(--color-kpi-positive)' : 'var(--color-border-subtle)',
+                                                        boxShadow: isDone ? '0 0 10px var(--color-kpi-positive)' : 'none',
+                                                        transition: 'all 0.3s'
+                                                    }}></div>
+                                                )}
+
+                                                {/* ICON NODE */}
+                                                <div style={{
+                                                    width: '50px', height: '50px', borderRadius: '50%',
+                                                    background: isActive ? 'var(--color-kpi-positive)' : isDone ? '#059669' : '#111',
+                                                    border: isActive ? '2px solid #fff' : '1px solid var(--color-border-subtle)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '1.5rem',
+                                                    boxShadow: isActive ? '0 0 20px var(--color-kpi-positive)' : 'none',
+                                                    zIndex: 2,
+                                                    transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                                                    transition: 'all 0.3s'
+                                                }}>
                                                     {node.icon}
                                                 </div>
-                                                <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#fff' }}>{node.label}</div>
-                                                <div style={{ fontSize: '0.7rem', color: '#aaa', height: '15px' }}>{node.status === 'WORKING' ? node.logs[0] : node.status}</div>
-                                                {/* Progress Bar */}
-                                                <div style={{ height: '4px', background: '#333', marginTop: '5px', borderRadius: '2px' }}>
-                                                    <div style={{ width: `${node.load}%`, height: '100%', background: node.id === 'DISPATCH' ? '#10b981' : '#06b6d4', transition: 'width 0.2s' }}></div>
+
+                                                {/* INFO CARD */}
+                                                <div style={{
+                                                    flex: 1,
+                                                    background: isActive ? 'rgba(0, 242, 255, 0.1)' : 'rgba(255,255,255,0.03)',
+                                                    border: isActive ? '1px solid var(--color-primary)' : '1px solid var(--color-border-subtle)',
+                                                    borderRadius: 'var(--radius-md)', padding: '10px 15px',
+                                                    display: 'flex', flexDirection: 'column', justifyContent: 'center'
+                                                }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <strong style={{ color: isActive ? '#fff' : 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{node.label}</strong>
+                                                        <span style={{ fontSize: '0.7rem', color: isActive ? 'var(--color-primary)' : '#555' }}>
+                                                            {isAuditMode ? 'SHA-256: VALID' : node.status}
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+                                                        {isAuditMode ? `ID: ${(node.id || '').toString().substring(0, 4)}-${Math.floor(Math.random() * 999)} | Lat: ${Math.floor(Math.random() * 20)}ms` : node.role}
+                                                    </div>
+
+                                                    {/* LIVE LOG IN NODE */}
+                                                    {isActive && (
+                                                        <div style={{ marginTop: '5px', fontSize: '0.75rem', color: 'var(--color-kpi-positive)', fontFamily: isAuditMode ? 'var(--font-mono)' : 'inherit' }}>
+                                                            &gt; {isAuditMode ? `TX_HASH: 0x${Math.random().toString(16).substr(2, 8)}...` : node.logs[0]}
+                                                        </div>
+                                                    )}
+
+                                                    {/* LOAD BAR */}
+                                                    {isActive && (
+                                                        <div style={{ width: '100%', height: '3px', background: '#333', marginTop: '8px', borderRadius: '2px' }}>
+                                                            <div style={{ width: `${node.load}%`, height: '100%', background: 'var(--color-kpi-positive)', transition: 'width 0.2s' }}></div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* COL 2: METRICS & CONSOLE */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+                            {/* KPI CARDS */}
+                            <div style={{ display: 'flex', gap: 'var(--spacing-lg)' }}>
+                                <div style={{ flex: 1, background: 'var(--color-bg-panel)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border-subtle)', textAlign: 'center' }}>
+                                    <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold', color: 'var(--color-kpi-positive)' }}>{metrics.efficiency}%</div>
+                                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>EFICIENCIA FLOTA</div>
+                                </div>
+                                <div style={{ flex: 1, background: 'var(--color-bg-panel)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border-subtle)', textAlign: 'center' }}>
+                                    <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>{metrics.avgResponse}m</div>
+                                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', letterSpacing: '1px' }}>TIEMPO RESPUESTA</div>
+                                </div>
+                            </div>
+
+                            {/* CONSOLE */}
+                            <div style={{ flex: 1, background: '#000', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-lg)', fontFamily: 'var(--font-mono)', overflowY: 'auto', position: 'relative' }}>
+                                <div style={{ position: 'sticky', top: 0, background: '#000', borderBottom: '1px solid var(--color-border-subtle)', paddingBottom: '10px', marginBottom: '10px', color: 'var(--color-primary)', fontWeight: 'bold' }}>
+                                    &gt; SYSTEM LOGS
+                                </div>
+                                {systemLogs.map((log, i) => (
+                                    <div key={i} style={{ marginBottom: '5px', fontSize: 'var(--text-sm)' }}>
+                                        <span style={{ color: 'var(--color-text-muted)' }}>[{log.time}]</span> <span style={{ color: '#ddd' }}>{log.msg}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* COL 3: CORP BILLING */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+                            <div style={{ background: 'var(--color-bg-panel)', border: '1px solid gold', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-lg)', flex: 1, overflowY: 'auto' }}>
+                                <h3 style={{ marginTop: 0, color: 'gold', fontSize: '1.2rem', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>💳 CORPORATE BILLING</span>
+                                    <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>DIAN SYNC ACTIVE</span>
+                                </h3>
+
+                                {/* NEW: BILLING SEARCH */}
+                                <input
+                                    type="text"
+                                    placeholder="🔍 Buscar empresa..."
+                                    value={billingSearch}
+                                    onChange={(e) => setBillingSearch(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid gold',
+                                        borderRadius: 'var(--radius-sm)',
+                                        padding: '8px 12px',
+                                        color: 'var(--color-text-primary)',
+                                        marginTop: '10px',
+                                        marginBottom: '10px',
+                                        fontFamily: "var(--font-main)"
+                                    }}
+                                />
+
+                                <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', fontStyle: 'italic', marginBottom: '20px' }}>
+                                    Servicios agrupados automáticamente por corte.
+                                </p>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                                    {corporateAccounts
+                                        .filter(c => c.name.toLowerCase().includes(billingSearch.toLowerCase()))
+                                        .map(company => (
+                                            <div key={company.id} style={{
+                                                background: 'rgba(255,215,0,0.05)',
+                                                border: '1px solid rgba(255,215,0,0.2)',
+                                                borderRadius: '10px',
+                                                padding: '15px'
+                                            }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                                    <strong style={{ color: '#fff', fontSize: '1rem' }}>{company.name}</strong>
+                                                    <StatusBadge status={company.cycleStatus === 'CUTOFF READY' ? 'active' : 'neutral'}>
+                                                        {company.cycleStatus}
+                                                    </StatusBadge>
+                                                </div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+                                                    <div style={{ flex: 1, height: '6px', background: '#333', borderRadius: '3px' }}>
+                                                        <div style={{
+                                                            width: `${Math.min(company.currentCycleServices * 4, 100)}%`,
+                                                            height: '100%',
+                                                            background: 'gold',
+                                                            borderRadius: '3px',
+                                                            transition: 'width 0.5s'
+                                                        }}></div>
+                                                    </div>
+                                                    <small style={{ color: 'gold', fontSize: '0.9rem', width: '50px', textAlign: 'right' }}>
+                                                        {company.currentCycleServices} Svc
+                                                    </small>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <small style={{ color: '#aaa', fontSize: '0.7rem' }}>ÚLTIMA FACTURA</small>
+                                                        <strong style={{ color: '#fff', fontSize: '0.9rem' }}>#{company.lastInvoice}</strong>
+                                                    </div>
+                                                    <TesoButton
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        style={{
+                                                            borderColor: 'gold', color: 'gold', background: 'rgba(255,215,0,0.1)',
+                                                            border: '1px solid gold'
+                                                        }}
+                                                        onClick={() => setPreviewPdf(company.pdf)}
+                                                    >
+                                                        👁️ VER PDF
+                                                    </TesoButton>
                                                 </div>
                                             </div>
                                         ))}
-                                    </div>
-                                    {/* SYSTEM LOG */}
-                                    <div style={{ marginTop: '20px', background: '#000', padding: '10px', borderRadius: '4px', height: '100px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.8rem', color: '#39FF14' }}>
-                                        {systemLogs.map((log, i) => (
-                                            <div key={i}>[{log.time}] {log.msg}</div>
-                                        ))}
-                                    </div>
                                 </div>
                             </div>
-                        )}
-
-                        {/* B. FINANZAS */}
-                        {activeSheet === 'FINANCE' && (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '20px' }}>
-                                {/* SIDEBAR METRICS */}
-                                <div className="glass-panel" style={{ padding: '20px' }}>
-                                    <h2>CAJA: {formatCurrency(analytics.margin)}</h2>
-                                    <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                        <div><div className="label">Ingresos Totales</div><div className="value">{formatCurrency(analytics.totalRevenue)}</div></div>
-                                        <div><div className="label">Costos Operativos</div><div className="value" style={{ color: '#ef4444' }}>{formatCurrency(analytics.totalCost)}</div></div>
-                                        <div><div className="label">Margen Neto</div><div className="value" style={{ color: '#39FF14' }}>{analytics.marginPercent}%</div></div>
-                                        <hr style={{ borderColor: '#333' }} />
-                                        <div><div className="label">CxC Pendiente</div><div className="value" style={{ color: '#f59e0b' }}>{formatCurrency(analytics.cxcPending)}</div></div>
-                                        <div><div className="label">CxP Drivers</div><div className="value" style={{ color: '#6366f1' }}>{formatCurrency(analytics.cxpPending)}</div></div>
-                                    </div>
-                                    <div style={{ marginTop: '30px' }}>
-                                        <TesoButton label="🔍 AUDITAR CAJA" onClick={handleAuditClick} />
-                                    </div>
-                                </div>
-
-                                {/* MAIN GRAPH AREA */}
-                                <div className="glass-panel" style={{ padding: '20px' }}>
-                                    <h3>PROYECCIÓN DE FLUJO DE CAJA (STRESS TEST)</h3>
-                                    <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '2px', paddingBottom: '20px', borderBottom: '1px solid #333', position: 'relative' }}>
-                                        {/* SVG GRAPH RENDERER */}
-                                        {stressResult && stressResult.graphPath && (
-                                            <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                                {/* Grid */}
-                                                <line x1="0" y1="50" x2="100" y2="50" stroke="#333" strokeDasharray="2" strokeWidth="0.5" />
-                                                {/* Data Path */}
-                                                <path d={stressResult.graphPath} fill="none" stroke={stressResult.status === 'INSOLVENT' ? '#ef4444' : '#39FF14'} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-                                                {/* Fill Gradient */}
-                                                <path d={`${stressResult.graphPath} L 100 100 L 0 100 Z`} fill={stressResult.status === 'INSOLVENT' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(57, 255, 20, 0.1)'} stroke="none" />
-                                            </svg>
-                                        )}
-                                        {/* Scenario Indicator */}
-                                        <div style={{ position: 'absolute', top: 10, right: 10, textAlign: 'right' }}>
-                                            <div style={{ fontSize: '0.8rem', color: '#aaa' }}>RUNWAY ACTUAL</div>
-                                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: stressResult?.runway === '∞' ? '#39FF14' : '#ef4444' }}>{stressResult?.runway}</div>
-                                        </div>
-                                    </div>
-                                    <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '10px' }}>
-                                        * Proyección basada en {analytics.cxcPending > 0 ? 'ciclo de cobro actual' : 'datos históricos'}.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* C. WAR ROOM (CONTROL) */}
-                        {activeSheet === 'WAR_ROOM' && (
-                            <div className="glass-panel" style={{ padding: '30px', maxWidth: '800px', margin: '0 auto' }}>
-                                <h2 style={{ color: '#ef4444' }}>⚔️ COMMAND CENTER (WAR ROOM) ⚔️</h2>
-                                <p>Ajuste parámetros globales de simulación. Use con precaución.</p>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '30px' }}>
-                                    <div>
-                                        <h4>ESCENARIO DE ESTRÉS</h4>
-                                        <div style={{ marginBottom: '15px' }}>
-                                            <label>Días de Cartera (CxC)</label>
-                                            <input
-                                                type="range" min="0" max="120"
-                                                value={scenario.cxcDays}
-                                                onChange={(e) => setScenario({ ...scenario, cxcDays: e.target.value })}
-                                                style={{ width: '100%' }}
-                                            />
-                                            <div style={{ textAlign: 'right', color: '#39FF14' }}>{scenario.cxcDays} Días</div>
-                                        </div>
-                                        <div style={{ marginBottom: '15px' }}>
-                                            <label>Frecuencia Nómina</label>
-                                            <select
-                                                value={scenario.cxpFreq}
-                                                onChange={(e) => setScenario({ ...scenario, cxpFreq: parseInt(e.target.value) })}
-                                                style={{ width: '100%', background: '#000', color: '#fff', padding: '5px' }}
-                                            >
-                                                <option value={15}>Quincenal (15)</option>
-                                                <option value={30}>Mensual (30)</option>
-                                                <option value={7}>Semanal (7)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center' }}>
-                                        <TesoButton
-                                            label="🚨 SIMULAR QUIEBRA (STRESS TEST)"
-                                            variant="danger"
-                                            onClick={() => {
-                                                setScenario({ cxcDays: 90, cxpFreq: 7, growth: 0.5 }); // Killer scenario
-                                                alert("Simulando escenario 'Perfect Storm'...");
-                                            }}
-                                        />
-                                        <TesoButton
-                                            label="📄 DESCARGAR REPORTE PDF"
-                                            variant="primary"
-                                            onClick={handleDownloadReport}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* E. GEMINI ARTIFACT */}
-                        {activeSheet === 'ARTEFACTO' && (
-                            <GeminiConsultantArtifact onClose={() => setActiveSheet('PROGRAMACION')} />
-                        )}
-
-                        {/* F. CLIENTS & OTHERS (Placeholder) */}
-                        {['CLIENTS', 'MARKETING'].includes(activeSheet) && (
-                            <div style={{ textAlign: 'center', padding: '50px', color: '#666' }}>
-                                <h1>MÓDULO {activeSheet}</h1>
-                                <p>Datos en vivo conectando con API v4...</p>
-                            </div>
-                        )}
+                        </div>
 
                     </div>
-                </>
-            )}
-        </div>
+                ) : (
+                    // --- VIRTUAL EXCEL VIEW (Embedded Real-time Sheet) ---
+                    // MODIFIED: Increased Bottom Margin significantly to clear Floating Chat Bar
+                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, marginBottom: '90px', gap: '10px', overflow: 'hidden' }}>
+
+                        {/* 1. VISUAL FINANCIAL CARDS (THE RESTORED FEATURE) */}
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(5,150,105,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #10b981', padding: '10px', borderRadius: '15px' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#6ee7b7', fontWeight: 'bold', textTransform: 'uppercase' }}>Ingresos Brutos (Revenue)</div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.totalRevenue)}</div>
+                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Proyección cierre de mes: ↑ 12%</div>
+                            </div>
+
+                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(234,179,8,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #eab308', padding: '10px', borderRadius: '15px' }}>
+                                <ExplainableTooltip
+                                    title="Margen Operativo (EBITDA)"
+                                    explanation="Beneficio real tras restar costos directos (Gasolina, Comisión). No incluye impuestos ni amortizaciones. Fuente: Análisis de Flujo de Caja en Tiempo Real."
+                                >
+                                    <div style={{ fontSize: '0.75rem', color: '#fde047', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'help', textDecoration: 'underline dotted' }}>Margen Operativo ℹ</div>
+                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.margin)}</div>
+                                        <span style={{ color: '#fde047', fontWeight: 'bold', fontSize: '0.9rem' }}>({analytics.marginPercent}%)</span>
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Post-Comisiones y Gasolina</div>
+                                </ExplainableTooltip>
+                            </div>
+
+                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(249,115,22,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #f97316', padding: '10px', borderRadius: '15px' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#fdba74', fontWeight: 'bold', textTransform: 'uppercase' }}>CxC (Cartera Clientes)</div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.cxcPending)}</div>
+                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Pendiente de Facturación</div>
+                            </div>
+
+                            <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #3b82f6', padding: '10px', borderRadius: '15px' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 'bold', textTransform: 'uppercase' }}>CxP (Nómina Drivers)</div>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{formatCurrency(analytics.cxpPending)}</div>
+                                <div style={{ fontSize: '0.7rem', color: '#aaa' }}>Corte: 20 DÍAS</div>
+                            </div>
+
+                            {/* CONFLICT SUMMARY CARD (NEW) */}
+                            {simulationData && simulationData.conflicts && (
+                                <div style={{ width: '180px', flexShrink: 0, background: 'linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(0,0,0,0.4) 100%)', border: '1px solid #ef4444', padding: '8px', borderRadius: '15px' }}>
+                                    <div style={{ fontSize: '0.65rem', color: '#fca5a5', fontWeight: 'bold', textTransform: 'uppercase' }}>Conflictos Ops</div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '5px' }}>
+                                        <div style={{ fontSize: '0.75rem', color: '#fff' }}>🚫 Cancelados: <strong style={{ color: '#fca5a5' }}>{simulationData.conflicts.cancellations}</strong></div>
+                                        <div style={{ fontSize: '0.75rem', color: '#fff' }}>⏳ Retrasos: <strong style={{ color: '#fcd34d' }}>{simulationData.conflicts.delays}</strong></div>
+                                        <div style={{ fontSize: '0.75rem', color: '#fff' }}>🔄 Cambios: <strong style={{ color: '#86efac' }}>{simulationData.conflicts.driverChanges}</strong></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 2. THE SPREADSHEET */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#0f172a', borderRadius: '8px', overflow: 'hidden', border: '1px solid #334155', boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>
+
+                            {/* TOOLBAR */}
+                            <div style={{ background: '#1e293b', padding: '8px 15px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                    <div style={{ color: '#f1f5f9', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '1.2rem' }}>📊</span> LIBRO: TESO_MASTER_DATASET_VIVO.xlsx
+                                    </div>
+                                    <div style={{ background: '#059669', padding: '2px 8px', borderRadius: '20px', color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', border: '1px solid #34d399' }}>● AUTOGUARDADO: ON</div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    {/* CLOUD COMPUTE EXPORT (PYTHON) */}
+                                    <button
+                                        onClick={async () => {
+                                            setIsExporting(true);
+                                            try {
+                                                // FIX: Use relative path for production (Space)
+                                                const apiUrl = import.meta.env.VITE_API_URL || '';
+                                                const response = await fetch(`${apiUrl}/api/simulate-export?days=360`);
+                                                if (!response.ok) throw new Error('Cloud Engine Offline');
+
+                                                const blob = await response.blob();
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = "TESO_CLOUD_SIM_360D.xlsx";
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                a.remove();
+                                            } catch (e) {
+                                                alert("⚠️ ERROR: Cloud Engine Offline. Asegúrate de correr 'uvicorn main:app' en teso_core/api");
+                                                console.error(e);
+                                            } finally {
+                                                setIsExporting(false);
+                                            }
+                                        }}
+                                        style={{
+                                            background: 'linear-gradient(90deg, #6366f1 0%, #a855f7 100%)',
+                                            color: 'white',
+                                            border: '1px solid #8b5cf6',
+                                            padding: '6px 15px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            fontSize: '0.8rem',
+                                            boxShadow: '0 0 15px rgba(168, 85, 247, 0.4)'
+                                        }}
+                                        title="Generar en Servidor (No consume memoria local)"
+                                    >
+                                        <span>☁️</span> CLOUD EXPORT (360D)
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setIsExporting(true);
+                                            // Use setTimeout to allow UI to render "GENERANDO..." before blocking main thread
+                                            setTimeout(() => {
+                                                const getDescCutoff = () => {
+                                                    const d = new Date();
+                                                    d.setHours(0, 0, 0, 0);
+                                                    if (timeFilter === 'Today') { d.setDate(d.getDate() - 1); return d; }
+                                                    if (timeFilter === '30D') { d.setDate(d.getDate() - 30); return d; }
+                                                    if (timeFilter === '90D') { d.setDate(d.getDate() - 90); return d; }
+                                                    if (timeFilter === '180D') { d.setDate(d.getDate() - 180); return d; }
+                                                    return new Date('2020-01-01');
+                                                };
+                                                const cutoff = getDescCutoff();
+
+                                                const raw = [...(requests || []), ...(simulationData?.services || [])];
+                                                const filteredDownload = timeFilter === 'ALL' ? raw : raw.filter(s => parseItemDate(s.date) >= cutoff);
+
+                                                generateMasterExcel(filteredDownload, vehicles, simulationData?.clients || [], simulationData, analytics, scenario);
+                                                setIsExporting(false);
+                                            }, 100);
+                                        }}
+                                        style={{
+                                            background: isExporting ? '#555' : 'linear-gradient(90deg, #059669 0%, #10b981 100%)',
+                                            color: 'white',
+                                            border: isExporting ? '1px solid #333' : '1px solid #34d399',
+                                            padding: '6px 15px',
+                                            borderRadius: '6px',
+                                            cursor: isExporting ? 'wait' : 'pointer',
+                                            fontWeight: 'bold',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+                                            fontSize: '0.8rem',
+                                            transition: 'all 0.2s',
+                                            animation: isExporting ? 'none' : 'pulse 2s infinite'
+                                        }}
+                                        disabled={isExporting}
+                                        onMouseOver={(e) => !isExporting && (e.currentTarget.style.transform = 'translateY(-1px)')}
+                                        onMouseOut={(e) => !isExporting && (e.currentTarget.style.transform = 'translateY(0)')}
+                                    >
+                                        <span>{isExporting ? '⏳' : '📥'}</span> {isExporting ? `GENERANDO (${filteredCount})...` : `DESCARGAR REPORTE (${timeFilter})`}
+                                    </button>
+                                </div>
+
+                                {/* SHEET TABS (RESTORED) */}
+                                <div style={{ display: 'flex', gap: '5px', padding: '0 15px', background: '#1e293b', borderBottom: '1px solid #334155' }}>
+                                    {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (
+                                        <button
+                                            key={sheet}
+                                            onClick={() => setActiveSheet(sheet)}
+                                            style={{
+                                                background: activeSheet === sheet ? '#0f172a' : 'transparent',
+                                                color: activeSheet === sheet ? 'var(--neon-green)' : '#94a3b8',
+                                                border: 'none',
+                                                borderBottom: activeSheet === sheet ? '2px solid var(--neon-green)' : '2px solid transparent',
+                                                padding: '10px 15px',
+                                                cursor: 'pointer',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.8rem',
+                                                transition: 'all 0.2s',
+                                                marginBottom: '-1px' // Overlap border
+                                            }}
+                                            onMouseOver={(e) => activeSheet !== sheet && (e.currentTarget.style.color = '#cbd5e1')}
+                                            onMouseOut={(e) => activeSheet !== sheet && (e.currentTarget.style.color = '#94a3b8')}
+                                        >
+                                            {sheet}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* SPREADSHEET GRID */}
+                                <div style={{ flex: 1, overflow: 'auto', background: '#0f172a', color: '#cbd5e1', fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                        <thead style={{ position: 'sticky', top: 0, zIndex: 10, borderBottom: '3px solid var(--neon-green)' }}>
+                                            <tr>
+                                                {/* DYNAMIC HEADERS WITH SORT ICONS */}
+                                                {activeSheet === 'PROGRAMACION' && ['ID', 'FECHA', 'HORA', 'CLIENTE (Pax)', 'RUTA DESTINO', 'ESTADO', 'CONDUCTOR', 'VEHÍCULO', 'TARIFA', 'PIN SEGURIDAD'].map(h => (
+                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                ))}
+                                                {activeSheet === 'CXC' && ['CLIENTE CORPORATIVO', 'SALDO PENDIENTE', 'ESTADO', 'DÍAS MORA', 'FACTURA / SOPORTE', 'ACCIÓN'].map(h => (
+                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                ))}
+                                                {activeSheet === 'CXP' && ['CONDUCTOR', 'VEHÍCULO', 'SALDO A FAVOR', 'BANCO', 'CUENTA', 'REF'].map(h => (
+                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                ))}
+                                                {activeSheet === 'BANCOS' && ['FECHA', 'TIPO', 'DESCRIPCION / REF', 'VALOR', 'SALDO'].map(h => (
+                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                ))}
+                                                {activeSheet === 'EGRESOS' && ['FECHA', 'RUBRO', 'VEHICULO', 'VALOR', 'REF'].map(h => (
+                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                ))}
+                                                {activeSheet === 'INGRESOS' && ['FECHA', 'ORIGEN', 'CONCEPTO', 'VALOR', 'ESTADO'].map(h => (
+                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                ))}
+                                                {activeSheet === 'CAJA' && ['FECHA', 'RESPONSABLE', 'CONCEPTO', 'ENTRADA', 'SALIDA', 'SALDO'].map(h => (
+                                                    <th key={h} style={{ background: '#1e293b', borderRight: '1px solid #334155', borderBottom: '2px solid #475569', padding: '12px', textAlign: 'left', color: '#94a3b8', fontWeight: '600', fontSize: '0.8rem', textTransform: 'uppercase' }}>{h}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {/* DYNAMIC BODY */}
+                                            {activeSheet === 'PROGRAMACION' && ([...(requests || []), ...(simulationData?.services || [])])
+                                                .filter(item => {
+                                                    // UI FILTER LOGIC REPLICATION
+                                                    if (!simulationData?.services) return true; // Show all if just requests
+                                                    if (timeFilter === 'ALL') return true;
+
+                                                    const getCutoff = () => {
+                                                        const d = new Date();
+                                                        d.setHours(0, 0, 0, 0);
+                                                        if (timeFilter === 'Today') { d.setDate(d.getDate() - 1); return d; }
+                                                        if (timeFilter === '7D') { d.setDate(d.getDate() - 7); return d; }
+                                                        if (timeFilter === '30D') { d.setDate(d.getDate() - 30); return d; }
+                                                        if (timeFilter === '90D') { d.setDate(d.getDate() - 90); return d; }
+                                                        if (timeFilter === '180D') { d.setDate(d.getDate() - 180); return d; }
+                                                        return new Date('2020-01-01');
+                                                    };
+                                                    const cutoff = getCutoff();
+
+                                                    // USE HELPER FOR ROBUST PARSING
+                                                    return parseItemDate(item.date) >= cutoff;
+                                                })
+                                                .slice(0, 500) // SAFETY CAP FOR UI RENDERING (Don't render 50k rows)
+                                                .map((r, i) => (
+                                                    <tr
+                                                        key={i}
+                                                        onClick={() => onRowClick && onRowClick(r)}
+                                                        style={{
+                                                            background: i % 2 === 0 ? '#0f172a' : '#1e293b',
+                                                            transition: 'background 0.1s',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                        onMouseOver={(e) => e.currentTarget.style.background = '#334155'}
+                                                        onMouseOut={(e) => e.currentTarget.style.background = i % 2 === 0 ? '#0f172a' : '#1e293b'}
+                                                        title="👆 Click para localizar vehículo en mapa"
+                                                    >
+                                                        {/* ID COLUMN WITH VISUAL AUDIT FEEDBACK */}
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#64748b', fontSize: '0.8rem' }}>
+                                                            {isAuditMode ? (
+                                                                <span style={{ fontFamily: 'monospace', color: 'var(--neon-green)' }}>
+                                                                    0x{Math.floor(Math.random() * 10000).toString(16)}...
+                                                                </span>
+                                                            ) : r.id}
+                                                        </td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.date}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fbbf24' }}>{r.flightTime || 'NOW'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: '#fff' }}>{r.paxName}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.dest || r.route || 'Local'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
+                                                            <span style={{
+                                                                background: r.status.includes('cancel') || r.status === 'CANCELLED' ? 'rgba(239, 68, 68, 0.2)' :
+                                                                    r.status === 'paid' ? 'rgba(5, 150, 105, 0.3)' : 'rgba(16, 185, 129, 0.2)',
+                                                                color: r.status.includes('cancel') || r.status === 'CANCELLED' ? '#fca5a5' :
+                                                                    r.status === 'paid' ? '#34d399' : '#6ee7b7',
+                                                                padding: '2px 8px', borderRadius: '4px',
+                                                                border: `1px solid ${r.status.includes('cancel') || r.status === 'CANCELLED' ? '#ef4444' : r.status === 'paid' ? '#059669' : '#10b981'}`,
+                                                                textShadow: r.status === 'paid' ? '0 0 5px #34d399' : 'none'
+                                                            }}>
+                                                                {r.status === 'paid' ? '✔ PAGADO' : r.status.toUpperCase().replace('_', ' ')}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{r.driverName || r.assignedDriver || '-'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{r.vehiclePlate || r.assignedVehicle || '-'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
+                                                            {r.financials ? formatCurrency(r.financials.totalValue) : (r.fare || '-')}
+                                                        </td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{r.pin || (r.id ? r.id.toString().substring(0, 4) : '????')}</td>
+                                                    </tr>
+                                                ))}
+                                            {activeSheet === 'CXC' && analytics.topClients.length === 0 && (
+                                                <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin datos de cartera disponibles. Ejecute una simulación.</td></tr>
+                                            )}
+                                            {activeSheet === 'CXC' && analytics.topClients.map((c, i) => {
+                                                // Try to match with a corporate billing account for the PDF
+                                                const matchedCorp = corporateAccounts.find(acc => acc.name.includes(c.name) || c.name.includes(acc.name));
+                                                const isExpanded = expandedClient === i;
+
+                                                return (
+                                                    <React.Fragment key={i}>
+                                                        <tr
+                                                            onClick={() => setExpandedClient(isExpanded ? null : i)}
+                                                            style={{
+                                                                background: isExpanded ? '#334155' : (i % 2 === 0 ? '#0f172a' : '#1e293b'),
+                                                                cursor: 'pointer',
+                                                                borderLeft: isExpanded ? '4px solid #39FF14' : '4px solid transparent'
+                                                            }}>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{isExpanded ? '▼' : '▶'}</span>
+                                                                {c.name}
+                                                            </td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fbbf24' }}>{formatCurrency(c.volume)}</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>POR COBRAR</td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: c.balance > 0 ? '#f87171' : '#34d399', fontWeight: 'bold' }}>
+                                                                {formatCurrency(c.balance)}
+                                                            </td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#94a3b8', fontSize: '0.7rem' }}>
+                                                                {matchedCorp ? 'FACTURA DISPONIBLE' : 'SIN SOPORTE'}
+                                                            </td>
+                                                            <td style={{ border: '1px solid #334155', padding: '8px 12px', textDecoration: 'underline', color: '#38bdf8', cursor: 'pointer' }}>Gestionar</td>
+                                                        </tr>
+                                                        {isExpanded && (
+                                                            <tr style={{ background: '#1e293b' }}>
+                                                                <td colSpan="6" style={{ padding: '0', border: '1px solid #334155' }}>
+                                                                    <div style={{
+                                                                        padding: '20px',
+                                                                        display: 'grid',
+                                                                        gridTemplateColumns: '1fr 1fr',
+                                                                        gap: '20px',
+                                                                        background: 'rgba(0,0,0,0.2)',
+                                                                        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)'
+                                                                    }}>
+                                                                        {/* LEFT: INFO */}
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                                            <div style={{ display: 'flex', gap: '40px' }}>
+                                                                                <div>
+                                                                                    <div style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '4px' }}>NIT / IDENTIFICACIÓN</div>
+                                                                                    <div style={{ color: '#fff', fontFamily: 'monospace' }}>900.{Math.floor(Math.random() * 1000)}.000-{i}</div>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <div style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '4px' }}>ESTADO DE CARTERA</div>
+                                                                                    <div style={{ color: c.balance > 0 ? '#fbbf24' : '#39FF14' }}>
+                                                                                        {c.balance > 0 ? `● PENDIENTE (${formatCurrency(c.balance)})` : '● AL DÍA'}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {matchedCorp && (
+                                                                                <div style={{ marginTop: '10px' }}>
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setPreviewPdf(matchedCorp.pdf);
+                                                                                        }}
+                                                                                        className="btn-neon"
+                                                                                        style={{
+                                                                                            borderColor: 'gold', color: 'gold', background: 'rgba(255, 215, 0, 0.05)',
+                                                                                            padding: '8px 20px', fontSize: '0.8rem', width: '100%',
+                                                                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                                                                        }}>
+                                                                                        <span>📄</span> VER FACTURA DIAN COMPLETA
+                                                                                    </button>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* RIGHT: MOVEMENTS TABLE */}
+                                                                        <div style={{ background: '#0f172a', padding: '10px', borderRadius: '4px' }}>
+                                                                            <div style={{ color: '#94a3b8', fontSize: '0.75rem', marginBottom: '8px', borderBottom: '1px solid #334155', paddingBottom: '4px' }}>
+                                                                                ÚLTIMOS MOVIMIENTOS Y ABONOS
+                                                                            </div>
+                                                                            <table style={{ width: '100%', fontSize: '0.75rem', color: '#cbd5e1' }}>
+                                                                                <tbody>
+                                                                                    {(simulationData?.bankTransactions?.filter(t => t.clientName === c.name) || []).slice(-4).map((tx, k) => (
+                                                                                        <tr key={k}>
+                                                                                            <td style={{ padding: '4px' }}>{tx.date}</td>
+                                                                                            <td style={{ padding: '4px', color: '#34d399' }}>ABONO CTA</td>
+                                                                                            <td style={{ padding: '4px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(tx.amount)}</td>
+                                                                                        </tr>
+                                                                                    ))}
+                                                                                    {(!simulationData?.bankTransactions?.some(t => t.clientName === c.name)) && (
+                                                                                        <tr><td colSpan="3" style={{ padding: '10px', textAlign: 'center', color: '#64748b' }}>Sin abonos recientes</td></tr>
+                                                                                    )}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                            {activeSheet === 'CXP' && (!simulationData?.payables && vehicles.length === 0) && (
+                                                <tr><td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin cuentas por pagar.</td></tr>
+                                            )}
+                                            {activeSheet === 'CXP' && (simulationData?.payables || vehicles.slice(0, 15)).slice(0, 100).map((item, i) => {
+                                                // Handler for both simulated data and fallback vehicle list
+                                                const isSim = !!simulationData?.payables;
+                                                return (
+                                                    <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold' }}>{isSim ? item.driver : item.driver}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{isSim ? item.vehicle : item.id}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399' }}>{formatCurrency(isSim ? item.amount : 450000)}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{isSim ? item.bank : 'BANCOLOMBIA'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace' }}>{isSim ? item.account : '****2341'}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.7rem', color: '#aaa' }}>{isSim ? item.ref : '-'}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                            {activeSheet === 'BANCOS' && (!simulationData?.bankTransactions || simulationData.bankTransactions.length === 0) && (
+                                                <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin transacciones registradas.</td></tr>
+                                            )}
+                                            {activeSheet === 'BANCOS' && (simulationData?.bankTransactions || []).slice(0, 100).map((t, i) => (
+                                                <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{t.date}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>
+                                                        <span style={{
+                                                            background: t.type === 'INCOME' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                                            color: t.type === 'INCOME' ? '#34d399' : '#fca5a5',
+                                                            padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold'
+                                                        }}>{t.type}</span>
+                                                    </td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>
+                                                        {t.description} <span style={{ color: '#64748b', fontSize: '0.7rem' }}>({t.ref})</span>
+                                                    </td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontWeight: 'bold', color: t.type === 'INCOME' ? '#34d399' : '#ef4444' }}>
+                                                        {t.type === 'INCOME' ? '+' : '-'}{formatCurrency(t.amount)}
+                                                    </td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace', color: '#fbbf24' }}>
+                                                        {formatCurrency(t.balance)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {activeSheet === 'EGRESOS' && (!simulationData?.expenses || simulationData.expenses.length === 0) && (
+                                                <tr><td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Sin egresos registrados.</td></tr>
+                                            )}
+                                            {activeSheet === 'EGRESOS' && (simulationData?.expenses || []).slice(0, 100).map((e, i) => (
+                                                <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{e.date}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', textTransform: 'uppercase', fontSize: '0.8rem', fontWeight: 'bold', color: '#94a3b8' }}>{e.category}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#38bdf8' }}>{e.vehicle}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>{formatCurrency(e.amount)}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.7rem', color: '#64748b' }}>{e.ref}</td>
+                                                </tr>
+                                            ))}
+
+                                            {activeSheet === 'INGRESOS' && (simulationData?.bankTransactions?.filter(t => t.type === 'INCOME') || []).slice(0, 100).map((t, i) => (
+                                                <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{t.date}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#fff' }}>{t.clientName || 'TESO PLATFORM'}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', fontSize: '0.8rem' }}>{t.description}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399', fontWeight: 'bold' }}>{formatCurrency(t.amount)}</td>
+                                                    <td style={{ border: '1px solid #334155', padding: '8px 12px' }}><span style={{ background: '#059669', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>APLICADO</span></td>
+                                                </tr>
+                                            ))}
+
+                                            {activeSheet === 'CAJA' && (
+                                                // Mock CAJA (Petty Cash mock)
+                                                [...Array(10)].map((_, i) => ({
+                                                    date: new Date().toISOString().split('T')[0],
+                                                    resp: 'OPERACIONES',
+                                                    conc: 'CAJA MENOR - REFRIGERIOS',
+                                                    in: 0,
+                                                    out: 50000,
+                                                    bal: 2000000 - (i * 50000)
+                                                })).map((c, i) => (
+                                                    <tr key={i} style={{ background: i % 2 === 0 ? '#0f172a' : '#1e293b' }}>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.date}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.resp}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px' }}>{c.conc}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#34d399' }}>{c.in}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', color: '#ef4444' }}>{c.out}</td>
+                                                        <td style={{ border: '1px solid #334155', padding: '8px 12px', fontFamily: 'monospace', color: 'gold' }}>{formatCurrency(c.bal)}</td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div style={{ background: '#1e293b', padding: '0px', display: 'flex', borderTop: '1px solid #334155', overflowX: 'auto' }}>
+                                    {['PROGRAMACION', 'CXC', 'CXP', 'BANCOS', 'EGRESOS', 'INGRESOS', 'CAJA'].map(sheet => (
+                                        <button
+                                            key={sheet}
+                                            onClick={() => setActiveSheet(sheet)}
+                                            style={{
+                                                padding: '10px 25px',
+                                                border: 'none',
+                                                borderRight: '1px solid #334155',
+                                                background: activeSheet === sheet ? '#0f172a' : '#1e293b',
+                                                color: activeSheet === sheet ? '#34d399' : '#94a3b8',
+                                                fontWeight: activeSheet === sheet ? 'bold' : 'normal',
+                                                cursor: 'pointer',
+                                                borderTop: activeSheet === sheet ? '3px solid #34d399' : '3px solid transparent',
+                                                transition: 'background 0.2s',
+                                                fontSize: '0.85rem'
+                                            }}
+                                        >
+                                            {sheet}
+                                        </button>
+                                    ))}
+                                    <button style={{ padding: '8px 20px', border: 'none', background: 'transparent', color: '#64748b', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.2rem' }}>+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+
+
+        </div >
     )
 };
 

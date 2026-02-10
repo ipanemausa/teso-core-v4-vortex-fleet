@@ -1,294 +1,237 @@
 import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
-import { vehicleIcon as carIcon, jobIcon, planeDivIcon, getAirportIcon } from '../utils/mapIcons'; // Import Icons!
-import L from 'leaflet';
-// Import PlaneMarker (Assuming it's a sub-component or needs to be defined/imported)
-// If PlaneMarker is not imported, let's define a simple one here to be safe or import it if exists.
-// Actually, looking at the code, PlaneMarker is used but not defined. I need to find where it is or define it.
-// For now, I'll define the constants.
+import { AiTaskForce } from "./AiTaskForce";
+import ErrorBoundary from "../components/ErrorBoundary";
 
-const CENTER_LAT = 6.2442;
-const CENTER_LNG = -75.5812;
-console.log("✅ CoreOperativo Loaded. Center:", CENTER_LAT, CENTER_LNG);
+const DEFAULT_CARS = 15;
+const DEFAULT_TRIPS_PER_DAY = 40;
 
-// --- DUMMY PlaneMarker if not imported ---
-const PlaneMarker = ({ p }) => (
-    <Marker
-        position={[p.lat, p.lng]}
-        icon={planeDivIcon(p.heading)}
-        zIndexOffset={1000}
-        eventHandlers={{
-            mouseover: (e) => e.target.openTooltip(),
-            mouseout: (e) => e.target.closeTooltip()
-        }}
-    >
-        <Tooltip direction="top" offset={[0, -10]} opacity={1} sticky>
-            <div style={{
-                background: 'rgba(15, 23, 42, 0.95)', border: '1px solid #334155', borderRadius: '6px',
-                padding: '10px', minWidth: '160px', color: '#fff', boxShadow: '0 10px 20px rgba(0,0,0,0.5)',
-                fontFamily: 'sans-serif'
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '6px', marginBottom: '6px' }}>
-                    <span style={{ fontWeight: '900', color: '#38bdf8', fontSize: '0.9rem' }}>{p.id}</span>
-                    <span style={{ fontSize: '0.6rem', background: '#10b981', padding: '2px 6px', borderRadius: '10px', color: '#fff', fontWeight: 'bold', border: '1px solid #059669' }}>IN FLIGHT</span>
+export function CoreOperativo({ onClose, onHome }) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [showLiveEvents, setShowLiveEvents] = useState(false);
+    const [activeFilter, setActiveFilter] = useState('Today');
+    const [displayRows, setDisplayRows] = useState([]);
+
+    useEffect(() => {
+        runSimulation();
+    }, [activeFilter]);
+
+    async function runSimulation() {
+        setLoading(true);
+        setError(null);
+        try {
+            // Determine days based on filter
+            let daysToSimulate = 1;
+            if (activeFilter === '7D') daysToSimulate = 7;
+            if (activeFilter === '30D') daysToSimulate = 30;
+            if (activeFilter === '90D') daysToSimulate = 90;
+            if (activeFilter === 'ALL') daysToSimulate = 360;
+
+            const apiUrl = 'https://teso-api-dev.fly.dev';
+            const resp = await fetch(
+                `${apiUrl}/api/simulate/core-v4`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        cars: DEFAULT_CARS,
+                        avg_trips_per_day: DEFAULT_TRIPS_PER_DAY,
+                        days: daysToSimulate
+                    }),
+                }
+            );
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const result = await resp.json();
+
+            // V4 Logic: Generate rows strictly based on the Model * Days
+            const dailyTrips = result.operational?.avg_trips_per_day || 40;
+            const totalTripsForPeriod = result.operational?.annual_trips || (dailyTrips * daysToSimulate);
+            const carsCount = result.operational?.cars || 15;
+
+            const generatedRows = Array.from({ length: totalTripsForPeriod }).map((_, i) => {
+                const carIdx = (i % carsCount) + 1;
+                const dayOffset = Math.floor(i / dailyTrips);
+                const date = new Date();
+                date.setDate(date.getDate() - dayOffset);
+
+                return {
+                    id: `ORD-${8000 + i}`,
+                    fecha: date.toLocaleDateString('en-US'),
+                    hora: "NOW",
+                    cliente: i % 4 === 0 ? "Bancolombia S.A." : "Grupo Argos",
+                    ruta: "Ruta Óptima",
+                    estado: "COMPLETED",
+                    conductor: `Conductor ${carIdx}`,
+                    vehiculo: `TES-${100 + carIdx}`,
+                    tarifa: 125000,
+                    pin: (Math.random().toString(36).substr(2, 4)).toUpperCase()
+                };
+            });
+
+            setData(result);
+            setDisplayRows(generatedRows);
+
+        } catch (e) {
+            setError(e.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    if (loading) return <div style={{ padding: 40, color: "#fff", background: "#000", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>Simulando V4 ({activeFilter})...</div>;
+    if (error) return <div style={{ padding: 40, color: "#ff6b6b", background: "#000", height: "100vh" }}>Error: {error}</div>;
+    if (!data) return null;
+
+    if (showLiveEvents) {
+        return (
+            <ErrorBoundary>
+                <AiTaskForce onClose={() => setShowLiveEvents(false)} />
+            </ErrorBoundary>
+        );
+    }
+
+    const fmtMoney = (n) => `$ ${n?.toLocaleString('es-CO') || '0'}`;
+
+    return (
+        <div style={{ padding: "0", background: "#000", minHeight: "100vh", color: "#fff", fontFamily: "'Inter', sans-serif" }}>
+            {/* COMPONENT HEADER */}
+            <div style={{ height: "60px", padding: "0 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #333", background: "#0B1120" }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                    <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "900", letterSpacing: "1px", color: "#fff" }}>CORE OPERATIVO</h1>
+                    <div style={{ fontSize: "0.7rem", color: "#00ff80", fontWeight: "bold" }}>● SISTEMA ACTIVO</div>
                 </div>
-                <div style={{ fontSize: '0.75rem', lineHeight: '1.5', color: '#e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                        <span style={{ color: '#94a3b8' }}>Ruta:</span>
-                        <span style={{ fontWeight: 'bold' }}>{p.from} ➔ MDE</span>
+
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                    <button onClick={() => setShowLiveEvents(true)} style={{ background: "#222", border: "1px solid #444", color: "#ccc", padding: "6px 12px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "600", cursor: "pointer" }}>LIVE EVENTS</button>
+                    <button style={{ background: "#FFD700", border: "none", color: "#000", padding: "6px 12px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>SHEET ANALYTICS</button>
+
+                    {/* Date Filters */}
+                    <div style={{ display: "flex", background: "#111", borderRadius: "4px", border: "1px solid #333", overflow: "hidden" }}>
+                        {['Today', '7D', '30D', '90D', 'ALL'].map((f) => (
+                            <div
+                                key={f}
+                                onClick={() => setActiveFilter(f)}
+                                style={{
+                                    padding: "6px 10px",
+                                    fontSize: "0.7rem",
+                                    cursor: "pointer",
+                                    background: activeFilter === f ? "#00ff80" : "transparent",
+                                    color: activeFilter === f ? "#000" : "#888",
+                                    fontWeight: "bold",
+                                    transition: "all 0.2s"
+                                }}
+                            >
+                                {f}
+                            </div>
+                        ))}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>📡 {p.alt.toLocaleString()} ft</span>
-                        <span>🚀 {p.spd} kts</span>
-                    </div>
-                    <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #334155', color: '#94a3b8', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span>✈️</span> {p.airline} Airlines • B737
+
+                    <button onClick={() => setShowLiveEvents(true)} style={{ background: "rgba(255, 69, 0, 0.15)", border: "1px solid #FF4500", color: "#FF4500", padding: "6px 12px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>+ WAR ROOM</button>
+
+                    <button onClick={onHome} style={{ background: "rgba(255,255,255,0.1)", border: "1px solid #fff", color: "#fff", padding: "6px 12px", borderRadius: "14px", fontSize: "0.75rem", fontWeight: "bold", marginLeft: "10px", cursor: "pointer" }}>🏠 INICIO</button>
+                    <button onClick={onClose} style={{ background: "transparent", border: "1px solid #ff4444", color: "#ff4444", padding: "6px 12px", borderRadius: "14px", fontSize: "0.75rem", fontWeight: "bold", marginLeft: "10px", cursor: "pointer" }}>✖ SALIR (MAPA)</button>
+
+                    <div style={{ marginLeft: "15px", textAlign: "right", lineHeight: "1" }}>
+                        <div style={{ fontSize: "1.2rem", fontWeight: "800", color: "#00f2ff" }}>{displayRows.length.toLocaleString()}</div>
+                        <div style={{ fontSize: "0.6rem", color: "#666" }}>SVC</div>
                     </div>
                 </div>
             </div>
-        </Tooltip>
-    </Marker>
-);
-const createPlane = (bounds, center) => {
-    const airlines = ['AA', 'AV', 'LA', 'CM', 'NK', 'IB', 'DL', 'AM'];
-    const markets = ['MIA', 'MAD', 'BOG', 'PTY', 'JFK', 'SCL', 'LIM', 'MEX'];
 
-    let south, north, west, east;
+            <div style={{ padding: "20px" }}>
+                {/* KPI CARDS ROW */}
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.2fr 1.2fr 1.2fr 0.8fr", gap: "15px", marginBottom: "20px" }}>
+                    {/* CARD 1: REVENUE */}
+                    <div style={{ background: "#0B1120", padding: "15px", borderRadius: "8px", border: "1px solid #333", borderLeft: "4px solid #00f2ff", boxShadow: "0 4px 6px rgba(0,0,0,0.3)" }}>
+                        <div style={{ fontSize: "0.7rem", color: "#00f2ff", fontWeight: "bold", marginBottom: "4px" }}>INGRESOS BRUTOS (REVENUE)</div>
+                        <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#fff" }}>{fmtMoney(data.financial?.gmv)}</div>
+                        <div style={{ fontSize: "0.7rem", color: "#666" }}>Proyección cierre de mes ↑ 12%</div>
+                    </div>
 
-    if (!bounds || !bounds.getSouth || !bounds.isValid()) {
-        south = 6.00; north = 6.40; west = -75.70; east = -75.30;
-    } else {
-        south = bounds.getSouth();
-        north = bounds.getNorth();
-        west = bounds.getWest();
-        east = bounds.getEast();
-    }
+                    {/* CARD 2: MARGIN */}
+                    <div style={{ background: "#0B1120", padding: "15px", borderRadius: "8px", border: "1px solid #333", borderLeft: "4px solid #FFD700", boxShadow: "0 4px 6px rgba(0,0,0,0.3)" }}>
+                        <div style={{ fontSize: "0.7rem", color: "#FFD700", fontWeight: "bold", marginBottom: "4px" }}>MARGEN OPERATIVO</div>
+                        <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#fff" }}>{fmtMoney(data.financial?.ebitda)} <span style={{ fontSize: "0.9rem", opacity: 0.8 }}>({data.financial?.margin_percent}%)</span></div>
+                        <div style={{ fontSize: "0.7rem", color: "#666" }}>Post-Comisiones y Gasolina</div>
+                    </div>
 
-    const safeCenter = (center && typeof center.lat === 'number') ? center : { lat: 6.2442, lng: -75.5812 };
-    const latSpan = north - south;
-    const lngSpan = east - west;
+                    {/* CARD 3: CXC */}
+                    <div style={{ background: "#0B1120", padding: "15px", borderRadius: "8px", border: "1px solid #333", borderLeft: "4px solid #F97316", boxShadow: "0 4px 6px rgba(0,0,0,0.3)" }}>
+                        <div style={{ fontSize: "0.7rem", color: "#F97316", fontWeight: "bold", marginBottom: "4px" }}>CXC (CARTERA CLIENTES)</div>
+                        <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#fff" }}>{fmtMoney(data.financial?.gmv * 0.35)}</div>
+                        <div style={{ fontSize: "0.7rem", color: "#666" }}>Pendiente de Facturación</div>
+                    </div>
 
-    // SPAWN JUST OUTSIDE (Immediate Entry)
-    // 10-20% margin outside the screen is enough to be invisible but enter quickly
-    const PADDING_LAT = latSpan * 0.15;
-    const PADDING_LNG = lngSpan * 0.15;
+                    {/* CARD 4: CXP */}
+                    <div style={{ background: "#0B1120", padding: "15px", borderRadius: "8px", border: "1px solid #333", borderLeft: "4px solid #3B82F6", boxShadow: "0 4px 6px rgba(0,0,0,0.3)" }}>
+                        <div style={{ fontSize: "0.7rem", color: "#3B82F6", fontWeight: "bold", marginBottom: "4px" }}>CXP (NÓMINA DRIVERS)</div>
+                        <div style={{ fontSize: "1.6rem", fontWeight: "800", color: "#fff" }}>{fmtMoney(data.financial?.gmv * 0.60)}</div>
+                        <div style={{ fontSize: "0.7rem", color: "#666" }}>Corte Quincenal: VIERNES</div>
+                    </div>
 
-    const edge = Math.floor(Math.random() * 4);
-    let lat, lng;
+                    {/* CARD 5: CONFLICTS */}
+                    <div style={{ background: "#111", padding: "15px", borderRadius: "8px", border: "1px solid #333", boxShadow: "inset 0 0 20px rgba(0,0,0,0.5)" }}>
+                        <div style={{ fontSize: "0.65rem", color: "#ff6b6b", fontWeight: "bold", marginBottom: "8px", textTransform: "uppercase" }}>CONFLICTOS OPS</div>
+                        <div style={{ fontSize: "0.7rem", color: "#ccc", display: "flex", justifyContent: "space-between", marginBottom: "4px", borderBottom: "1px solid #222", paddingBottom: "2px" }}><span>🚫 Cancelados:</span> <span style={{ color: "#ff6b6b", fontWeight: "bold" }}>55</span></div>
+                        <div style={{ fontSize: "0.7rem", color: "#ccc", display: "flex", justifyContent: "space-between", marginBottom: "4px", borderBottom: "1px solid #222", paddingBottom: "2px" }}><span>⚠️ Retrasos:</span> <span style={{ color: "#F97316", fontWeight: "bold" }}>12</span></div>
+                        <div style={{ fontSize: "0.7rem", color: "#ccc", display: "flex", justifyContent: "space-between" }}><span>🔄 Cambios:</span> <span style={{ color: "#00f2ff", fontWeight: "bold" }}>4</span></div>
+                    </div>
+                </div>
 
-    if (edge === 0) { lat = north + PADDING_LAT; lng = west + (Math.random() * lngSpan); }
-    else if (edge === 1) { lat = south - PADDING_LAT; lng = west + (Math.random() * lngSpan); }
-    else if (edge === 2) { lat = south + (Math.random() * latSpan); lng = west - PADDING_LNG; }
-    else { lat = south + (Math.random() * latSpan); lng = east + PADDING_LNG; }
+                {/* TABLE CONTAINER */}
+                <div style={{ background: "#0B1120", borderRadius: "8px", border: "1px solid #333", overflow: "hidden" }}>
+                    {/* TABLE HEADER */}
+                    <div style={{ padding: "10px 15px", background: "#1F2937", borderBottom: "1px solid #333", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <span style={{ fontSize: "1.2rem" }}>📊</span>
+                            <span style={{ fontWeight: "700", color: "#fff", fontSize: "0.85rem", letterSpacing: "0.5px" }}>LIBRO: TESO_EDGE_DOCUMENT_VIVO.xlsx</span>
+                            <span style={{ background: "#00ff80", color: "#000", padding: "2px 6px", borderRadius: "4px", fontSize: "0.6rem", fontWeight: "bold" }}>● AUTOGUARDADO: ON</span>
+                        </div>
+                        <button style={{ background: "#10B981", border: "none", color: "#fff", padding: "6px 12px", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}>EDGE DOCUMENT VIVO</button>
+                    </div>
 
-    const targetLat = safeCenter.lat + (Math.random() - 0.5) * (latSpan * 0.3);
-    const targetLng = safeCenter.lng + (Math.random() - 0.5) * (lngSpan * 0.3);
-    const angleToCenter = Math.atan2(targetLng - lng, targetLat - lat) * (180 / Math.PI);
-
-    // SPEED: Adjusted for visual flow
-    const speed = ((latSpan * 0.002) + (Math.random() * (latSpan * 0.0010)));
-
-    return {
-        id: `${airlines[Math.floor(Math.random() * airlines.length)]}${Math.floor(100 + Math.random() * 900)}`,
-        airline: airlines[Math.floor(Math.random() * airlines.length)],
-        from: markets[Math.floor(Math.random() * markets.length)],
-        lat, lng,
-        heading: angleToCenter,
-        speed: speed,
-        alt: 10000 + Math.floor(Math.random() * 5000),
-        spd: 300 + Math.floor(Math.random() * 200)
-    };
-};
-
-// Simulation Engine Component (Must be child of MapContainer)
-const RadarController = ({ setPlanes }) => {
-    const map = useMap(); // Access the map instance!
-
-    useEffect(() => {
-        if (!map) return;
-        const safeUpdate = () => {
-            try {
-                if (!map || !map._leaflet_id) return;
-                const bounds = map.getBounds();
-                const center = map.getCenter();
-                // Tight Death Bounds: Die as soon as they are partially off-screen (0.2 padding)
-                // This ensures we don't simulate invisible planes for long
-                const deathBounds = bounds.pad(0.2);
-
-                setPlanes(prevPlanes => {
-                    // Initialize or Replenish to 8 (User requested ~6 constant)
-                    // We generate 8 to ensure coverage even if 1-2 are transitioning
-                    let currentPlanes = [...prevPlanes];
-                    if (currentPlanes.length < 8) {
-                        while (currentPlanes.length < 8) {
-                            // console.log("✈️ Spawning New Plane...");
-                            currentPlanes.push(createPlane(bounds, center));
-                        }
-                    }
-
-                    // Move & Despawn Logic
-                    return currentPlanes.map(p => {
-                        const nextLat = p.lat + (Math.cos(p.heading * Math.PI / 180) * p.speed);
-                        const nextLng = p.lng + (Math.sin(p.heading * Math.PI / 180) * p.speed);
-
-                        // If outside death bounds, respawn IMMEDIATELY
-                        if (!deathBounds.contains([nextLat, nextLng])) {
-                            return createPlane(bounds, center);
-                        }
-                        return { ...p, lat: nextLat, lng: nextLng };
-                    });
-                });
-            } catch (err) { /* silent */ }
-        };
-        const interval = setInterval(safeUpdate, 50); // Faster tick (50ms = 20fps) for smoother 'immediate' entry
-        return () => clearInterval(interval);
-    }, [map, setPlanes]);
-
-    return null;
-};
-
-export function CoreOperativo({ onClose, onHome, command, simulationData, activeLayers }) {
-    const [fleet, setFleet] = useState([]);
-    const [jobs, setJobs] = useState([]);
-    const [internalPlanes, setInternalPlanes] = useState([]); // Local state for simulation
-
-    // 1. INITIALIZE FLEET & DATA FROM SIMULATION
-    useEffect(() => {
-        if (simulationData && simulationData.services) {
-            const activeServices = simulationData.services.slice(0, 15);
-            const mappedFleet = activeServices.map((svc, i) => ({
-                id: svc.plate || `V-0${i + 10}`,
-                lat: svc.lat || (CENTER_LAT + (Math.random() - 0.5) * 0.05),
-                lng: svc.lng || (CENTER_LNG + (Math.random() - 0.5) * 0.05),
-                status: svc.status === 'COMPLETED' ? 'ACTIVE' : 'IDLE',
-                speed: Math.floor(Math.random() * 60) + 20,
-                target: null,
-                driver: svc.driver_name
-            }));
-            setFleet(mappedFleet);
-        } else {
-            // Fallback
-            setFleet(Array.from({ length: 15 }).map((_, i) => ({
-                id: `V-0${i + 10}`,
-                lat: CENTER_LAT + (Math.random() - 0.5) * 0.06,
-                lng: CENTER_LNG + (Math.random() - 0.5) * 0.06,
-                status: 'ACTIVE',
-                speed: 30
-            })));
-        }
-    }, [simulationData]);
-
-    // 2. LISTEN FOR COMMANDS (The Brain Logic)
-    useEffect(() => {
-        const cmdType = command?.type || command;
-        if (cmdType === 'DISPATCH_WAVE') {
-            // VISUAL DISPATCH EFFECT
-            setFleet(prev => prev.map(v => ({
-                ...v,
-                status: 'DISPATCHED',
-                target: {
-                    // Move to a random nearby point to simulate activity
-                    lat: v.lat + (Math.random() - 0.5) * 0.02,
-                    lng: v.lng + (Math.random() - 0.5) * 0.02
-                },
-                speed: Math.floor(Math.random() * 40) + 60 // Accelerate
-            })));
-            console.log("🌊 DISPATCH WAVE EXECUTED: Units Mobilized.");
-        }
-    }, [command]);
-
-    // INTERNAL COMPONENT: MAP COMMAND HANDLER
-    const MapCommandHandler = ({ cmd }) => {
-        const map = useMap();
-        useEffect(() => {
-            if (cmd && cmd.type === 'FLY_TO' && cmd.payload) {
-                console.log("✈️ FLYING TO:", cmd.payload);
-                map.flyTo([cmd.payload.lat, cmd.payload.lng], 15, { duration: 2.0, easeLinearity: 0.25 });
-                map.openPopup(L.popup().setLatLng([cmd.payload.lat, cmd.payload.lng]).setContent(`Target: ${cmd.payload.id || 'Location'}`));
-            }
-        }, [cmd, map]);
-        return null;
-    };
-
-    // 3. LIVE FLEET ANIMATION LOOP 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setFleet(prev => prev.map(car => {
-                const isMoving = car.status === 'ACTIVE' || car.status === 'DISPATCHED';
-                if (!isMoving) return car;
-
-                return {
-                    ...car,
-                    lat: car.lat + (Math.random() - 0.5) * 0.0015,
-                    lng: car.lng + (Math.random() - 0.5) * 0.0015,
-                    speed: Math.max(20, Math.floor(Math.random() * 70))
-                };
-            }));
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
-
-    // DEBUG: Monitor Plane Count
-    useEffect(() => {
-        console.log("✈️ [CoreOperativo] Active Planes:", internalPlanes.length);
-        if (internalPlanes.length > 0) {
-            console.log("✈️ [CoreOperativo] Sample Plane:", internalPlanes[0]);
-        }
-    }, [internalPlanes]);
-
-
-    return (
-        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-            {/* THE MAP ITSELF */}
-            <MapContainer
-                center={[CENTER_LAT, CENTER_LNG]}
-                zoom={13}
-                style={{ height: '100%', width: '100%' }}
-                zoomControl={false}
-                attributionControl={false}
-            >
-                <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-
-                {/* ACTIVATE RADAR CONTROLLER */}
-                <MapCommandHandler cmd={command} />
-                <RadarController setPlanes={setInternalPlanes} />
-
-                {/* LAYER 1: FLEET VECTORS */}
-                {(!activeLayers || activeLayers.includes('FLEET')) && fleet.map(car => (
-                    <Marker key={car.id} position={[car.lat, car.lng]} icon={carIcon}>
-                        <Popup><strong>{car.id}</strong></Popup>
-                    </Marker>
-                ))}
-
-                {/* LAYER 2: DEMAND/JOBS */}
-                {(!activeLayers || activeLayers.includes('JOBS')) && jobs.map(job => (
-                    <Marker key={job.id} position={[job.lat, job.lng]} icon={jobIcon} />
-                ))}
-
-                {/* LAYER 3: STATIC INFRASTRUCTURE (AIRPORTS) */}
-                {[
-                    { id: 'MDE', lat: 6.17, lng: -75.43, code: 'JMC' }, // Jose Maria Cordova
-                    { id: 'EOH', lat: 6.22, lng: -75.59, code: 'EOH' }  // Olaya Herrera
-                ].map(apt => (
-                    <Marker key={apt.id} position={[apt.lat, apt.lng]} icon={getAirportIcon(apt.code)}>
-                        <Popup>{apt.code}</Popup>
-                    </Marker>
-                ))}
-
-                {/* LAYER 3: AIRSPACE/RADAR (DEBUG: ALWAYS VISIBLE) */}
-                {/* Removed condition checking activeLayers to force visibility */}
-                {internalPlanes.map(p => (
-                    <PlaneMarker
-                        key={p.id}
-                        p={p}
-                        isSelected={false}
-                    />
-                ))}
-
-            </MapContainer>
+                    {/* TABLE */}
+                    <div style={{ overflowX: "auto", maxHeight: "500px" }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem", color: "#ccc" }}>
+                            <thead style={{ position: "sticky", top: 0, background: "#111827", zIndex: 10 }}>
+                                <tr style={{ borderBottom: "1px solid #333", textAlign: "left", color: "#6B7280", textTransform: "uppercase" }}>
+                                    {['ID', 'FECHA', 'HORA', 'CLIENTE (PAX)', 'RUTA DESTINO', 'ESTADO', 'CONDUCTOR', 'VEHÍCULO', 'TARIFA', 'PIN SEGURIDAD'].map(h => (
+                                        <th key={h} style={{ padding: "12px 15px", fontWeight: "600", fontSize: "0.7rem" }}>{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {displayRows.map((row, idx) => (
+                                    <tr key={idx} style={{ borderBottom: "1px solid #1F2937", background: idx % 2 === 0 ? "rgba(255,255,255,0.01)" : "transparent" }}>
+                                        <td style={{ padding: "10px 15px", fontFamily: "monospace", color: "#fff" }}>{row.id}</td>
+                                        <td style={{ padding: "10px 15px" }}>{row.fecha}</td>
+                                        <td style={{ padding: "10px 15px", color: "#F97316", fontWeight: "bold" }}>{row.hora}</td>
+                                        <td style={{ padding: "10px 15px", fontWeight: "600", color: "#fff" }}>{row.cliente}</td>
+                                        <td style={{ padding: "10px 15px" }}>{row.ruta}</td>
+                                        <td style={{ padding: "10px 15px" }}>
+                                            <span style={{ border: "1px solid #059669", color: "#059669", padding: "2px 8px", borderRadius: "4px", fontSize: "0.65rem", background: "rgba(5, 150, 105, 0.1)", fontWeight: "bold" }}>{row.estado}</span>
+                                        </td>
+                                        <td style={{ padding: "10px 15px" }}>{row.conductor}</td>
+                                        <td style={{ padding: "10px 15px", color: "#00f2ff" }}>{row.vehiculo}</td>
+                                        <td style={{ padding: "10px 15px", fontWeight: "bold", color: "#fff" }}>{fmtMoney(row.tarifa)}</td>
+                                        <td style={{ padding: "10px 15px", fontFamily: "monospace" }}>{row.pin}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* BOTTOM TABS */}
+                    <div style={{ padding: "0 15px", background: "#1F2937", borderTop: "1px solid #333", display: "flex", gap: "1px" }}>
+                        <div style={{ background: "#111827", color: "#00f2ff", padding: "10px 15px", borderTop: "2px solid #00f2ff", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>PROGRAMACION</div>
+                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>CXC</div>
+                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>CXP</div>
+                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>BANCOS</div>
+                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>EGRESOS</div>
+                        <div style={{ background: "#222", color: "#666", padding: "10px 15px", fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer" }}>+</div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
