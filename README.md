@@ -1,3 +1,4 @@
+e
 ---
 title: Teso Command Center V4
 emoji: 🚛
@@ -21,3 +22,4 @@ app_port: 7860
 ## Status
 - **Version:** 4.0.0 (Stable)
 - **Mode:** Unified (No external frontend required)
+
